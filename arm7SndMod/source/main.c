@@ -58,5 +58,5 @@ void arm7_fini()
 	REG_SOUNDCNT &= ~SOUND_ENABLE;
 	writePowerManagement(PM_CONTROL_REG, ( readPowerManagement(PM_CONTROL_REG) & ~PM_SOUND_AMP ) | PM_SOUND_MUTE );
 	powerOff(POWER_SOUND);
-	fifoSetDatamsgHandler(fifoCh,  NULL, NULL);
+	fifoSetDatamsgHandler(fifoChan,  0, 0);
 }
