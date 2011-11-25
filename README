@@ -1,0 +1,5 @@
+Installation:
+
+arm7SndMod.fx2 	-> into FeOS/data/FeOS/arm7
+codecs 		-> into FeOS/data/FeOS/lib
+music.fx2 	-> into FeOS/data/FeOS/bin

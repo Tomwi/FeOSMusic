@@ -1,0 +1,4 @@
+build/*
+*.elf
+*.fx2
+*.sh

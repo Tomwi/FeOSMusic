@@ -1,0 +1,10 @@
+16th july 2011:
+
+removed static function declarations to remove compiler warnings (mp4ffint.h)
+
+13th november 2011
+mp4atom.c:
+added #ifndef FEOS .. #endif to fix error 
+
+
+
