@@ -1,34 +1,24 @@
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
+export THIS_MAKEFILE := Makefile.FeOS
 
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>devkitPro")
+CODECS := $(notdir $(patsubst %/,%,$(dir $(wildcard codecs/*/Makefile))))
+
+all: arm7 $(CODECS)
+	@make -f Makefile.FeOS
+
+arm7:
+	@make -C arm7SndMod
+
+$(CODECS):
+	@make -C codecs/$@
+
+clean:
+	@make -f Makefile.FeOS clean
+	@make -C arm7SndMod clean
+	@for i in $(CODECS); do make -C codecs/$$i clean; done
+
+ifneq ($(strip $(DEST)),)
+install: all
+	@make -f Makefile.FeOS install
+	@make -C arm7SndMod install
+	@for i in $(CODECS); do make -C codecs/$$i install; done
 endif
-
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
-endif
-
-ifeq ($(strip $(FEOSSDK)),)
-$(error "Please set FEOSSDK in your environment. export FEOSSDK=<path to>FeOS/sdk")
-endif
-
-FEOSMK = $(FEOSSDK)/mk
-
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-#---------------------------------------------------------------------------------
-TARGET        := $(shell basename $(CURDIR))
-BUILD         := build
-SOURCES       := source
-DATA          := data
-INCLUDES      := include
-
-CONF_DEFINES =
-
-include $(FEOSMK)/app.mk

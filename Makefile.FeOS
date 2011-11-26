@@ -15,7 +15,6 @@ $(error "Please set FEOSSDK in your environment. export FEOSSDK=<path to>FeOS/sd
 endif
 
 FEOSMK = $(FEOSSDK)/mk
-export THIS_MAKEFILE := Makefile
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -26,17 +25,15 @@ export THIS_MAKEFILE := Makefile
 #---------------------------------------------------------------------------------
 TARGET        := $(shell basename $(CURDIR))
 BUILD         := build
-SOURCES       := source 
+SOURCES       := source
 DATA          := data
 INCLUDES      := include
 
-CONF_DEFINES = -DLITTLE_ENDIAN
-CONF_LIBDIRS = 
-CONF_LIBS = 
+CONF_DEFINES =
 
-include $(FEOSMK)/dynlib.mk
+include $(FEOSMK)/app.mk
 
 ifneq ($(strip $(DEST)),)
 install: all
-	@cp $(TARGET).fx2 $(DEST)/data/FeOS/lib/$(TARGET).fx2 || exit 1
+	@cp $(TARGET).fx2 $(DEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
 endif

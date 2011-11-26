@@ -15,6 +15,7 @@ $(error "Please set FEOSSDK in your environment. export FEOSSDK=<path to>FeOS/sd
 endif
 
 FEOSMK = $(FEOSSDK)/mk
+export THIS_MAKEFILE := Makefile
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -33,3 +34,8 @@ CONF_DEFINES =
 CONF_ARM7 = 1
 
 include $(FEOSMK)/app.mk
+
+ifneq ($(strip $(DEST)),)
+install: all
+	@cp $(TARGET).fx2 $(DEST)/data/FeOS/lib/$(TARGET).fx2 || exit 1
+endif

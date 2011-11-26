@@ -3,3 +3,6 @@ build/*
 *.fx2
 *.sh
 codecs/*/build/*
+codecs/*/lib
+codecs/*/*.imp.a
+arm7SndMod/build
