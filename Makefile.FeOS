@@ -30,6 +30,8 @@ DATA          := data
 INCLUDES      := include
 
 CONF_DEFINES =
+CONF_LIBDIRS = $(CURDIR)/../FeOSBrowser
+CONF_LIBS = -lfilebrowser
 
 include $(FEOSMK)/app.mk
 
