@@ -1,5 +1,6 @@
 #include <feos.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <filebrowser.h>
 #include "CodecInterface.h"
@@ -48,15 +49,20 @@ int main(int argc, char ** argv)
 		type = "ogg";
 	else if(strcmp(path+len-4, ".m4a") == 0)
 		type = "mp4";
-	else
+	else {
+		free(path);
 		return 0;
+	}
 
 	startStream(&codec, type, path);
 	while(1) {
 		FeOS_WaitForVBlank();
-		if(!updateStream(&codec))
+		if(!updateStream(&codec)) {
+			free(path);
 			return 0;
+		}
 	}
 
+	free(path);
 	return 0;
 }
