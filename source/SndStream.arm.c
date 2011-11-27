@@ -96,6 +96,8 @@ int updateStream(CODEC_INTERFACE * cdc)
 			free(workBuf.buffer);
 			unloadCodec(cdc);
 			FeOS_FreeARM7(arm7_sndModule, fifoCh);
+			FeOS_TimerWrite(0, 0);
+			FeOS_TimerWrite(1, 0);
 			printf("Playback stopped\n");
 			return 0;
 		}

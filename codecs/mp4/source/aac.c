@@ -119,6 +119,7 @@ int decSamples(int length, unsigned char ** readBuf, short int * destBuf, int *d
 			read = mp4ff_read_sample_v2(infile, track, trackSample++,*readBuf);
 			/* Update amount of data in readBuffer */
 			*dataLeft+=read;
+			memset(*readBuf+*dataLeft, 0, 1940 - *dataLeft);
 			/* Decode sample */
 			ret = AACDecode(decoder, readBuf, dataLeft, destBuf);
 			// Update readBuf pointer to point to the first 'free'space
