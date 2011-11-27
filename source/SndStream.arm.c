@@ -16,7 +16,6 @@ int frequency, nChans, smpNc;
 unsigned char readBuf[READ_BUF_SIZE];
 unsigned char * readOff;
 int dataLeft;
-unsigned int count;
 hword_t  sampleCount[2];
 
 char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
@@ -115,10 +114,9 @@ int updateStream(CODEC_INTERFACE * cdc)
 			outBuf.bufOff = ret-temp;
 		}
 		DC_FlushAll();
+		FeOS_DrainWriteBuffer();
 		smpNc -= ret;
 	}
-	//printf("\x1b[2J");
-	//printf("Buffer-fullness %d\n", ((STREAM_BUF_SIZE - smpNc)*100)/STREAM_BUF_SIZE);
 	return 1;
 }
 
@@ -127,7 +125,7 @@ void preFill(CODEC_INTERFACE * cdc)
 	smpNc = STREAM_BUF_SIZE;
 	int ret = 0;
 	while(smpNc > 0) {
-		ret = cdc->decSamples((int)(smpNc), &readOff, workBuf.buffer, &dataLeft);
+		ret = cdc->decSamples(((smpNc)&(~3)), &readOff, workBuf.buffer, &dataLeft);
 		if(ret<=0) {
 			break;
 		}

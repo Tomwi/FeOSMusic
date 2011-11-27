@@ -34,7 +34,7 @@ typedef struct{
 int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file);
 void irq_sampleCntHandler(void);
 int updateStream(CODEC_INTERFACE * cdc);
-void deInterleave(void *in, void *out, int samples);
+void _deInterleave(short *in, short *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);
 /*
  * Initalize arm7 module for sound playback
