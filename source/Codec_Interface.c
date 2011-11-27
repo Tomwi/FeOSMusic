@@ -19,3 +19,7 @@ int loadCodec(char * codecFile, CODEC_INTERFACE * cdc){
 		return -1;
 	}
 }
+
+void unloadCodec(CODEC_INTERFACE * cdc){
+	FeOS_FreeModule(cdc->codecModule);
+}

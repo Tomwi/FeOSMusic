@@ -10,9 +10,8 @@ int main(int argc, char ** argv)
 	startStream(&codec, argv[2], argv[1]);
 	while(1) {
 		FeOS_WaitForVBlank();
-		if(!updateStream(&codec)){
+		if(!updateStream(&codec))
 			return 0;
-		}
 	}
 
 	return 0;
