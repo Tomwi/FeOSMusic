@@ -2,7 +2,9 @@ build/*
 *.elf
 *.fx2
 *.sh
+*.a
 codecs/*/build/*
 codecs/*/lib
 codecs/*/*.imp.a
-arm7SndMod/build
+arm7SndMod/build/*
+

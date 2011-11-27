@@ -54,9 +54,8 @@ int main(int argc, char ** argv)
 	startStream(&codec, type, path);
 	while(1) {
 		FeOS_WaitForVBlank();
-		if(!updateStream(&codec)){
+		if(!updateStream(&codec))
 			return 0;
-		}
 	}
 
 	return 0;

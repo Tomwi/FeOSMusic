@@ -84,52 +84,42 @@ int updateStream(CODEC_INTERFACE * cdc)
 
 	sampleCount[1] = sampleCount[0];
 	smpNc += smpPlayed;
- 	int ret = 0;
+	int ret = 0;
 	if(smpNc>0) {
 
-		ret = cdc->decSamples((int)(smpNc), &readOff, workBuf.buffer, &dataLeft);
-		/* Nothing decoded/decoder error:
-		 * free decoder
-		 * stop sound
-		 * free buffers
-		 */
+		ret = cdc->decSamples(((smpNc)&(~3)), &readOff, workBuf.buffer, &dataLeft);
+
 		if(ret <0) {
 			msg.type = FIFO_AUDIO_STOP;
 			fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
 			cdc->freeDecoder();
 			free(outBuf.buffer);
 			free(workBuf.buffer);
-			FeOS_FreeModule(arm7_sndModule);
+			unloadCodec(cdc);
+			FeOS_FreeARM7(arm7_sndModule, fifoCh);
+			printf("Playback stopped\n");
 			return 0;
 		}
-		count+=ret;
+
+
 		int temp = ret;
 		// Crossing boundary
-		if((outBuf.bufOff + ret) >=STREAM_BUF_SIZE)
+		if((outBuf.bufOff + ret) > STREAM_BUF_SIZE)
 			temp = STREAM_BUF_SIZE - outBuf.bufOff;
-		deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], temp);
+		_deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], temp);
 		outBuf.bufOff+=temp;
 		// still some left
+
 		if(temp!=ret) {
-			deInterleave(&workBuf.buffer[temp], outBuf.buffer, ret-temp);
+			_deInterleave(&workBuf.buffer[temp], outBuf.buffer, ret-temp);
 			outBuf.bufOff = ret-temp;
 		}
+		DC_FlushAll();
 		smpNc -= ret;
 	}
+	//printf("\x1b[2J");
+	//printf("Buffer-fullness %d\n", ((STREAM_BUF_SIZE - smpNc)*100)/STREAM_BUF_SIZE);
 	return 1;
-}
-
-void deInterleave(void *in, void*out, int samples)
-{
-	
-	short * right = out;
-	short * left = right+STREAM_BUF_SIZE;
-
-	for(; samples>0; samples--) {
-		*right++ = *((unsigned int*)(in));
-		*left++ = (*((unsigned int*)(in+=4))) >> 16;
-	}
-
 }
 
 void preFill(CODEC_INTERFACE * cdc)
@@ -141,10 +131,9 @@ void preFill(CODEC_INTERFACE * cdc)
 		if(ret<=0) {
 			break;
 		}
-		deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], ret);
+		_deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], ret);
 		outBuf.bufOff +=ret;
 		smpNc -=ret;
-		count +=ret;
 	}
 	CLAMP(outBuf.bufOff, 0, STREAM_BUF_SIZE);
 }

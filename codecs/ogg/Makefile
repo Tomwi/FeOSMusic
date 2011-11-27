@@ -30,7 +30,9 @@ SOURCES       := source
 DATA          := data
 INCLUDES      := include
 
-CONF_DEFINES = -DLITTLE_ENDIAN
+DEFARCH		:= -marm
+
+CONF_DEFINES = -DLITTLE_ENDIAN -D_ARM_ASSEM_
 CONF_LIBDIRS = 
 CONF_LIBS = 
 
