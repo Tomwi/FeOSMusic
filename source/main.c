@@ -1,10 +1,5 @@
-#include <feos.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "FeosMusic.h"
 #include <filebrowser.h>
-#include "CodecInterface.h"
-#include "SndStream.h"
 
 #define TYPE_DIR(n) (n == DT_DIR ? 1 : 0)
 
@@ -53,7 +48,7 @@ int main(int argc, char ** argv)
 		free(path);
 		return 0;
 	}
-
+	
 	startStream(&codec, type, path);
 	while(1) {
 		FeOS_WaitForVBlank();

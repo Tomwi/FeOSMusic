@@ -5,6 +5,7 @@
 * 	The streaming functions are based upon the example found in the helix
 * 	aac decoder source
 */
+#include <feos.h>
 #include "aacdec.h"
 #include "aaccommon.h"
 #include "mp4ff.h"
@@ -20,6 +21,10 @@ AACFrameInfo inf;
 int trackSample;
 static int samples;
 int track;
+
+FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
+FEOS_EXPORT unsigned char *readOff;
+FEOS_EXPORT int dataLeft;
 
 uint32_t read_callback(void *user_data, void *buffer, uint32_t length)
 {
@@ -51,7 +56,7 @@ int findAudioTrack(mp4ff_t * f)
  */
 FILE * openFile(char * name)
 {
-
+	readOff = readBuf;
 	if((fp = fopen(name, "rb"))) {
 		mp4cb.user_data = fp;
 		if((infile = mp4ff_open_read(&mp4cb))) {
@@ -106,7 +111,7 @@ void freeDecoder(void)
 	fclose(fp);
 }
 
-int decSamples(int length, unsigned char ** readBuf, short int * destBuf, int *dataLeft)
+int decSamples(int length, short * destBuf)
 {
 	
 	int ret = 0;
@@ -116,14 +121,14 @@ int decSamples(int length, unsigned char ** readBuf, short int * destBuf, int *d
 		/* The decoder is always fed one aac frame */
 		if(trackSample < samples) {
 			/* Read sample for decoding*/
-			read = mp4ff_read_sample_v2(infile, track, trackSample++,*readBuf);
+			read = mp4ff_read_sample_v2(infile, track, trackSample++, readBuf+dataLeft);
 			/* Update amount of data in readBuffer */
-			*dataLeft+=read;
-			memset(*readBuf+*dataLeft, 0, 1940 - *dataLeft);
-			/* Decode sample */
-			ret = AACDecode(decoder, readBuf, dataLeft, destBuf);
-			// Update readBuf pointer to point to the first 'free'space
-			*readBuf -= read - *dataLeft;
+			dataLeft+=read;
+			memset(readBuf+dataLeft, 0, READ_BUF_SIZE - dataLeft);
+			/* Decode sample, after return the external application should move the oldest 
+			 * data to the beginning of the readbuffer */
+			ret = AACDecode(decoder, &readOff, &dataLeft, destBuf);
+			readOff -= (read - dataLeft);
 			return 1024;
 		}
 		/* Either a sample read error occured , an decoding error occured or simply EOF */

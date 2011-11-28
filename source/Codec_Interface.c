@@ -12,6 +12,9 @@ int loadCodec(char * codecFile, CODEC_INTERFACE * cdc){
 	cdc->freeDecoder	=	FeOS_FindSymbol(mdl, "freeDecoder");
 	cdc->decSamples		= 	FeOS_FindSymbol(mdl, "decSamples");
 	cdc->codecModule	=	mdl;
+	cdc->dataLeft		= 	FeOS_FindSymbol(mdl, "dataLeft");
+	cdc->readBuf		=	FeOS_FindSymbol(mdl, "readBuf");
+	cdc->readOff		= 	FeOS_FindSymbol(mdl, "readOff");
 	return 1;
 	}
 	else{

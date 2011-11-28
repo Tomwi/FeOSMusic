@@ -36,6 +36,7 @@ void irq_sampleCntHandler(void);
 int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);
+void deFragReadbuf(CODEC_INTERFACE * cdc);
 /*
  * Initalize arm7 module for sound playback
  * Returns:

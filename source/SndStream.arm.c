@@ -1,21 +1,12 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <feos.h>
-#include "SndStream.h"
+#include "FeosMusic.h"
 
 int fifoCh;
 instance_t arm7_sndModule;
 FILE * currentFile;
 
-#define CLAMP(n,b,u) (n = (n >= u? b : n))
 AUDIO_BUFFER outBuf;
 AUDIO_BUFFER workBuf;
 int frequency, nChans, smpNc;
-/* Readbuffer variabelen */
-unsigned char readBuf[READ_BUF_SIZE];
-unsigned char * readOff;
-int dataLeft;
 hword_t  sampleCount[2];
 
 char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
@@ -47,8 +38,7 @@ int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file)
 		outBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
 		if(workBuf.buffer && outBuf.buffer) {
 
-			readOff = readBuf;
-			memset(readOff, READ_BUF_SIZE, 0);
+			memset(*cdc->readBuf, READ_BUF_SIZE, 0);
 			preFill(cdc);
 
 			msg.type = FIFO_AUDIO_START;
@@ -85,8 +75,14 @@ int updateStream(CODEC_INTERFACE * cdc)
 	smpNc += smpPlayed;
 	int ret = 0;
 	if(smpNc>0) {
-
-		ret = cdc->decSamples(((smpNc)&(~3)), &readOff, workBuf.buffer, &dataLeft);
+		if(*cdc->dataLeft){
+			// Readbuffer not yet defragmented
+			if(*cdc->dataLeft != (int)(*cdc->readOff-*cdc->readBuf)){
+				//deFragReadbuf(cdc);
+			}
+		}
+		 
+		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
 
 		if(ret <0) {
 			msg.type = FIFO_AUDIO_STOP;
@@ -127,7 +123,7 @@ void preFill(CODEC_INTERFACE * cdc)
 	smpNc = STREAM_BUF_SIZE;
 	int ret = 0;
 	while(smpNc > 0) {
-		ret = cdc->decSamples(((smpNc)&(~3)), &readOff, workBuf.buffer, &dataLeft);
+		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
 		if(ret<=0) {
 			break;
 		}
@@ -136,4 +132,9 @@ void preFill(CODEC_INTERFACE * cdc)
 		smpNc -=ret;
 	}
 	CLAMP(outBuf.bufOff, 0, STREAM_BUF_SIZE);
+}
+
+void deFragReadbuf(CODEC_INTERFACE * cdc){
+	memmove(*cdc->readBuf, *cdc->readOff, *cdc->dataLeft);
+	*cdc->readOff = *cdc->readBuf + *cdc->dataLeft;
 }

@@ -1,6 +1,10 @@
 #include "ivorbisfile.h"
 #include "ogg_t.h"
+#include <feos.h>
 
+FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
+FEOS_EXPORT unsigned char *readOff;
+FEOS_EXPORT int dataLeft;
 
 OggVorbis_File vf;
 static int current_section;
@@ -14,7 +18,6 @@ FILE* openFile(char * name) {
 	if(fp) {
 		int ret = ov_open(fp, &vf, NULL,0);
 		vi=ov_info(&vf,-1);
-		printf("opened file %s\n", name);
 		return fp;
 	}
 	ov_clear(&vf);
@@ -38,7 +41,7 @@ int seekPercentage(int perc){
 	return -1;
 }
 
-int decSamples(int length, unsigned char ** readBuf, short int * destBuf, int *dataLeft){
+int decSamples(int length, short * destBuf){
 
 	short *target = destBuf;
 	if(length >= 1024){
