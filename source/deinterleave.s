@@ -10,6 +10,7 @@ _deInterleave:
 	cmp r2, #4
 	bxlt lr		@ nothing to split
 
+	bic r2, r2, #3
 	push {r4-r9}
 
 	add r3, r1, #BUF_BYTES

@@ -38,7 +38,6 @@ int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file)
 		outBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
 		if(workBuf.buffer && outBuf.buffer) {
 
-			memset(*cdc->readBuf, READ_BUF_SIZE, 0);
 			preFill(cdc);
 
 			msg.type = FIFO_AUDIO_START;
@@ -74,13 +73,8 @@ int updateStream(CODEC_INTERFACE * cdc)
 	sampleCount[1] = sampleCount[0];
 	smpNc += smpPlayed;
 	int ret = 0;
+	
 	if(smpNc>0) {
-		if(*cdc->dataLeft){
-			// Readbuffer not yet defragmented
-			if(*cdc->dataLeft != (int)(*cdc->readOff-*cdc->readBuf)){
-				//deFragReadbuf(cdc);
-			}
-		}
 		 
 		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
 
@@ -97,8 +91,6 @@ int updateStream(CODEC_INTERFACE * cdc)
 			printf("Playback stopped\n");
 			return 0;
 		}
-
-
 		int temp = ret;
 		// Crossing boundary
 		if((outBuf.bufOff + ret) > STREAM_BUF_SIZE)
@@ -123,6 +115,7 @@ void preFill(CODEC_INTERFACE * cdc)
 	smpNc = STREAM_BUF_SIZE;
 	int ret = 0;
 	while(smpNc > 0) {
+		
 		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
 		if(ret<=0) {
 			break;
@@ -134,7 +127,7 @@ void preFill(CODEC_INTERFACE * cdc)
 	CLAMP(outBuf.bufOff, 0, STREAM_BUF_SIZE);
 }
 
-void deFragReadbuf(CODEC_INTERFACE * cdc){
-	memmove(*cdc->readBuf, *cdc->readOff, *cdc->dataLeft);
-	*cdc->readOff = *cdc->readBuf + *cdc->dataLeft;
+void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft){
+	memmove(readBuf, *readOff, dataLeft);
+	*readOff = readBuf;
 }

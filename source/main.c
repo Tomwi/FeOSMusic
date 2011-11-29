@@ -12,7 +12,8 @@ int filter(const struct dirent *dent) {
 
 	len = strlen(dent->d_name);
 	return stricmp(dent->d_name+len-4, ".ogg") == 0
-	    || stricmp(dent->d_name+len-4, ".m4a") == 0;
+	    || stricmp(dent->d_name+len-4, ".m4a") == 0
+		|| stricmp(dent->d_name+len-4, ".mp3") == 0;;
 }
 
 int compar(const struct dirent **dent1, const struct dirent **dent2) {
@@ -44,12 +45,15 @@ int main(int argc, char ** argv)
 		type = "ogg";
 	else if(strcmp(path+len-4, ".m4a") == 0)
 		type = "mp4";
+	else if(strcmp(path+len-4, ".mp3") == 0)
+		type = "mp3";
 	else {
 		free(path);
 		return 0;
 	}
 	
 	startStream(&codec, type, path);
+	
 	while(1) {
 		FeOS_WaitForVBlank();
 		if(!updateStream(&codec)) {

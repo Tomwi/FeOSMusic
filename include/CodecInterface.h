@@ -11,9 +11,7 @@ typedef struct {
 	int (*getPercentage) (void);
 	void (*freeDecoder)(void);
 	int (*decSamples)(int length, short int * destBuf);
-	unsigned char ** readBuf;
-	unsigned char ** readOff;
-	int * dataLeft;
+	void (*deFragReadbuf)(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);
 	instance_t codecModule;
 }CODEC_INTERFACE;
 
