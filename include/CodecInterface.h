@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 typedef struct {
-	FILE * (*openFile)(char * name);
+	int (*openFile)(char * name);
 	int (*getSampleRate)(void);
 	int (*getnChannels)(void);
 	int (*seekPercentage)(int perc);
@@ -13,7 +13,7 @@ typedef struct {
 	int (*decSamples)(int length, short int * destBuf);
 	void (*deFragReadbuf)(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);
 	instance_t codecModule;
-}CODEC_INTERFACE;
+} CODEC_INTERFACE;
 
 int loadCodec(char * codecFile, CODEC_INTERFACE * cdc);
 void unloadCodec(CODEC_INTERFACE * cdc);

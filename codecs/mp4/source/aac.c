@@ -22,9 +22,11 @@ int trackSample;
 static int samples;
 int track;
 
-FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
-FEOS_EXPORT unsigned char *readOff;
-FEOS_EXPORT int dataLeft;
+unsigned char readBuf[READ_BUF_SIZE];
+unsigned char *readOff;
+int dataLeft;
+
+FEOS_EXPORT void (*deFragReadbuf)(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);
 
 uint32_t read_callback(void *user_data, void *buffer, uint32_t length)
 {
@@ -52,9 +54,9 @@ int findAudioTrack(mp4ff_t * f)
 }
 /*
  * Input	:	Filename
- * Output	: 	1 if succesful -1 if not
+ * Output	: 	1 if succesful 0 if not
  */
-FILE * openFile(char * name)
+int openFile(char * name)
 {
 	readOff = readBuf;
 	if((fp = fopen(name, "rb"))) {
@@ -70,13 +72,12 @@ FILE * openFile(char * name)
 					inf.profile = AAC_PROFILE_LC;
 					samples = mp4ff_num_samples(infile, track);
 					if(!AACSetRawBlockParams(decoder, 0, &inf))
-						return fp;
+						return 1;
 				}
 			}
 		}
 	}
-	printf("Fail\n");
-	return NULL;	/* sndFile == NULL */
+	return 0;
 }
 
 /*
@@ -113,22 +114,23 @@ void freeDecoder(void)
 
 int decSamples(int length, short * destBuf)
 {
-	
+
 	int ret = 0;
 	/* We'll always output 1024 (nah almost) samples */
 	if(length >=1024) {
 		int read = 0;
 		/* The decoder is always fed one aac frame */
 		if(trackSample < samples) {
+			/* Move old data to the beginning of the buffer */
+			deFragReadbuf(readBuf, &readOff, dataLeft);
 			/* Read sample for decoding*/
 			read = mp4ff_read_sample_v2(infile, track, trackSample++, readBuf+dataLeft);
 			/* Update amount of data in readBuffer */
 			dataLeft+=read;
 			memset(readBuf+dataLeft, 0, READ_BUF_SIZE - dataLeft);
-			/* Decode sample, after return the external application should move the oldest 
+			/* Decode sample, after return the external application should move the oldest
 			 * data to the beginning of the readbuffer */
 			ret = AACDecode(decoder, &readOff, &dataLeft, destBuf);
-			readOff -= (read - dataLeft);
 			return 1024;
 		}
 		/* Either a sample read error occured , an decoding error occured or simply EOF */

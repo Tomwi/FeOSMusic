@@ -12,7 +12,7 @@
  * MP4 files are handled differently then plain aac files, but
  * info like sample rate are stored in the same decoder structure
  */
-FEOS_EXPORT FILE* openFile(char * name);
+FEOS_EXPORT int openFile(char * name);
 FEOS_EXPORT int getSampleRate(void);
 FEOS_EXPORT int getnChannels(void);
 FEOS_EXPORT int seekPercentage(int perc);

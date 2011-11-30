@@ -2,13 +2,12 @@
 
 int fifoCh;
 instance_t arm7_sndModule;
-FILE * currentFile;
 
 AUDIO_BUFFER outBuf;
 AUDIO_BUFFER workBuf;
 int frequency, nChans, smpNc;
 hword_t  sampleCount[2];
-
+int test;
 char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
 
 FIFO_AUD_MSG msg;
@@ -27,10 +26,10 @@ int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file)
 	loadCodec(codecFile, cdc);
 	if(!cdc)
 		printf("codec %s not found!\n", codecFile);
-	currentFile = cdc->openFile(file);
+	int ret = cdc->openFile(file);
 	sampleCount[0] = sampleCount[1] = 0;
 
-	if(currentFile) {
+	if(ret) {
 		frequency 	= cdc->getSampleRate();
 		nChans		= cdc->getnChannels();
 		/* sample is 2 bytes */
@@ -73,9 +72,9 @@ int updateStream(CODEC_INTERFACE * cdc)
 	sampleCount[1] = sampleCount[0];
 	smpNc += smpPlayed;
 	int ret = 0;
-	
+
 	if(smpNc>0) {
-		 
+
 		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
 
 		if(ret <0) {
@@ -91,21 +90,25 @@ int updateStream(CODEC_INTERFACE * cdc)
 			printf("Playback stopped\n");
 			return 0;
 		}
-		int temp = ret;
-		// Crossing boundary
-		if((outBuf.bufOff + ret) > STREAM_BUF_SIZE)
-			temp = STREAM_BUF_SIZE - outBuf.bufOff;
-		_deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], temp);
-		outBuf.bufOff+=temp;
-		// still some left
+		if(ret) {
+			int temp = ret;
+			// Crossing boundary
+			if((outBuf.bufOff + ret) > STREAM_BUF_SIZE)
+				temp = STREAM_BUF_SIZE - outBuf.bufOff;
 
-		if(temp!=ret) {
-			_deInterleave(&workBuf.buffer[temp], outBuf.buffer, ret-temp);
-			outBuf.bufOff = ret-temp;
+			_deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], temp);
+			outBuf.bufOff+=temp;
+
+			// still some left
+			if(temp!=ret) {
+				_deInterleave(&workBuf.buffer[temp*cdc->getnChannels()], outBuf.buffer, ret-temp);
+				outBuf.bufOff = ret-temp;
+			}
+			DC_FlushAll();
+			FeOS_DrainWriteBuffer();
+			smpNc -= ret;
 		}
-		DC_FlushAll();
-		FeOS_DrainWriteBuffer();
-		smpNc -= ret;
+
 	}
 	return 1;
 }
@@ -115,7 +118,7 @@ void preFill(CODEC_INTERFACE * cdc)
 	smpNc = STREAM_BUF_SIZE;
 	int ret = 0;
 	while(smpNc > 0) {
-		
+
 		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
 		if(ret<=0) {
 			break;
@@ -127,7 +130,8 @@ void preFill(CODEC_INTERFACE * cdc)
 	CLAMP(outBuf.bufOff, 0, STREAM_BUF_SIZE);
 }
 
-void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft){
+void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft)
+{
 	memmove(readBuf, *readOff, dataLeft);
 	*readOff = readBuf;
 }

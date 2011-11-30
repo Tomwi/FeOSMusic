@@ -79,7 +79,7 @@ void parseID3_V2(FILE * fp)
 	fileSize -= firstFrame;
 }
 
-FILE * openFile(char * name)
+int openFile(char * name)
 {
 	memset(&inf, 0, sizeof(inf));
 	readOff = readBuf;
@@ -97,11 +97,11 @@ FILE * openFile(char * name)
 				/* Get info for mm stream init */
 				MP3GetLastFrameInfo(mdecoder, &inf);
 				bitrate = inf.bitrate;
-				return fp;
+				return 1;
 			}
 		}
 	}
-	return NULL;
+	return 0;
 }
 
 int getSampleRate(void)
@@ -142,12 +142,9 @@ int decSamples(int length, short * destBuf)
 			ret = fread(readBuf+dataLeft, 1, READ_BUF_SIZE-dataLeft, fp);
 			dataLeft += ret;
 			
-			if(dataLeft != READ_BUF_SIZE) {
-				if(feof(fp))
+				if(feof(fp) && !dataLeft)
 					return -1;
-			}
 		}
-
 		/* check for errors */
 		if((ret = MP3Decode(mdecoder, &readOff, &dataLeft, destBuf,0))) {
 			switch(ret) {
