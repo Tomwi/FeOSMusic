@@ -35,7 +35,5 @@ CONF_LIBS = -lfilebrowser
 
 include $(FEOSMK)/app.mk
 
-ifneq ($(strip $(DEST)),)
 install: all
-	@cp $(TARGET).fx2 $(DEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
-endif
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1

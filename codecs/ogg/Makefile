@@ -38,7 +38,5 @@ CONF_LIBS =
 
 include $(FEOSMK)/dynlib.mk
 
-ifneq ($(strip $(DEST)),)
 install: all
-	@cp $(TARGET).fx2 $(DEST)/data/FeOS/lib/$(TARGET).fx2 || exit 1
-endif
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/lib/$(TARGET).fx2 || exit 1
