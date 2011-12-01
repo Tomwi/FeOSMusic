@@ -16,9 +16,7 @@ clean:
 	@make -C arm7SndMod clean
 	@for i in $(CODECS); do make -C codecs/$$i clean; done
 
-ifneq ($(strip $(DEST)),)
 install: all
 	@make -f Makefile.FeOS install
 	@make -C arm7SndMod install
 	@for i in $(CODECS); do make -C codecs/$$i install; done
-endif

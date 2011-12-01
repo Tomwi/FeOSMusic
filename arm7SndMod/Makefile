@@ -35,7 +35,5 @@ CONF_ARM7 = 1
 
 include $(FEOSMK)/app.mk
 
-ifneq ($(strip $(DEST)),)
 install: all
-	@cp $(TARGET).fx2 $(DEST)/data/FeOS/arm7/$(TARGET).fx2 || exit 1
-endif
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/arm7/$(TARGET).fx2 || exit 1
