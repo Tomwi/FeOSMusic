@@ -21,22 +21,22 @@ void FifoMsgHandler(int num_bytes, void *userdata)
 	int i;
 	switch(msg.type) {
 	case FIFO_AUDIO_START:
-		if(channels <=2 && channels > 0)
-		{
-		for(i=0; i<channels; i++) {
-			SCHANNEL_TIMER(i) = SOUND_FREQ((u16)(msg.property));
-			SCHANNEL_SOURCE(i) = (u32)(msg.buffer+msg.bufLen*i*2);
-			SCHANNEL_LENGTH(i) = msg.bufLen/2;	// length is counted in words, sample is halfword
-			SCHANNEL_REPEAT_POINT(i) = 0;
+		if(channels <=2 && channels > 0) {
+			for(i=0; i<channels; i++) {
+				SCHANNEL_TIMER(i) = SOUND_FREQ((u16)(msg.property));
+				SCHANNEL_SOURCE(i) = (u32)(msg.buffer+msg.bufLen*i*2);
+				SCHANNEL_LENGTH(i) = msg.bufLen/2;	// length is counted in words, sample is halfword
+				SCHANNEL_REPEAT_POINT(i) = 0;
+			}
+
+
+			if(channels == 2) {
+				SCHANNEL_CR(0) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(0);
+				SCHANNEL_CR(1) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(127);
+			} else
+				SCHANNEL_CR(0) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(64);
+
 		}
-		
-		if(channels == 2)
-		SCHANNEL_CR(0) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(0);
-		SCHANNEL_CR(1) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(127);
-		}
-		else
-			SCHANNEL_CR(0) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(64);
-	
 		break;
 	case FIFO_AUDIO_STOP:
 		SCHANNEL_CR(0) = 0;

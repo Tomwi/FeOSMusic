@@ -36,6 +36,7 @@ int main(int argc, char ** argv)
 	int   len;
 	initSoundStreamer();
 	
+	
 	path = pickFile("/", filter, compar);
 	if(path == NULL)
 		return 0;
@@ -54,13 +55,13 @@ int main(int argc, char ** argv)
 	
 	startStream(&codec, type, path);
 	
-	//startStream(&codec, "mp3", "test.mp3");
 	while(1) {
 		FeOS_WaitForVBlank();
 		if(!updateStream(&codec)) {
 			free(path);
 			return 0;
 		}
+		 
 	}
 
 	free(path);

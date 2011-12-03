@@ -7,7 +7,6 @@ AUDIO_BUFFER outBuf;
 AUDIO_BUFFER workBuf;
 int frequency, nChans, smpNc;
 hword_t  sampleCount[2];
-int test;
 char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
 
 FIFO_AUD_MSG msg;
@@ -91,21 +90,7 @@ int updateStream(CODEC_INTERFACE * cdc)
 			return 0;
 		}
 		if(ret) {
-			int temp = ret;
-			// Crossing boundary
-			if((outBuf.bufOff + ret) > STREAM_BUF_SIZE)
-				temp = STREAM_BUF_SIZE - outBuf.bufOff;
-
-			_deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], temp);
-			outBuf.bufOff+=temp;
-
-			// still some left
-			if(temp!=ret) {
-				_deInterleave(&workBuf.buffer[temp*cdc->getnChannels()], outBuf.buffer, ret-temp);
-				outBuf.bufOff = ret-temp;
-			}
-			DC_FlushAll();
-			FeOS_DrainWriteBuffer();
+			copySamples(workBuf.buffer, 1, ret);
 			smpNc -= ret;
 		}
 
@@ -123,15 +108,62 @@ void preFill(CODEC_INTERFACE * cdc)
 		if(ret<=0) {
 			break;
 		}
-		_deInterleave(workBuf.buffer, &outBuf.buffer[outBuf.bufOff], ret);
-		outBuf.bufOff +=ret;
+		copySamples(workBuf.buffer, 1, ret);
 		smpNc -=ret;
 	}
-	CLAMP(outBuf.bufOff, 0, STREAM_BUF_SIZE);
 }
 
 void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft)
 {
 	memmove(readBuf, *readOff, dataLeft);
 	*readOff = readBuf;
+}
+
+/*
+ * Input:
+ * 	-Pointer to buffer with decoded samples
+ * 	-Interleave flag (only set when stereo, but even then not mandatory
+ * 						depending on the decoders output)
+ *	Output:
+ * 	-Decoded samples in the outBuffer(s)
+ */
+void copySamples(short * inBuf, int deinterleave, int samples)
+{
+	int toEnd = ((outBuf.bufOff + samples) > STREAM_BUF_SIZE? STREAM_BUF_SIZE - outBuf.bufOff : samples);
+
+	DC_FlushAll();
+	FeOS_DrainWriteBuffer();
+
+copy:
+
+	if(toEnd) {
+
+		switch(nChans) {
+			//. Right channel
+		case 2:
+			if(!deinterleave)
+				memcpy(&outBuf.buffer[STREAM_BUF_SIZE+outBuf.bufOff], &inBuf[toEnd], toEnd*2);
+			// has to be stereo
+			else {
+				_deInterleave(inBuf, &outBuf.buffer[outBuf.bufOff], toEnd);
+				break;
+			}
+			//Left channel
+		case 1:
+			memcpy(&outBuf.buffer[outBuf.bufOff], inBuf, toEnd*2);
+			break;
+		}
+	}
+
+
+	samples -= toEnd;
+
+	if(samples) {
+		outBuf.bufOff = 0;
+		inBuf += toEnd*nChans;
+		toEnd = samples;
+		goto copy;
+	}
+	outBuf.bufOff += toEnd;
+
 }

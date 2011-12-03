@@ -37,6 +37,7 @@ int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);
 void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);
+void copySamples(short * inBuf, int deinterleave, int samples);
 /*
  * Initalize arm7 module for sound playback
  * Returns:
