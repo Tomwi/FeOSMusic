@@ -13,7 +13,7 @@ vorbis_info *vi = NULL;
 /*
 Opens an OGG file
 */
-int openFile(char * name)
+int openFile(const char * name)
 {
 	FILE * fp = fopen(name, "rb");
 	if(fp) {

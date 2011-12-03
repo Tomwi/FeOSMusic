@@ -20,7 +20,7 @@ int initSoundStreamer(void)
 	return 0;
 }
 
-int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file)
+int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file)
 {
 	loadCodec(codecFile, cdc);
 	if(!cdc)

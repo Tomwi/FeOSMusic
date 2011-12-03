@@ -8,7 +8,7 @@
 
 #define READ_BUF_SIZE 		1940
 
-FEOS_EXPORT int openFile(char * name);
+FEOS_EXPORT int openFile(const char * name);
 FEOS_EXPORT int getSampleRate(void);
 FEOS_EXPORT int getnChannels(void);
 FEOS_EXPORT int seekPercentage(int perc);

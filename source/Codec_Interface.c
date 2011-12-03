@@ -1,6 +1,6 @@
 #include "FeosMusic.h"
 
-int loadCodec(char * codecFile, CODEC_INTERFACE * cdc)
+int loadCodec(const char * codecFile, CODEC_INTERFACE * cdc)
 {
 	instance_t mdl 		= 	FeOS_LoadModule(codecFile);
 	if(mdl) {

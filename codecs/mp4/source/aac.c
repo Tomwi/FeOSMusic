@@ -56,7 +56,7 @@ int findAudioTrack(mp4ff_t * f)
  * Input	:	Filename
  * Output	: 	1 if succesful 0 if not
  */
-int openFile(char * name)
+int openFile(const char * name)
 {
 	readOff = readBuf;
 	if((fp = fopen(name, "rb"))) {

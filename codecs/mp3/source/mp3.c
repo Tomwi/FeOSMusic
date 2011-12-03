@@ -79,7 +79,7 @@ void parseID3_V2(FILE * fp)
 	fileSize -= firstFrame;
 }
 
-int openFile(char * name)
+int openFile(const char * name)
 {
 	memset(&inf, 0, sizeof(inf));
 	readOff = readBuf;
