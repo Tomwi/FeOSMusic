@@ -12,6 +12,7 @@ const struct {
 	{ ".ogg",  "ogg"  },
 	{ ".m4a",  "mp4"  },
 	{ ".mp3",  "mp3"  },
+	{ ".flac", "flac" },
 };
 #define NUM_EXT (sizeof(extensions)/sizeof(extensions[0]))
 
