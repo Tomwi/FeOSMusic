@@ -36,7 +36,6 @@ static void error_callback(const FLAC__StreamDecoder *decoder,
 
 int openFile(const char * name)
 {
-  printf("flac: 0x%08x\n", (unsigned int)FeOS_hInstance);
   FLAC__StreamDecoderInitStatus init_status;
 
   finfo.frame  = NULL;
