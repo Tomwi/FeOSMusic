@@ -52,8 +52,12 @@ int main(int argc, char ** argv)
 	int   len;
 	int   i;
 	initSoundStreamer();
-	
-	path = pickFile("/", filter, compar);
+
+	if(argc == 1)
+		path = pickFile("/", filter, compar);
+	else
+		path = strdup(argv[1]);
+
 	if(path == NULL)
 		return 0;
 
