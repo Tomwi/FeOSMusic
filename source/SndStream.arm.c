@@ -20,11 +20,12 @@ int initSoundStreamer(void)
 	return 0;
 }
 
-int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file)
+int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file)
 {
-	loadCodec(codecFile, cdc);
-	if(!cdc)
+	if(!loadCodec(codecFile, cdc)) {
 		printf("codec %s not found!\n", codecFile);
+		return 0;
+	}
 	int ret = cdc->openFile(file);
 	sampleCount[0] = sampleCount[1] = 0;
 

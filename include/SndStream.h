@@ -31,7 +31,7 @@ typedef struct{
 	int bufOff;
 }AUDIO_BUFFER;
 
-int startStream(CODEC_INTERFACE * cdc, char * codecFile, char * file);
+int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file);
 void irq_sampleCntHandler(void);
 int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);

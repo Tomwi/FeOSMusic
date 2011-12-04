@@ -3,17 +3,34 @@
 
 #define TYPE_DIR(n) (n == DT_DIR ? 1 : 0)
 
+#define CHECK(path,ext) (stricmp(path + len - strlen(ext), ext) == 0)
+
+const struct {
+	const char * const ext;
+	const char * const mod;
+} extensions[] = {
+	{ ".ogg",  "ogg"  },
+	{ ".m4a",  "mp4"  },
+	{ ".mp3",  "mp3"  },
+	{ ".flac", "flac" },
+};
+#define NUM_EXT (sizeof(extensions)/sizeof(extensions[0]))
+
 int filter(const struct dirent *dent) {
 	int len;
+	int i;
 
 	if(TYPE_DIR(dent->d_type)
 	&& strcmp(dent->d_name, ".") != 0)
 		return 1;
 
 	len = strlen(dent->d_name);
-	return stricmp(dent->d_name+len-4, ".ogg") == 0
-	    || stricmp(dent->d_name+len-4, ".m4a") == 0
-		|| stricmp(dent->d_name+len-4, ".mp3") == 0;;
+	for(i = 0; i < NUM_EXT; i++) {
+		if(CHECK(dent->d_name, extensions[i].ext))
+			return 1;
+	}
+
+	return 0;
 }
 
 int compar(const struct dirent **dent1, const struct dirent **dent2) {
@@ -32,23 +49,25 @@ CODEC_INTERFACE codec;
 int main(int argc, char ** argv)
 {
 	char *path;
-	char *type;
+	const char *type = NULL;
 	int   len;
+	int   i;
 	initSoundStreamer();
-	
-	
-	path = pickFile("/", filter, compar);
+
+	if(argc == 1)
+		path = pickFile("/", filter, compar);
+	else
+		path = strdup(argv[1]);
+
 	if(path == NULL)
 		return 0;
 
 	len = strlen(path);
-	if(strcmp(path+len-4, ".ogg") == 0)
-		type = "ogg";
-	else if(strcmp(path+len-4, ".m4a") == 0)
-		type = "mp4";
-	else if(strcmp(path+len-4, ".mp3") == 0)
-		type = "mp3";
-	else {
+	for(i = 0; type == NULL && i < NUM_EXT; i++) {
+		if(CHECK(path, extensions[i].ext))
+			type = extensions[i].mod;
+	}
+	if(type == NULL) {
 		free(path);
 		return 0;
 	}
