@@ -10,6 +10,7 @@ hword_t  sampleCount[2];
 char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
 
 FIFO_AUD_MSG msg;
+char mixer_status;
 
 int initSoundStreamer(void)
 {
@@ -18,6 +19,20 @@ int initSoundStreamer(void)
 		return 1;
 	}
 	return 0;
+}
+
+void deinitSoundStreamer(CODEC_INTERFACE * cdc){
+	if(mixer_status == STATUS_PLAY){
+			msg.type = FIFO_AUDIO_STOP;
+			fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
+			cdc->freeDecoder();
+			free(outBuf.buffer);
+			free(workBuf.buffer);
+			unloadCodec(cdc);
+			FeOS_TimerWrite(0, 0);
+			FeOS_TimerWrite(1, 0);
+	}
+	FeOS_FreeARM7(arm7_sndModule, fifoCh);
 }
 
 int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file)
@@ -36,7 +51,7 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 		workBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
 		outBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
 		if(workBuf.buffer && outBuf.buffer) {
-
+			outBuf.bufOff = 0;
 			preFill(cdc);
 
 			msg.type = FIFO_AUDIO_START;
@@ -54,6 +69,36 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 	}
 	printf("Stream failed to start!\n");
 	return 0;
+}
+
+/*
+ * Input: -
+ * Output: Stream is paused
+ * Todo:
+ * move unplayed samples to beginning, for some reason distorts the stream...
+ */
+void pauseStream(void)
+{
+	msg.type = FIFO_AUDIO_PAUSE;
+	fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
+
+	sampleCount[0] = sampleCount[1] = 0;
+	FeOS_TimerWrite(0, 0);
+	FeOS_TimerWrite(1, 0);
+	memset(outBuf.buffer, 0, STREAM_BUF_SIZE*2);
+	outBuf.bufOff = 0;
+	smpNc = 0;
+	mixer_status = STATUS_PAUSE;
+}
+
+void resumeStream(CODEC_INTERFACE * cdc)
+{
+	msg.type = FIFO_AUDIO_RESUME;
+	fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
+
+	FeOS_TimerWrite(0, (65536-(0x2000000)/frequency)|((TIMER_ENABLE)<<16));
+	FeOS_TimerWrite(1, ((4|TIMER_ENABLE)<<16));
+	mixer_status = STATUS_PLAY;
 }
 
 /*
@@ -84,10 +129,8 @@ int updateStream(CODEC_INTERFACE * cdc)
 			free(outBuf.buffer);
 			free(workBuf.buffer);
 			unloadCodec(cdc);
-			FeOS_FreeARM7(arm7_sndModule, fifoCh);
 			FeOS_TimerWrite(0, 0);
 			FeOS_TimerWrite(1, 0);
-			printf("Playback stopped\n");
 			return 0;
 		}
 		if(ret) {
@@ -101,7 +144,7 @@ int updateStream(CODEC_INTERFACE * cdc)
 
 void preFill(CODEC_INTERFACE * cdc)
 {
-	smpNc = STREAM_BUF_SIZE;
+	smpNc = STREAM_BUF_SIZE-outBuf.bufOff;
 	int ret = 0;
 	while(smpNc > 0) {
 
@@ -140,7 +183,7 @@ copy:
 	if(toEnd) {
 
 		switch(nChans) {
-			//. Right channel
+			// Right channel
 		case 2:
 			if(!deinterleave)
 				memcpy(&outBuf.buffer[STREAM_BUF_SIZE+outBuf.bufOff], &inBuf[toEnd], toEnd*2);
@@ -155,10 +198,7 @@ copy:
 			break;
 		}
 	}
-
-
 	samples -= toEnd;
-
 	if(samples) {
 		outBuf.bufOff = 0;
 		inBuf += toEnd*nChans;
@@ -166,5 +206,4 @@ copy:
 		goto copy;
 	}
 	outBuf.bufOff += toEnd;
-
 }

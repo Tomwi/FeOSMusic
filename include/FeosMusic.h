@@ -10,5 +10,6 @@
 #include "SndStream.h"
 
 #define CLAMP(n,b,u) (n = (n >= u? b : n))
+extern bool playing;
 
 #endif

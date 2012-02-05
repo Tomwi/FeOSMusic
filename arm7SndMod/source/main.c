@@ -3,6 +3,8 @@
 /* Message types */
 #define FIFO_AUDIO_START	1
 #define FIFO_AUDIO_STOP		2
+#define FIFO_AUDIO_PAUSE	3
+#define FIFO_AUDIO_RESUME	4
 
 typedef struct {
 	int type;			// kind of audio message
@@ -14,6 +16,11 @@ typedef struct {
 FIFO_AUD_MSG  msg;
 int fifoChan;
 
+int chanReg[2];
+
+/* TODO:
+ * -Make it neat
+ */
 void FifoMsgHandler(int num_bytes, void *userdata)
 {
 	fifoGetDatamsg(fifoChan, num_bytes, (u8*)&msg);
@@ -41,6 +48,18 @@ void FifoMsgHandler(int num_bytes, void *userdata)
 	case FIFO_AUDIO_STOP:
 		SCHANNEL_CR(0) = 0;
 		SCHANNEL_CR(1) = 0;
+		break;
+	case FIFO_AUDIO_PAUSE:
+		SCHANNEL_CR(0) = 0;
+		SCHANNEL_CR(1) = 0;
+		break;
+
+	case FIFO_AUDIO_RESUME:
+		if(channels == 2) {
+			SCHANNEL_CR(0) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(0);
+			SCHANNEL_CR(1) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(127);
+		} else
+			SCHANNEL_CR(0) = SOUND_REPEAT|SOUND_FORMAT_16BIT|SCHANNEL_ENABLE|SOUND_VOL(127)|SOUND_PAN(64);
 		break;
 	default:
 		break;

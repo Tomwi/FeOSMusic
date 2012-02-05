@@ -30,8 +30,8 @@ DATA          := data
 INCLUDES      := include
 
 CONF_DEFINES =
-CONF_LIBDIRS = $(FEOSSDK)/userlib/FeOSBrowser
-CONF_LIBS = -lfilebrowser
+CONF_LIBDIRS = 
+CONF_LIBS = 
 
 include $(FEOSMK)/app.mk
 

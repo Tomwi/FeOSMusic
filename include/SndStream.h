@@ -17,6 +17,13 @@
 /* Message types */
 #define FIFO_AUDIO_START	1
 #define FIFO_AUDIO_STOP		2
+#define FIFO_AUDIO_PAUSE	3
+#define FIFO_AUDIO_RESUME	4
+
+/* Mixer status */
+#define STATUS_STOP			0
+#define STATUS_PLAY			1
+#define STATUS_PAUSE		2
 
 typedef struct {
 	int type;			// kind of audio message
@@ -32,7 +39,8 @@ typedef struct{
 }AUDIO_BUFFER;
 
 int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file);
-void irq_sampleCntHandler(void);
+void pauseStream(void);
+void resumeStream(CODEC_INTERFACE * cdc);
 int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);
@@ -45,5 +53,8 @@ void copySamples(short * inBuf, int deinterleave, int samples);
  * 1 on success
  */
 int initSoundStreamer(void);
+void deinitSoundStreamer(CODEC_INTERFACE * cdc);
+
+extern char mixer_status;
 
 #endif /* SND_STREAM_H */
