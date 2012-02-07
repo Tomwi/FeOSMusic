@@ -40,7 +40,7 @@ typedef struct{
 
 int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file);
 void pauseStream(void);
-void resumeStream(CODEC_INTERFACE * cdc);
+void resumeStream(void);
 int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);

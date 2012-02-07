@@ -29,7 +29,7 @@ int main(int argc, char ** argv)
 			break;
 		case STATUS_PAUSE:
 			if(keysPres & KEY_A)
-				resumeStream(&cur_codec);
+				resumeStream();
 			break;
 		}
 

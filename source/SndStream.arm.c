@@ -21,16 +21,17 @@ int initSoundStreamer(void)
 	return 0;
 }
 
-void deinitSoundStreamer(CODEC_INTERFACE * cdc){
-	if(mixer_status == STATUS_PLAY){
-			msg.type = FIFO_AUDIO_STOP;
-			fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
-			cdc->freeDecoder();
-			free(outBuf.buffer);
-			free(workBuf.buffer);
-			unloadCodec(cdc);
-			FeOS_TimerWrite(0, 0);
-			FeOS_TimerWrite(1, 0);
+void deinitSoundStreamer(CODEC_INTERFACE * cdc)
+{
+	if(mixer_status == STATUS_PLAY) {
+		msg.type = FIFO_AUDIO_STOP;
+		fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
+		cdc->freeDecoder();
+		free(outBuf.buffer);
+		free(workBuf.buffer);
+		unloadCodec(cdc);
+		FeOS_TimerWrite(0, 0);
+		FeOS_TimerWrite(1, 0);
 	}
 	FeOS_FreeARM7(arm7_sndModule, fifoCh);
 }
@@ -74,8 +75,6 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 /*
  * Input: -
  * Output: Stream is paused
- * Todo:
- * move unplayed samples to beginning, for some reason distorts the stream...
  */
 void pauseStream(void)
 {
@@ -85,13 +84,30 @@ void pauseStream(void)
 	sampleCount[0] = sampleCount[1] = 0;
 	FeOS_TimerWrite(0, 0);
 	FeOS_TimerWrite(1, 0);
+
+	int i,j;
+	int size = STREAM_BUF_SIZE-smpNc;
+	int start = outBuf.bufOff-size;
+	if(start < 0)
+		start +=STREAM_BUF_SIZE;
+
+	for(j=0; j<nChans; j++) {
+		for(i = 0; i<STREAM_BUF_SIZE-smpNc; i++) {
+			workBuf.buffer[STREAM_BUF_SIZE*j + i] = outBuf.buffer[STREAM_BUF_SIZE*j + (start + i)%8192];
+		}
+	}
 	memset(outBuf.buffer, 0, STREAM_BUF_SIZE*2);
-	outBuf.bufOff = 0;
-	smpNc = 0;
 	mixer_status = STATUS_PAUSE;
+	memcpy(outBuf.buffer, workBuf.buffer, (STREAM_BUF_SIZE-smpNc)*2);
+	if(nChans == 2)
+		memcpy(outBuf.buffer+STREAM_BUF_SIZE, workBuf.buffer+STREAM_BUF_SIZE, (STREAM_BUF_SIZE-smpNc)*2);
+
+	outBuf.bufOff = STREAM_BUF_SIZE-smpNc;
+	DC_FlushAll();
+	FeOS_DrainWriteBuffer();
 }
 
-void resumeStream(CODEC_INTERFACE * cdc)
+void resumeStream(void)
 {
 	msg.type = FIFO_AUDIO_RESUME;
 	fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
@@ -120,7 +136,7 @@ int updateStream(CODEC_INTERFACE * cdc)
 
 	if(smpNc>0) {
 
-		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
+		ret = cdc->decSamples(smpNc, workBuf.buffer);
 
 		if(ret <0) {
 			msg.type = FIFO_AUDIO_STOP;
@@ -148,7 +164,7 @@ void preFill(CODEC_INTERFACE * cdc)
 	int ret = 0;
 	while(smpNc > 0) {
 
-		ret = cdc->decSamples(((smpNc)&(~3)), workBuf.buffer);
+		ret = cdc->decSamples(smpNc, workBuf.buffer);
 		if(ret<=0) {
 			break;
 		}
@@ -173,10 +189,10 @@ void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLe
  */
 void copySamples(short * inBuf, int deinterleave, int samples)
 {
+	// Deinterleave will fail otherwise (deinterleaves 4n samples)
+	samples &= (~3); // bic
 	int toEnd = ((outBuf.bufOff + samples) > STREAM_BUF_SIZE? STREAM_BUF_SIZE - outBuf.bufOff : samples);
-
-	DC_FlushAll();
-	FeOS_DrainWriteBuffer();
+	toEnd  	&= (~3);
 
 copy:
 
@@ -199,6 +215,7 @@ copy:
 		}
 	}
 	samples -= toEnd;
+	/* There was a split */
 	if(samples) {
 		outBuf.bufOff = 0;
 		inBuf += toEnd*nChans;
@@ -206,4 +223,7 @@ copy:
 		goto copy;
 	}
 	outBuf.bufOff += toEnd;
+
+	DC_FlushAll();
+	FeOS_DrainWriteBuffer();
 }

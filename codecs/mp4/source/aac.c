@@ -11,6 +11,22 @@
 #include "mp4ff.h"
 #include "aac.h"
 
+int AAC_FREQS[13] = {
+	96000,
+	88200,
+	64000,
+	48000,
+	44100,
+	32000,
+	24000,
+	22050,
+	16000,
+	12000,
+	11025,
+	8000,
+	7350,
+};
+
 FILE * fp;
 
 /* Helix variabelen*/
@@ -65,12 +81,30 @@ int openFile(const char * name)
 			if ((track = findAudioTrack(infile)) >= 0) {
 				/* Decoder failed to initialize */
 				if((decoder = AACInitDecoder())) {
-					/* Decoder should be updated to decode raw blocks in the mp4 */
+					/* Decoder should be updated to decode raw blocks in the mp4
+					 * IMPORTANT:
+					 * mp4ff_get_channel_count will return the wrong value for mono in this state
+					 */
 					inf.sampRateCore = mp4ff_get_sample_rate(infile, track);
-					inf.nChans = mp4ff_get_channel_count(infile,track);
-					/* AACSetRawBlockParams will fail if not set */
-					inf.profile = AAC_PROFILE_LC;
 					samples = mp4ff_num_samples(infile, track);
+					/*
+					DECODER CONFIG:
+					[AAAA ABBB] [BCCC CDEF]
+
+					A)object type
+					B)frequency index
+					C)channel configuration
+					D)bit: frame length flag
+					E)bit: dependsOnCoreCoder
+					F)bit: extensionFlag
+					*/
+
+					unsigned char * config_buf;
+					unsigned int config_bufSize;
+					mp4ff_get_decoder_config(infile, track, &config_buf, &config_bufSize);
+					inf.profile =  AAC_PROFILE_LC;
+					inf.nChans 	= (config_buf[1] >> 3) & 0xF;
+					free(config_buf);
 					if(!AACSetRawBlockParams(decoder, 0, &inf))
 						return 1;
 				}
