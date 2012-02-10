@@ -96,7 +96,7 @@ void updateBrowser(void)
 			cursor--;
 	}
 	if(keysPres & KEY_A) {
-		if(list[cursor].type_name == DT_DIR) {
+		if(list[cursor].type_name[0] == DT_DIR) {
 
 		} else {
 			if(mixer_status == STATUS_STOP) {
