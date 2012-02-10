@@ -7,6 +7,10 @@
 #include "mp3common.h"
 #include "mp3.h"
 
+/* decoder status */
+#define DEC_ERR				-1
+#define DEC_EOF				-2
+
 HMP3Decoder * mdecoder;
 MP3FrameInfo inf;
 
@@ -141,9 +145,8 @@ int decSamples(int length, short * destBuf)
 			deFragReadbuf(readBuf, &readOff, dataLeft);
 			ret = fread(readBuf+dataLeft, 1, READ_BUF_SIZE-dataLeft, fp);
 			dataLeft += ret;
-			
-				if(feof(fp) && !dataLeft)
-					return -1;
+			if(feof(fp) && !dataLeft)
+				return DEC_EOF;
 		}
 		/* check for errors */
 		if((ret = MP3Decode(mdecoder, &readOff, &dataLeft, destBuf,0))) {
@@ -156,7 +159,7 @@ int decSamples(int length, short * destBuf)
 				return 0;
 			default:
 				printf("HELIX MP3 ERROR: %d", ret);
-				return -1;
+				return DEC_ERR;
 			}
 		}
 		/* GCC can't know channels being only 1 or 2 */

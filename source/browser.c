@@ -7,14 +7,15 @@
 #include "browser.h"
 
 
-const char * Codecs [4][2]= {
+const char * Codecs [5][2]= {
 	{".ogg", "ogg"},
-	{".m4a", "mp4"},
+	{".m4a", "aac"},
+	{".aac", "aac"},
 	{".mp3", "mp3"},
 	{".flac", "flac"},
 };
 
-#define NUM_EXT 4
+#define NUM_EXT 5
 
 typedef struct DIRENTRY {
 	char * type_name; // type = char, name = string, concatenated
@@ -24,6 +25,7 @@ DIRENTRY *list;
 unsigned int numEnt;
 int cursor;
 CODEC_INTERFACE cur_codec;
+int loadedCodec;
 
 int compare(const void * a, const void * b)
 {
@@ -56,7 +58,7 @@ void retrieveDir(char * path)
 	DIR * dir;
 	struct dirent * entry;
 	numEnt = 0;
-
+	cursor = 0;
 	if((dir = opendir(path))) {
 		while((entry = readdir(dir))) {
 			// Realloc list
@@ -94,14 +96,24 @@ void updateBrowser(void)
 			cursor--;
 	}
 	if(keysPres & KEY_A) {
-		if(mixer_status == STATUS_STOP) {
-			char * file = list[cursor].type_name +1;
-			int i;
-			for(i =0; i<NUM_EXT; i++){
-				if(strstr(file, Codecs[i][0])) {
-					startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
-					mixer_status = STATUS_PLAY;
-					return;
+		if(list[cursor].type_name == DT_DIR) {
+
+		} else {
+			if(mixer_status == STATUS_STOP) {
+				char * file = list[cursor].type_name +1;
+				int i;
+				for(i =0; i<NUM_EXT; i++) {
+					if(strstr(file, Codecs[i][0])) {
+						if(strcmp(Codecs[loadedCodec][1],(Codecs[i][1]))) {
+							unloadCodec(&cur_codec);
+							if(!loadCodec((Codecs[i][1]), &cur_codec))
+								return;
+
+						}
+						loadedCodec = i;
+						startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
+						return;
+					}
 				}
 			}
 		}

@@ -2,6 +2,10 @@
 #include "ogg_t.h"
 #include <feos.h>
 
+/* decoder status */
+#define DEC_ERR				-1
+#define DEC_EOF				-2
+
 FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
 FEOS_EXPORT unsigned char *readOff;
 FEOS_EXPORT int dataLeft;
@@ -61,7 +65,9 @@ int decSamples(int length, short * destBuf)
 		/* Decoding error or EOF*/
 		if(ret <= 0) {
 			ov_clear(&vf);
-			return -1;
+			if(!ret)
+				return DEC_EOF;
+			return DEC_ERR;
 		}
 		tlength -= ret/(vi->channels*2);
 		target +=ret/2; // we increase a s16 pointer so half the byte size

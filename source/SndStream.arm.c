@@ -1,5 +1,8 @@
 #include "FeosMusic.h"
 
+#define TIMER_CASCADE   (1<<2)
+#define TIMER_IRQ_REQ   (1<<6)
+
 int fifoCh;
 instance_t arm7_sndModule;
 
@@ -12,10 +15,29 @@ char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
 FIFO_AUD_MSG msg;
 char mixer_status;
 
+void fifoValHandler(u32 value32, void *userdata)
+{
+	switch(value32) {
+		// Sound channels are enabled, enable timers
+	case FIFO_AUDIO_START:
+		/* Set the timer to start at a bunch of samples */
+		FeOS_TimerWrite(0, (65536-(0x2000000)/frequency)|((TIMER_ENABLE)<<16));
+		// cascade mode
+		FeOS_TimerWrite(1, ((4|TIMER_ENABLE)<<16));
+		mixer_status = STATUS_PLAY;
+		break;
+	default:
+		printf("FIFO returned %d\n", value32);
+		break;
+	}
+}
 int initSoundStreamer(void)
 {
 	arm7_sndModule= FeOS_LoadARM7(arm7Module, &fifoCh);
+
 	if(arm7_sndModule) {
+		// For handling states returned by arm7
+		fifoSetValue32Handler(fifoCh, fifoValHandler, NULL);
 		return 1;
 	}
 	return 0;
@@ -38,10 +60,6 @@ void deinitSoundStreamer(CODEC_INTERFACE * cdc)
 
 int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file)
 {
-	if(!loadCodec(codecFile, cdc)) {
-		printf("codec %s not found!\n", codecFile);
-		return 0;
-	}
 	int ret = cdc->openFile(file);
 	sampleCount[0] = sampleCount[1] = 0;
 
@@ -61,22 +79,22 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 			msg.bufLen = STREAM_BUF_SIZE;
 			fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
 
-			/* Set the timer to start at a bunch of samples */
-			FeOS_TimerWrite(0, (65536-(0x2000000)/frequency)|((TIMER_ENABLE)<<16));
-			// cascade mode
-			FeOS_TimerWrite(1, ((4|TIMER_ENABLE)<<16));
 			return 1;
 		}
 	}
-	printf("Stream failed to start!\n");
+	printf("File couldn't be opened!\n");
 	return 0;
 }
 
 /*
  * Input: -
  * Output: Stream is paused
+ * Details:
+ * Stream is paused by moving unplayed samples to the start of the buffer(s)
+ * and then resetting every timer so that when the stream is resumed no
+ * samples are skipped
  */
-void pauseStream(void)
+void pauseStream(CODEC_INTERFACE * cdc)
 {
 	msg.type = FIFO_AUDIO_PAUSE;
 	fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
@@ -96,13 +114,12 @@ void pauseStream(void)
 			workBuf.buffer[STREAM_BUF_SIZE*j + i] = outBuf.buffer[STREAM_BUF_SIZE*j + (start + i)%8192];
 		}
 	}
-	memset(outBuf.buffer, 0, STREAM_BUF_SIZE*2);
-	mixer_status = STATUS_PAUSE;
-	memcpy(outBuf.buffer, workBuf.buffer, (STREAM_BUF_SIZE-smpNc)*2);
+	memcpy(outBuf.buffer, workBuf.buffer, size*2);
 	if(nChans == 2)
-		memcpy(outBuf.buffer+STREAM_BUF_SIZE, workBuf.buffer+STREAM_BUF_SIZE, (STREAM_BUF_SIZE-smpNc)*2);
+		memcpy(outBuf.buffer+STREAM_BUF_SIZE, workBuf.buffer+STREAM_BUF_SIZE, size*2);
 
-	outBuf.bufOff = STREAM_BUF_SIZE-smpNc;
+	outBuf.bufOff = size;
+	mixer_status = STATUS_PAUSE;
 	DC_FlushAll();
 	FeOS_DrainWriteBuffer();
 }
@@ -118,6 +135,21 @@ void resumeStream(void)
 }
 
 /*
+ * Input: -
+ * Output: Stopped stream, however the used codec is not free'ed!
+ */
+void stopStream(CODEC_INTERFACE * cdc)
+{
+	msg.type = FIFO_AUDIO_STOP;
+	fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
+	free(outBuf.buffer);
+	free(workBuf.buffer);
+	FeOS_TimerWrite(0, 0);
+	FeOS_TimerWrite(1, 0);
+	cdc->freeDecoder();
+}
+
+/*
  * Input: codec
  * Output: return value where nonzero indicates success
  */
@@ -125,33 +157,42 @@ int updateStream(CODEC_INTERFACE * cdc)
 {
 	sampleCount[0] = FeOS_TimerTick(1);
 	int smpPlayed = sampleCount[0]-sampleCount[1];
-
-	if(smpPlayed < 0) {
-		smpPlayed += 65536;
-	}
+	smpPlayed += (smpPlayed < 0 ? 65536 : 0);
 
 	sampleCount[1] = sampleCount[0];
 	smpNc += smpPlayed;
-	int ret = 0;
+	int ret = DEC_EOF;
 
 	if(smpNc>0) {
+decode:
+		if(mixer_status != STATUS_WAIT)
+			ret = cdc->decSamples(smpNc, workBuf.buffer);
 
-		ret = cdc->decSamples(smpNc, workBuf.buffer);
-
-		if(ret <0) {
-			msg.type = FIFO_AUDIO_STOP;
-			fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
-			cdc->freeDecoder();
-			free(outBuf.buffer);
-			free(workBuf.buffer);
-			unloadCodec(cdc);
-			FeOS_TimerWrite(0, 0);
-			FeOS_TimerWrite(1, 0);
+		switch(ret) {
+		case DEC_ERR:
+			stopStream(cdc);
 			return 0;
-		}
-		if(ret) {
-			copySamples(workBuf.buffer, 1, ret);
-			smpNc -= ret;
+		case DEC_EOF:
+			mixer_status = STATUS_WAIT;
+			if(smpNc >= STREAM_BUF_SIZE) {
+				stopStream(cdc);
+				return 0;
+			}
+			int i,j;
+			for(j=0; j<nChans; j++) {
+				for(i=outBuf.bufOff; i<(outBuf.bufOff+smpPlayed); i++) {
+					outBuf.buffer[(i%STREAM_BUF_SIZE)+STREAM_BUF_SIZE*j] = 0;
+				}
+			}
+			outBuf.bufOff = (outBuf.bufOff + smpPlayed)%STREAM_BUF_SIZE;
+			break;
+		default:
+			if(ret > 0) {
+				copySamples(workBuf.buffer, 1, ret);
+				smpNc -= ret;
+				if(smpNc)
+					goto decode;
+			}
 		}
 
 	}
@@ -226,4 +267,9 @@ copy:
 
 	DC_FlushAll();
 	FeOS_DrainWriteBuffer();
+}
+
+void timer_irqHndlr(void)
+{
+
 }

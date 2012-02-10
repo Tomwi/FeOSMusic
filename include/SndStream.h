@@ -24,6 +24,12 @@
 #define STATUS_STOP			0
 #define STATUS_PLAY			1
 #define STATUS_PAUSE		2
+#define STATUS_WAIT 		3
+
+/* decoder status */
+#define DEC_ERR				-1
+#define DEC_EOF				-2
+
 
 typedef struct {
 	int type;			// kind of audio message
@@ -39,8 +45,9 @@ typedef struct{
 }AUDIO_BUFFER;
 
 int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file);
-void pauseStream(void);
+void pauseStream(CODEC_INTERFACE * cdc);
 void resumeStream(void);
+void stopStream(CODEC_INTERFACE * cdc);
 int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);

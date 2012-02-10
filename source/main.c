@@ -15,17 +15,23 @@ int main(int argc, char ** argv)
 			freeDir();
 			return 0;
 		}
+		if(keysPres & KEY_B){
+			stopStream(&cur_codec);
+			mixer_status = STATUS_STOP;
+		}
+			
 		
 		switch(mixer_status) {
 		case STATUS_STOP:
 			updateBrowser();
 			break;
+		case STATUS_WAIT:
 		case STATUS_PLAY:
 			if(!updateStream(&cur_codec)) {
 				mixer_status = STATUS_STOP;
 			}
 			if(keysPres & KEY_A)
-				pauseStream();
+				pauseStream(&cur_codec);
 			break;
 		case STATUS_PAUSE:
 			if(keysPres & KEY_A)
