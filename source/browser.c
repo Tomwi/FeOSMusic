@@ -1,11 +1,12 @@
-#include <feos.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <dirent.h>
-#include "browser.h"
+#include "FeosMusic.h"
 
+#define ENTRY_TYPE 0
+#define ENTRY_NAME 1
+
+char ** list;
+int numEnt;
+int cursor;
+char cwd[FILENAME_MAX];
 
 const char * Codecs [5][2]= {
 	{".ogg", "ogg"},
@@ -17,28 +18,38 @@ const char * Codecs [5][2]= {
 
 #define NUM_EXT 5
 
-typedef struct DIRENTRY {
-	char * type_name; // type = char, name = string, concatenated
-} DIRENTRY;
-
-DIRENTRY *list;
-unsigned int numEnt;
-int cursor;
 CODEC_INTERFACE cur_codec;
 int loadedCodec;
 
+u16 * iconFrames[2] = {
+	NULL,
+	NULL,
+};
+
+bool isRoot(char * path)
+{
+	int i;
+	int counter = 0;
+	for(i=0; i<strlen(path); i++) {
+		if(path[i]=='/')
+			counter++;
+		if(counter == 2)
+			return false;
+	}
+	return true;
+}
 int compare(const void * a, const void * b)
 {
-	DIRENTRY * c = (DIRENTRY*)a;
-	DIRENTRY * d = (DIRENTRY*)b;
+	char * c = *((char**)a);
+	char * d = *((char**)b);
 	// Directory goes before file
-	if(c->type_name[0] != d->type_name[0])
-		if(c->type_name[0] == DT_DIR)
+	if(c[ENTRY_TYPE] !=d[ENTRY_TYPE])
+		if(c[ENTRY_TYPE] == DT_DIR)
 			return -1;
 		else
 			return 1;
 	else {
-		return strcmp(c->type_name+1, d->type_name+1);
+		return stricmp(&c[ENTRY_NAME], &d[ENTRY_NAME]);
 	}
 	return 0;
 }
@@ -47,41 +58,70 @@ void freeDir(void)
 {
 	int i;
 	for(i=0; i<numEnt; i++) {
-		free(list[i].type_name);
+		free(list[i]);
 	}
 	free(list);
+	list = NULL;
 }
 
 void retrieveDir(char * path)
 {
-	freeDir();
-	DIR * dir;
-	struct dirent * entry;
-	numEnt = 0;
-	cursor = 0;
-	if((dir = opendir(path))) {
-		while((entry = readdir(dir))) {
-			// Realloc list
-			void * temp = realloc(list, sizeof(DIRENTRY)*(numEnt+1));
-			if(temp) {
-				list = temp;
-				list[numEnt].type_name = malloc(strlen(entry->d_name)+2);
-				if(list[numEnt].type_name) {
-					list[numEnt].type_name[0]=entry->d_type;
-					memcpy(list[numEnt].type_name+1, entry->d_name, strlen(entry->d_name) );
-					list[numEnt].type_name[strlen(entry->d_name)+1]=0;
-					numEnt++;
-					continue;
+	DIR *pdir;
+	if(path) {
+
+
+		getcwd(cwd, FILENAME_MAX);
+
+		if(strcmp(path, "..")) {
+			strcat(cwd, path);
+		} else {
+			int i;
+			if(!isRoot(cwd)) {
+				for(i=strlen(cwd)-2; i>1; i--) {
+					if(cwd[i] == '/')
+						break;
+					cwd[i] = 0;
 				}
-			}
-			printf("Couldn't open %s\n", path);
-			freeDir();
-			closedir(dir);
-			return;
+
+			} else
+				return;
 		}
-		qsort(list, numEnt, sizeof(DIRENTRY), compare);
+
 		cursor = 0;
-		closedir(dir);
+		numEnt = 0;
+		struct dirent *pent;
+
+		pdir=opendir(cwd);
+
+		if (pdir) {
+			chdir(cwd);
+			freeDir();
+			while ((pent=readdir(pdir))!=NULL) {
+
+				if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
+					continue;
+
+				void * temp = realloc(list, sizeof(char**)*(numEnt+1));
+				if(temp) {
+					list = temp;
+					int toAlloc = ((strlen(pent->d_name) + sizeof(char)*2));
+					list[numEnt] = malloc(toAlloc);
+					if(list[numEnt]) {
+						list[numEnt][ENTRY_TYPE] = pent->d_type;
+						strcpy(&list[numEnt][ENTRY_NAME], pent->d_name);
+						numEnt++;
+					} else
+						goto error;
+				}
+
+			}
+
+		} else {
+			printf ("opendir() failure; terminating\n");
+		}
+error:
+		qsort(list, numEnt, sizeof(char*), compare);
+		closedir(pdir);
 	}
 }
 
@@ -96,11 +136,11 @@ void updateBrowser(void)
 			cursor--;
 	}
 	if(keysPres & KEY_A) {
-		if(list[cursor].type_name[0] == DT_DIR) {
-
-		} else {
+		if(list[cursor][ENTRY_TYPE]==DT_DIR)
+			retrieveDir(&list[cursor][ENTRY_NAME]);
+		else {
 			if(mixer_status == STATUS_STOP) {
-				char * file = list[cursor].type_name +1;
+				char * file = &list[cursor][ENTRY_NAME];
 				int i;
 				for(i =0; i<NUM_EXT; i++) {
 					if(strstr(file, Codecs[i][0])) {
@@ -108,21 +148,29 @@ void updateBrowser(void)
 							unloadCodec(&cur_codec);
 							if(!loadCodec((Codecs[i][1]), &cur_codec))
 								return;
-
 						}
 						loadedCodec = i;
 						startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
+						mixer_status = STATUS_PLAY;
 						return;
 					}
 				}
 			}
 		}
 	}
-	/* Print files on screen */
-	int i;
+	if(keysPres & KEY_B) {
+		retrieveDir("..");
+	}
+
 	printf("\x1b[2J");
-	for(i=0; i<numEnt; i++) {
-		printf((cursor == i? "*" : "-"));
-		printf("%s\n", list[i].type_name+1);
+	int begin = ( cursor < 12? 0 : cursor-12);
+	if(begin > (numEnt- 24)) {
+		begin = (numEnt- 24);
+		if(begin < 0)
+			begin = 0;
+	}
+	int i;
+	for(i=begin; i<(begin+24) && i<numEnt; i++) {
+		printf("%s %.29s\n", (i==cursor? "*" : "-"), &list[i][ENTRY_NAME]);
 	}
 }

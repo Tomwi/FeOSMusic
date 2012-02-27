@@ -207,15 +207,17 @@ int decSamples(int length, short * destBuf)
 				/* Decode sample, after return the external application should move the oldest
 				 * data to the beginning of the readbuffer */
 				ret = AACDecode(decoder, &readOff, &dataLeft, destBuf);
+				/* Either a sample read error occured , an decoding error occured or simply EOF */
+				if(!read || ret) {
+					printf("ret %d, read %d\n", ret, read);
+					mp4ff_close(infile);
+					if(!read)
+						return DEC_EOF;
+					return DEC_ERR;
+				}
 				return 1024;
 			}
-			/* Either a sample read error occured , an decoding error occured or simply EOF */
-			if(!read || ret) {
-				mp4ff_close(infile);
-				if(!read)
-					return DEC_EOF;
-				return DEC_ERR;
-			}
+
 		}
 		// DEC_STATE = AAC
 		else {

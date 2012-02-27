@@ -5,11 +5,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <dirent.h>
 
 #include "CodecInterface.h"
 #include "SndStream.h"
-
-#define CLAMP(n,b,u) (n = (n >= u? b : n))
+#include "input.h"
 extern bool playing;
 
 #endif
