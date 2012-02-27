@@ -68,10 +68,7 @@ void retrieveDir(char * path)
 {
 	DIR *pdir;
 	if(path) {
-
-
 		getcwd(cwd, FILENAME_MAX);
-
 		if(strcmp(path, "..")) {
 			strcat(cwd, path);
 		} else {
@@ -113,9 +110,7 @@ void retrieveDir(char * path)
 					} else
 						goto error;
 				}
-
 			}
-
 		} else {
 			printf ("opendir() failure; terminating\n");
 		}
@@ -170,7 +165,7 @@ void updateBrowser(void)
 			begin = 0;
 	}
 	int i;
-	for(i=begin; i<(begin+24) && i<numEnt; i++) {
+	for(i=begin; i<(begin+23) && i<numEnt; i++) {
 		printf("%s %.29s\n", (i==cursor? "*" : "-"), &list[i][ENTRY_NAME]);
 	}
 }

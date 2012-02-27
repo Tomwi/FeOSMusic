@@ -6,14 +6,11 @@
 * 	aac decoder source
 */
 #include <feos.h>
+#include "decoder.h"
 #include "aacdec.h"
 #include "aaccommon.h"
 #include "mp4ff.h"
 #include "aac.h"
-
-/* decoder status */
-#define DEC_ERR				-1
-#define DEC_EOF				-2
 
 #define DEC_AAC 0
 #define DEC_MP4 1
@@ -217,6 +214,7 @@ int decSamples(int length, short * destBuf)
 				}
 				return 1024;
 			}
+			return DEC_EOF;
 
 		}
 		// DEC_STATE = AAC

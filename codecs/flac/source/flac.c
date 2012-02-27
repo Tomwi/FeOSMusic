@@ -4,10 +4,7 @@
 #include <stdio.h>
 #include "FLAC/stream_decoder.h"
 #include "flac.h"
-
-/* decoder status */
-#define DEC_ERR				-1
-#define DEC_EOF				-2
+#include "decoder.h"
 
 typedef struct {
 	const FLAC__Frame *frame;

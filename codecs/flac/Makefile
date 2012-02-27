@@ -28,7 +28,7 @@ TARGET        := $(shell basename $(CURDIR))
 BUILD         := build
 SOURCES       := source
 DATA          := data
-INCLUDES      := include
+INCLUDES      := include ../../include
 
 DEFARCH		:= -marm
 

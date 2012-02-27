@@ -1,10 +1,7 @@
 #include "ivorbisfile.h"
 #include "ogg_t.h"
 #include <feos.h>
-
-/* decoder status */
-#define DEC_ERR				-1
-#define DEC_EOF				-2
+#include "decoder.h"
 
 FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
 FEOS_EXPORT unsigned char *readOff;

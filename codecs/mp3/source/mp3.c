@@ -6,10 +6,7 @@
 #include "mp3dec.h"
 #include "mp3common.h"
 #include "mp3.h"
-
-/* decoder status */
-#define DEC_ERR				-1
-#define DEC_EOF				-2
+#include "decoder.h"
 
 HMP3Decoder * mdecoder;
 MP3FrameInfo inf;
