@@ -3,7 +3,7 @@ export THIS_MAKEFILE := Makefile.FeOS
 GRIT        := $(DEVKITARM)/bin/grit.exe
 
 CODECS := $(notdir $(patsubst %/,%,$(dir $(wildcard codecs/*/Makefile))))
-GFX		:=  /E/FeOSMusic/gfx
+GFX		:=  gfx
 PNGFILES		:= $(foreach dir, $(GFX),$(notdir $(wildcard $(dir)/*.png)))
 IMGBINS			:= $(PNGFILES:.png=.img.bin)
 
