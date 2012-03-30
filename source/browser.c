@@ -3,6 +3,9 @@
 #define ENTRY_TYPE 0
 #define ENTRY_NAME 1
 
+#define ICON_SZ 32
+#define ENTS_AL SCREEN_HEIGHT/ICON_SZ
+
 char ** list;
 int numEnt;
 int cursor;
@@ -157,15 +160,27 @@ void updateBrowser(void)
 		retrieveDir("..");
 	}
 
-	printf("\x1b[2J");
-	int begin = ( cursor < 12? 0 : cursor-12);
-	if(begin > (numEnt- 24)) {
-		begin = (numEnt- 24);
+	clearConsole();
+	int begin = ( cursor < (ENTS_AL-ENTS_AL/2)? 0 : cursor-(ENTS_AL-ENTS_AL/2));
+	if(begin > (numEnt - ENTS_AL)) {
+		begin = (numEnt- ENTS_AL);
 		if(begin < 0)
 			begin = 0;
 	}
 	int i;
-	for(i=begin; i<(begin+23) && i<numEnt; i++) {
-		printf("%s %.29s\n", (i==cursor? "*" : "-"), &list[i][ENTRY_NAME]);
+	for(i=begin; i<(begin+ENTS_AL); i++) {
+		if(i<numEnt) {
+			setSprXY(i-begin, 0, (i-begin)*ICON_SZ, SUB_SCREEN);
+			if(list[i-begin][ENTRY_TYPE]==DT_DIR) {
+				setFrame(iconFrames[0], (i-begin), SUB_SCREEN);
+			} else {
+				setFrame(iconFrames[1], (i-begin), SUB_SCREEN);
+			}
+			setConsoleCoo(ICON_SZ/8, (i-begin)*ICON_SZ/8+2);
+			print((i==cursor? "*" : "-"),1);
+			print(&list[i][ENTRY_NAME],(31-(ICON_SZ+1)/8));
+		} else {
+			hideSprite(i-begin, SUB_SCREEN);
+		}
 	}
 }

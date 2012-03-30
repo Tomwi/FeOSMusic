@@ -11,6 +11,8 @@
 #include "CodecInterface.h"
 #include "SndStream.h"
 #include "input.h"
-extern bool playing;
+#include "video.h"
+#include "sprite.h"
+#include "file.h"
 
 #endif

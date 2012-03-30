@@ -3,20 +3,22 @@
 
 int main(int argc, char ** argv)
 {
-	retrieveDir("/");
+	initVideo();
+	retrieveDir("");
 	initSoundStreamer();
 
 	while(1) {
 		updateInput();
+		updateVideo();
 		FeOS_WaitForVBlank();
-		
+
 		/* Exit program */
-		if(keysPres & KEY_START){
+		if(keysPres & KEY_START) {
 			deinitSoundStreamer(&cur_codec);
 			freeDir();
 			return 0;
 		}
-		
+
 		switch(mixer_status) {
 		case STATUS_STOP:
 			updateBrowser();
@@ -28,7 +30,7 @@ int main(int argc, char ** argv)
 			}
 			if(keysPres & KEY_A)
 				pauseStream(&cur_codec);
-			if(keysPres & KEY_B){
+			if(keysPres & KEY_B) {
 				stopStream(&cur_codec);
 				mixer_status = STATUS_STOP;
 			}
@@ -38,8 +40,6 @@ int main(int argc, char ** argv)
 				resumeStream();
 			break;
 		}
-		
-
 	}
 	return 0;
 }

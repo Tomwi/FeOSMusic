@@ -25,15 +25,23 @@ FEOSMK = $(FEOSSDK)/mk
 #---------------------------------------------------------------------------------
 TARGET        := $(shell basename $(CURDIR))
 BUILD         := build
-SOURCES       := source
+SOURCES       := source 
 DATA          := data
 INCLUDES      := include
+GRAPHICS	  := gfx
 
+IMGBINS		  := $(foreach dir, $(GRAPHICS),$(notdir $(wildcard $(dir)/*.bin)))
 CONF_DEFINES =
 CONF_LIBDIRS = 
 CONF_LIBS = 
+
 
 include $(FEOSMK)/app.mk
 
 install: all
 	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
+	@[ -d $(FEOSDEST)/data/FeOSMusic ] || mkdir -p $(FEOSDEST)/data/FeOSMusic || exit 1
+	@for i in $(IMGBINS); do cp $(GRAPHICS)/$$i $(FEOSDEST)/data/FeOSMusic; done
+
+	
+

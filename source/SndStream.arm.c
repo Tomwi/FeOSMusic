@@ -78,11 +78,9 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 			msg.buffer = outBuf.buffer;
 			msg.bufLen = STREAM_BUF_SIZE;
 			fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
-
 			return 1;
 		}
 	}
-	printf("File couldn't be opened!\n");
 	return 0;
 }
 
@@ -179,8 +177,10 @@ decode:
 				return 0;
 			}
 			int i,j;
+			/* No more samples to decode, but still playing, fill zeroes */
 			for(j=0; j<nChans; j++) {
 				for(i=outBuf.bufOff; i<(outBuf.bufOff+smpPlayed); i++) {
+					/* STREAM_BUF_SIZE is a power of 2 */
 					outBuf.buffer[(i%STREAM_BUF_SIZE)+STREAM_BUF_SIZE*j] = 0;
 				}
 			}
@@ -194,7 +194,6 @@ decode:
 					goto decode;
 			}
 		}
-
 	}
 	return 1;
 }
@@ -267,9 +266,4 @@ copy:
 
 	DC_FlushAll();
 	FeOS_DrainWriteBuffer();
-}
-
-void timer_irqHndlr(void)
-{
-
 }

@@ -7,4 +7,5 @@ codecs/*/build/*
 codecs/*/lib
 codecs/*/*.imp.a
 arm7SndMod/build/*
-
+*.tags*
+*.workspace*

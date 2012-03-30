@@ -4,7 +4,7 @@
 int keysPres, keysHold, keysReleased;
 
 void updateInput(void){
-	keysUpdate();
+	scanKeys();
 	keysPres = keysDown();
 	keysHold = keysHeld();
 	keysReleased = keysUp();
