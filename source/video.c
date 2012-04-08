@@ -25,6 +25,9 @@ void init3D(void){
 	            0.0, 1.0, 0.0);		//up
 }
 
+void deinit3D(void){
+	glDeinit();
+}
 void initVideo(void)
 {
 	/* We need access to DS hardware */
@@ -116,6 +119,7 @@ void updateVideo(void){
 }
 
 void deinitVideo(void){
+	deinit3D();
 	FeOS_ConsoleMode();
 }
 
