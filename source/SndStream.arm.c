@@ -165,7 +165,6 @@ int updateStream(CODEC_INTERFACE * cdc)
 decode:
 		if(mixer_status != STATUS_WAIT)
 			ret = cdc->decSamples(smpNc, workBuf.buffer);
-
 		switch(ret) {
 		case DEC_ERR:
 			stopStream(cdc);
@@ -190,7 +189,7 @@ decode:
 			if(ret > 0) {
 				copySamples(workBuf.buffer, 1, ret);
 				smpNc -= ret;
-				if(smpNc)
+				if(smpNc>0)
 					goto decode;
 			}
 		}
@@ -233,7 +232,9 @@ void copySamples(short * inBuf, int deinterleave, int samples)
 	samples &= (~3); // bic
 	int toEnd = ((outBuf.bufOff + samples) > STREAM_BUF_SIZE? STREAM_BUF_SIZE - outBuf.bufOff : samples);
 	toEnd  	&= (~3);
-
+	/* I don't care about the lag*/
+	visualize(&inBuf[toEnd], toEnd, nChans);
+	
 copy:
 
 	if(toEnd) {
@@ -254,6 +255,7 @@ copy:
 			break;
 		}
 	}
+	
 	samples -= toEnd;
 	/* There was a split */
 	if(samples) {
@@ -263,7 +265,7 @@ copy:
 		goto copy;
 	}
 	outBuf.bufOff += toEnd;
-
+	
 	DC_FlushAll();
 	FeOS_DrainWriteBuffer();
 }

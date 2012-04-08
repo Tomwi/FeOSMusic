@@ -1,3 +1,4 @@
+#include <feos.h>
 #include "file.h"
 
 
@@ -18,6 +19,7 @@ void * bufferFile(char * file)
 		if((buf = malloc(size))) {
 			fread(buf, 1, size, fp);
 			fclose(fp);
+			DC_FlushRange(buf, size);
 			return buf;
 		}
 	}

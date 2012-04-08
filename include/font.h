@@ -26,3 +26,4 @@ extern const unsigned short fontPal[256];
 #endif // GRIT_FONT_H
 
 //}}BLOCK(font)
+

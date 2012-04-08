@@ -1,6 +1,6 @@
 export THIS_MAKEFILE := Makefile.FeOS
 
-GRIT        := $(DEVKITARM)/bin/grit.exe
+GRIT        := $(DEVKITARM)/bin/grit
 
 CODECS := $(notdir $(patsubst %/,%,$(dir $(wildcard codecs/*/Makefile))))
 GFX		:=  gfx
@@ -29,4 +29,5 @@ install: all
 		
 convert: $(IMGBINS)
 $(IMGBINS) : %.img.bin : $(GFX)/%.png $(GFX)/%.grit
-		$(GRIT) $<  -o$(CURDIR)/gfx/$*
+		$(GRIT) $< -fh! -o$(CURDIR)/gfx/$*
+		

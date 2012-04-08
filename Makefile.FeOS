@@ -32,8 +32,8 @@ GRAPHICS	  := gfx
 
 IMGBINS		  := $(foreach dir, $(GRAPHICS),$(notdir $(wildcard $(dir)/*.bin)))
 CONF_DEFINES =
-CONF_LIBDIRS = 
-CONF_LIBS = 
+CONF_LIBDIRS = $(FEOSSDK)/userlib/feos3d
+CONF_LIBS = -lfeos3d
 
 
 include $(FEOSMK)/app.mk

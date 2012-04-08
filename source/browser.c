@@ -22,7 +22,7 @@ const char * Codecs [5][2]= {
 #define NUM_EXT 5
 
 CODEC_INTERFACE cur_codec;
-int loadedCodec;
+int loadedCodec = -1;
 
 u16 * iconFrames[2] = {
 	NULL,

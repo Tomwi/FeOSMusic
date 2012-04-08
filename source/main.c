@@ -4,18 +4,21 @@
 int main(int argc, char ** argv)
 {
 	initVideo();
+	chdir("/");
 	retrieveDir("");
 	initSoundStreamer();
 
 	while(1) {
 		updateInput();
 		updateVideo();
+		glFlush(0);
 		FeOS_WaitForVBlank();
 
 		/* Exit program */
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer(&cur_codec);
 			freeDir();
+			deinitVideo();
 			return 0;
 		}
 

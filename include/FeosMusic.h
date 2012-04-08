@@ -2,6 +2,7 @@
 #define FEOS_MUSIC_H
 
 #include <feos.h>
+#include <feos3d.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
