@@ -26,7 +26,6 @@ int loadCodec(const char * codecFile, CODEC_INTERFACE * cdc)
 
 void unloadCodec(CODEC_INTERFACE * cdc)
 {
-	FeOS_FreeModule(cdc->codecModule);
 	if (cdc->codecModule)
 	{
 		FeOS_FreeModule(cdc->codecModule);
