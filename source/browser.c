@@ -142,11 +142,10 @@ void updateBrowser(void)
 				int i;
 				for(i =0; i<NUM_EXT; i++) {
 					if(strstr(file, Codecs[i][0])) {
-						if(strcmp(Codecs[loadedCodec][1],(Codecs[i][1]))) {
+						if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1])))
 							unloadCodec(&cur_codec);
-							if(!loadCodec((Codecs[i][1]), &cur_codec))
-								return;
-						}
+						if(!loadCodec((Codecs[i][1]), &cur_codec))
+							return;
 						loadedCodec = i;
 						startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
 						mixer_status = STATUS_PLAY;
