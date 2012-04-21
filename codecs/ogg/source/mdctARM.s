@@ -3,11 +3,17 @@
 	@ full accuracy version
 
 	.global mdct_backwardARM
+	.type mdct_backwardARM, %function
 	.global mdct_shift_right
+	.type mdct_shift_right, %function
 	.global mdct_unroll_prelap
+	.type mdct_unroll_prelap, %function
 	.global mdct_unroll_part2
+	.type mdct_unroll_part2, %function
 	.global mdct_unroll_part3
+	.type mdct_unroll_part3, %function
 	.global mdct_unroll_postlap
+	.type mdct_unroll_postlap, %function
 
 mdct_unroll_prelap:
 	@ r0 = out

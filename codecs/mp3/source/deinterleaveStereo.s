@@ -1,7 +1,7 @@
 
 .arm                                                                               
 .global deinterleaveStereo
-.func deinterleaveStereo
+.type deinterleaveStereo, %function
 
 @ de-interleave a stereo source 
 @ Code by Thoduv and ecurtz
@@ -60,6 +60,5 @@ loop:
 	ldmia sp!, {r4-r11}
 	bx lr
 
-.endfunc
 .pool
 

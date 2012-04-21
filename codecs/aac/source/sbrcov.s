@@ -43,6 +43,7 @@
 @   see comments in sbrhfgen.c
 
         .global raac_CVKernel1
+		.type raac_CVKernel1, %function
 raac_CVKernel1:
 
         stmfd   sp!, {r4-r11, r14}
@@ -123,6 +124,7 @@ CV1_Loop_Start:
 @   see comments in sbrhfgen.c
 
         .global raac_CVKernel2
+		.type raac_CVKernel2, %function
 raac_CVKernel2:
         stmfd   sp!, {r4-r11, r14}
         
