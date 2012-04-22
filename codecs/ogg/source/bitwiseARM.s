@@ -1,9 +1,13 @@
 	.text
 
 	.global	oggpack_look
+	.type oggpack_look, %function
 	.global	oggpack_adv
+	.type oggpack_adv, %function
 	.global	oggpack_readinit
+	.type oggpack_readinit, %function
 	.global	oggpack_read
+	.type oggpack_read, %function
 
 oggpack_look:
 	@ r0 = oggpack_buffer *b

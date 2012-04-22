@@ -1,6 +1,7 @@
 .equ BUF_BYTES, 8192*2
 .global _deInterleave
 .hidden _deInterleave
+.type _deInterleave, %function
 
 .arm
 .align 2

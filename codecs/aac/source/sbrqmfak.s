@@ -43,6 +43,7 @@
 @   see comments in sbrqmf.c
 
         .global raac_QMFAnalysisConv
+		.type raac_QMFAnalysisConv, %function
 raac_QMFAnalysisConv:
         stmfd   sp!, {r4-r11, r14}
 

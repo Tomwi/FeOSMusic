@@ -34,6 +34,7 @@
 @ * ***** END LICENSE BLOCK ***** */ 
 
 	.GLOBAL xmp3_PolyphaseStereo
+	.TYPE xmp3_PolyphaseStereo STT_FUNC
 xmp3_PolyphaseStereo:
 	STMFD    sp!,{r4-r11,lr}
 	SUB      sp,sp,#8
@@ -385,6 +386,7 @@ LoopPS:
 	LDMFD    sp!,{r4-r11,pc}
 
 	.GLOBAL xmp3_PolyphaseMono
+	.TYPE xmp3_PolyphaseMono STT_FUNC
 xmp3_PolyphaseMono:
 	STMFD    sp!,{r4-r11,lr}
 	SUB      sp,sp,#8

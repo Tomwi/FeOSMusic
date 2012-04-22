@@ -1,10 +1,15 @@
 	.text
 
 	.global	decode_packed_entry_number
+	.type decode_packed_entry_number, %function
 	.global decode_packed_entry_number_REALSTART
+	.type decode_packed_entry_number_REALSTART, %function
 	.global decode_map
+	.type decode_map, %function
 	.global vorbis_book_decodevv_add
+	.type vorbis_book_decodevv_add, %function
 	.global _checksum
+	.type _checksum, %function
 
 decode_packed_entry_number_REALSTART:
 dpen_nobits:
