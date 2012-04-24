@@ -170,7 +170,7 @@ void updateBrowser(void)
 	for(i=begin; i<(begin+ENTS_AL); i++) {
 		if(i<numEnt) {
 			setSprXY(i-begin, 0, (i-begin)*ICON_SZ, SUB_SCREEN);
-			if(list[i-begin][ENTRY_TYPE]==DT_DIR) {
+			if(list[i][ENTRY_TYPE]==DT_DIR) {
 				setFrame(iconFrames[0], (i-begin), SUB_SCREEN);
 			} else {
 				setFrame(iconFrames[1], (i-begin), SUB_SCREEN);
