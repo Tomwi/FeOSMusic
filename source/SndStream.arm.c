@@ -164,7 +164,7 @@ int updateStream(CODEC_INTERFACE * cdc)
 	if(smpNc>0) {
 decode:
 		if(mixer_status != STATUS_WAIT)
-			ret = cdc->decSamples(smpNc, workBuf.buffer);
+			ret = cdc->decSamples((smpNc&(~3)), workBuf.buffer);
 		switch(ret) {
 		case DEC_ERR:
 			stopStream(cdc);

@@ -15,5 +15,6 @@
 #include "video.h"
 #include "sprite.h"
 #include "file.h"
+#include "decoder.h"
 
 #endif

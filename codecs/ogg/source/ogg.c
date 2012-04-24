@@ -52,13 +52,13 @@ int seekPercentage(int perc)
 int decSamples(int length, short * destBuf)
 {
 
-	short *target = destBuf;
+	char *target = destBuf;
 	if(length >= 1024) {
-		int tlength = length;//1024;
+		int tlength = length*vi->channels*2;
 
 		while(tlength) {
 			/* Read enough bytes, 4* for stereo, 2*for mono */
-			int ret=ov_read(&vf,target,tlength*vi->channels*2, &current_section);
+			int ret=ov_read(&vf,target,tlength, &current_section);
 			/* Decoding error or EOF*/
 			if(ret <= 0) {
 				ov_clear(&vf);
@@ -66,8 +66,8 @@ int decSamples(int length, short * destBuf)
 					return DEC_EOF;
 				return DEC_ERR;
 			}
-			tlength -= ret/(vi->channels*2);
-			target +=ret/2; // we increase a s16 pointer so half the byte size
+			tlength -= ret;
+			target += ret; 
 		}
 		return length; /* Return how many samples are decoded */
 	}
