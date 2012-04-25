@@ -1,4 +1,4 @@
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 
 #define ENTRY_TYPE 0
 #define ENTRY_NAME 1

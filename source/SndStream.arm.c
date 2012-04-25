@@ -1,4 +1,4 @@
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 
 #define TIMER_CASCADE   (1<<2)
 #define TIMER_IRQ_REQ   (1<<6)
@@ -14,6 +14,7 @@ char arm7Module[] = "/data/FeOS/arm7/arm7SndMod.fx2";
 
 FIFO_AUD_MSG msg;
 char mixer_status;
+
 
 void fifoValHandler(u32 value32, void *userdata)
 {
@@ -145,6 +146,7 @@ void stopStream(CODEC_INTERFACE * cdc)
 	FeOS_TimerWrite(0, 0);
 	FeOS_TimerWrite(1, 0);
 	cdc->freeDecoder();
+	glFlush(0);
 }
 
 /*
@@ -160,7 +162,9 @@ int updateStream(CODEC_INTERFACE * cdc)
 	sampleCount[1] = sampleCount[0];
 	smpNc += smpPlayed;
 	int ret = DEC_EOF;
-
+	visualizePlayingSMP();
+	glFlush(0);
+			
 	if(smpNc>0) {
 decode:
 		if(mixer_status != STATUS_WAIT)
@@ -232,8 +236,6 @@ void copySamples(short * inBuf, int deinterleave, int samples)
 	samples &= (~3); // bic
 	int toEnd = ((outBuf.bufOff + samples) > STREAM_BUF_SIZE? STREAM_BUF_SIZE - outBuf.bufOff : samples);
 	toEnd  	&= (~3);
-	/* I don't care about the lag*/
-	visualize(&inBuf[toEnd], toEnd, nChans);
 	
 copy:
 
@@ -268,4 +270,29 @@ copy:
 	
 	DC_FlushAll();
 	FeOS_DrainWriteBuffer();
+}
+
+void visualizePlayingSMP(void){
+	int off = ((outBuf.bufOff + smpNc) & STREAM_BUF_SIZE);
+	short * buffer = &outBuf.buffer[off];
+	
+	glBegin( GL_TRIANGLE_STRIP);
+	glBindTexture( 0, 0 );
+	int i, j = (frequency/60)/256;
+	
+	for(i = 0; i<255; i++) {
+		glColor3b(0,0,255);
+		
+		int val1 = (*buffer>>8);
+		int val2 = (buffer[1]>>8);
+		if(nChans>1){
+			val1+=(buffer[STREAM_BUF_SIZE]>>8);
+			val1>>=1;
+			val2+=(buffer[STREAM_BUF_SIZE+1]>>8);
+			val2>>=1;
+		}
+		drawLine(i, val1+96, i+1, val2+96);
+		buffer+=j;
+	}
+	glColor3b(255,255,255);
 }

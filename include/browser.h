@@ -1,6 +1,6 @@
 #ifndef BROWSER_H
 #define BROWSER_H
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 #include "input.h"
 
 extern CODEC_INTERFACE cur_codec;

@@ -1,4 +1,4 @@
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 
 int loadCodec(const char * codecFile, CODEC_INTERFACE * cdc)
 {

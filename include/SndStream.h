@@ -50,10 +50,10 @@ void resumeStream(void);
 void stopStream(CODEC_INTERFACE * cdc);
 int updateStream(CODEC_INTERFACE * cdc);
 void _deInterleave(short *in, short *out, int samples);
-void _deInterleave8B(char *in, char *out, int samples);
 void preFill(CODEC_INTERFACE * cdc);
 void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);
 void copySamples(short * inBuf, int deinterleave, int samples);
+void visualizePlayingSMP(void);
 /*
  * Initalize arm7 module for sound playback
  * Returns:

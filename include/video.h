@@ -1,7 +1,7 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 
 #define SUB_SCREEN 0
 #define TOP_SCREEN 1
@@ -14,6 +14,6 @@ void print(char * string, int limit);
 void setConsoleCoo(int, int);
 void updateVideo(void);
 void clearConsole(void);
-void visualize(s16 * buffer, int length, int ch);
+void drawLine(int x, int y, int x2, int y2);
 extern u16 * iconFrames[2];
 #endif

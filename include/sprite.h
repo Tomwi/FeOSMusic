@@ -1,7 +1,7 @@
 #ifndef T_SPRITE_H
 #define T_SPRITE_H
 
-#include <FeosMusic.h>
+#include <FeOSMusic.h>
 #define states(n) (n>0? FeOS_GetMainOAM():FeOS_GetSubOAM())
 
 /* Straight from libnds */

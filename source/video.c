@@ -1,4 +1,4 @@
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 
 u16 * iconFrames[2];
 u16 * iconGfx;
@@ -133,25 +133,4 @@ void drawLine(int x, int y, int x2, int y2)
 	glVertex3v16(x,y,0);
 	glVertex2v16(x2,y2);
 	glVertex2v16(x2,y2);
-}
-
-void visualize(s16 * buffer, int length, int ch)
-{
-	glBegin( GL_TRIANGLE_STRIP);
-	glBindTexture( 0, 0 );
-	int i, j = length/1024;
-	for(i = 0; i<256; i++) {
-		glColor3b(0,0,255);
-		int val1 = (*buffer>>8);
-		int val2 = (buffer[2]>>8);
-		if(ch>1){
-			val1+=(buffer[1]>>8);
-			val1>>=1;
-			val2+=(buffer[3]>>8);
-			val2>>=1;
-		}
-		drawLine(i, val1+96, i+1, val2+96);
-		buffer+=j;
-	}
-	glColor3b(255,255,255);
 }

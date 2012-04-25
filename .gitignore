@@ -11,3 +11,5 @@ codecs/*/*.imp.a
 arm7SndMod/build/*
 *.tags*
 *.workspace*
+gfx/*.bin
+gfx/*.h

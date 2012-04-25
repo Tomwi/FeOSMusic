@@ -1,4 +1,4 @@
-#include "FeosMusic.h"
+#include "FeOSMusic.h"
 #include "browser.h"
 
 int main(int argc, char ** argv)
@@ -11,7 +11,7 @@ int main(int argc, char ** argv)
 	while(1) {
 		updateInput();
 		updateVideo();
-		glFlush(0);
+		
 		FeOS_WaitForVBlank();
 
 		/* Exit program */
@@ -30,6 +30,7 @@ int main(int argc, char ** argv)
 		case STATUS_PLAY:
 			if(!updateStream(&cur_codec)) {
 				mixer_status = STATUS_STOP;
+				break;
 			}
 			if(keysPres & KEY_A)
 				pauseStream(&cur_codec);
