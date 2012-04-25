@@ -50,13 +50,15 @@ void initVideo(void)
 			initSprite(i, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[0]),SpriteSize_32x32 ,SpriteColorFormat_256Color,SUB_SCREEN);
 			setSprXY(i, 0, i*32, SUB_SCREEN);
 		}
-	} else {
 		free(pal);
 		free(iconGfx);
+	} else {
+		FeOS_ConsoleMode();
+		abort();
 	}
+
 	init3D();
 }
-
 
 void initConsole(void){
 	

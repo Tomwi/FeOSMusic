@@ -13,3 +13,4 @@ arm7SndMod/build/*
 *.workspace*
 gfx/*.bin
 gfx/*.h
+fs/

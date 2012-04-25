@@ -2,7 +2,8 @@
 #define FILE_H
 #include "FeOSMusic.h"
 
-int bufferTo(char * file, void * dest);
-void * bufferFile(char * file);
+void * bufferFile(const char * file);
+
+extern far_t hArc;
 
 #endif
