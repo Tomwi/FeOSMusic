@@ -1,42 +1,33 @@
 #include <feos.h>
 #include "file.h"
 
+far_t hArc;
 
-int sizeofFile(FILE * fp)
+FEOSINIT static void _initFar()
 {
-	rewind(fp);
-	fseek(fp, 0, SEEK_END);
-	int ret = ftell(fp);
-	rewind(fp);
-	return ret;
-}
-void * bufferFile(char * file)
-{
-	FILE * fp;
-	void * buf;
-	if((fp=fopen(file, "rb"))) {
-		int size = sizeofFile(fp);
-		if((buf = malloc(size))) {
-			fread(buf, 1, size, fp);
-			fclose(fp);
-			DC_FlushRange(buf, size);
-			return buf;
-		}
-	}
-	free(buf);
-	return NULL;
+	hArc = FAR_OpenSelf();
 }
 
-int bufferTo(char * file, void * dest)
+FEOSFINI static void _deinitFar()
 {
-	FILE * fp;
-	if(dest) {
-		if((fp=fopen(file, "rb"))) {
-			int size = sizeofFile(fp);
-			fread(dest, 1, size, fp);
-			fclose(fp);
-			return 1;
-		}
+	if (hArc) FAR_Close(hArc);
+}
+
+void * bufferFile(const char * file)
+{
+	if (!hArc) return NULL;
+
+	farfile_t hFile = FAR_GetFile(hArc, file);
+	if (!hFile) return NULL;
+	size_t size;
+	void* mem = malloc(size = FAR_FileGetSize(hFile));
+	if (!mem)
+	{
+		FAR_FileClose(hFile);
+		return NULL;
 	}
-	return 0;
+	FAR_FileRead(hFile, mem, size);
+	FAR_FileClose(hFile);
+	DC_FlushRange(mem, size);
+	return mem;
 }

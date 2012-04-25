@@ -3,6 +3,7 @@
 
 #include <feos.h>
 #include <feos3d.h>
+#include <far.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
