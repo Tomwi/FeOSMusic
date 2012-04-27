@@ -280,7 +280,7 @@ void visualizePlayingSMP(void){
 	int i, j = (frequency/60)/128;
 	
 	for(i = 0; i<128; i++) {
-		int val1 = (*buffer>>8);
+		int val1 = (buffer[0]>>8);
 		int val2 = (buffer[1]>>8);
 		if(nChans>1){
 			val1+=(buffer[STREAM_BUF_SIZE]>>8);
