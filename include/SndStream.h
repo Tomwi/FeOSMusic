@@ -4,31 +4,31 @@
 
 #include "CodecInterface.h"
 
-#define CLAMP(n,b,u) (n = (n >= u? b : n))
+#define CLAMP(n,b,u) ((n) = ((n) >= (u)? (b) : (n)))
 #define BUS_CLOCK   (33513982)
 #define TIMER_IRQ_ENABLE	(1<<6)	
 #define TIMER_ENABLE		(1<<7)
 
 /* amount of samples to be counted every timer0 irq */
-#define SAMPLE_PACKET		32		
-#define READ_BUF_SIZE 		1940
+#define SAMPLE_PACKET     (32)
+#define READ_BUF_SIZE     (1940)
 // samples per channel
-#define STREAM_BUF_SIZE		8192	
+#define STREAM_BUF_SIZE   (8192)
 /* Message types */
-#define FIFO_AUDIO_START	1
-#define FIFO_AUDIO_STOP		2
-#define FIFO_AUDIO_PAUSE	3
-#define FIFO_AUDIO_RESUME	4
+#define FIFO_AUDIO_START  (1)
+#define FIFO_AUDIO_STOP   (2)
+#define FIFO_AUDIO_PAUSE  (3)
+#define FIFO_AUDIO_RESUME (4)
 
 /* Mixer status */
-#define STATUS_STOP			0
-#define STATUS_PLAY			1
-#define STATUS_PAUSE		2
-#define STATUS_WAIT 		3
+#define STATUS_STOP       (0)
+#define STATUS_PLAY       (1)
+#define STATUS_PAUSE      (2)
+#define STATUS_WAIT       (3)
 
 /* decoder status */
-#define DEC_ERR				-1
-#define DEC_EOF				-2
+#define DEC_ERR           (-1)
+#define DEC_EOF           (-2)
 
 
 typedef struct {

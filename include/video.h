@@ -3,8 +3,8 @@
 
 #include "FeOSMusic.h"
 
-#define SUB_SCREEN 0
-#define TOP_SCREEN 1
+#define SUB_SCREEN (0)
+#define TOP_SCREEN (1)
 
 void initVideo(void);
 void deinitVideo(void);

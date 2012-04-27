@@ -1,10 +1,10 @@
 #include "FeOSMusic.h"
 
-#define ENTRY_TYPE 0
-#define ENTRY_NAME 1
+#define ENTRY_TYPE (0)
+#define ENTRY_NAME (1)
 
-#define ICON_SZ 32
-#define ENTS_AL SCREEN_HEIGHT/ICON_SZ
+#define ICON_SZ (32)
+#define ENTS_AL (SCREEN_HEIGHT/ICON_SZ)
 
 char ** list;
 int numEnt;
