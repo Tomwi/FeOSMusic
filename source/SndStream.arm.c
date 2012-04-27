@@ -292,8 +292,8 @@ void visualizePlayingSMP(void){
 		drawLine(i*2, val1+96, i*2+2, val2+96);
 		glColor3b(0,( val2 < 0? -val2*2 : val2*2	),255-val2);
 		buffer+=j;
-		if(buffer > (outBuf.buffer + STREAM_BUF_SIZE))
-			buffer = (outBuf.buffer + ((int)buffer - STREAM_BUF_SIZE));
+		if(buffer >= (outBuf.buffer + STREAM_BUF_SIZE))
+			buffer -= STREAM_BUF_SIZE;
 	}
 	glColor3b(255,255,255);
 	glFlush(0);
