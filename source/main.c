@@ -28,16 +28,21 @@ int main(int argc, char ** argv)
 			break;
 		case STATUS_WAIT:
 		case STATUS_PLAY:
+		visualizePlayingSMP();
 			if(!updateStream(&cur_codec)) {
 				mixer_status = STATUS_STOP;
 				break;
 			}
-			if(keysPres & KEY_A)
+			if(keysPres & KEY_A){
 				pauseStream(&cur_codec);
+				break;
+			}
 			if(keysPres & KEY_B) {
 				stopStream(&cur_codec);
 				mixer_status = STATUS_STOP;
+				break;
 			}
+			
 			break;
 		case STATUS_PAUSE:
 			if(keysPres & KEY_A)

@@ -162,8 +162,7 @@ int updateStream(CODEC_INTERFACE * cdc)
 	sampleCount[1] = sampleCount[0];
 	smpNc += smpPlayed;
 	int ret = DEC_EOF;
-	visualizePlayingSMP();
-	glFlush(0);
+	
 			
 	if(smpNc>0) {
 decode:
@@ -278,11 +277,9 @@ void visualizePlayingSMP(void){
 	
 	glBegin( GL_TRIANGLE_STRIP);
 	glBindTexture( 0, 0 );
-	int i, j = (frequency/60)/256;
+	int i, j = (frequency/60)/128;
 	
-	for(i = 0; i<255; i++) {
-		glColor3b(0,0,255);
-		
+	for(i = 0; i<128; i++) {
 		int val1 = (*buffer>>8);
 		int val2 = (buffer[1]>>8);
 		if(nChans>1){
@@ -291,8 +288,11 @@ void visualizePlayingSMP(void){
 			val2+=(buffer[STREAM_BUF_SIZE+1]>>8);
 			val2>>=1;
 		}
-		drawLine(i, val1+96, i+1, val2+96);
+		glColor3b(0,( val1 < 0? -val1*2 : val1*2	),255-val1);
+		drawLine(i*2, val1+96, i*2+2, val2+96);
+		glColor3b(0,( val2 < 0? -val2*2 : val2*2	),255-val2);
 		buffer+=j;
 	}
 	glColor3b(255,255,255);
+	glFlush(0);
 }
