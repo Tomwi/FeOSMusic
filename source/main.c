@@ -7,6 +7,7 @@ int main(int argc, char ** argv)
 	chdir("/");
 	retrieveDir("");
 	initSoundStreamer();
+	keysSetRepeat(15, 6);
 
 	while(1) {
 		updateInput();

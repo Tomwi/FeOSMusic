@@ -11,7 +11,7 @@ int numEnt;
 int cursor;
 char cwd[FILENAME_MAX];
 
-const char * Codecs [5][2]= {
+const char * Codecs [][2]= {
 	{".ogg", "ogg"},
 	{".m4a", "aac"},
 	{".aac", "aac"},
@@ -19,7 +19,7 @@ const char * Codecs [5][2]= {
 	{".flac", "flac"},
 };
 
-#define NUM_EXT 5
+#define NUM_EXT (sizeof(Codecs)/sizeof(Codecs[0]))
 
 CODEC_INTERFACE cur_codec;
 int loadedCodec = -1;
