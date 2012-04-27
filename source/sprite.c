@@ -1,6 +1,6 @@
 #include "sprite.h"
 
-hword_t * spritePalettes[2] = {
+hword_t * const const spritePalettes[2] = {
 	SPRITE_PALETTE,
 	SPRITE_PALETTE_SUB,
 };
