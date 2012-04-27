@@ -1,9 +1,5 @@
 #include "FeOSMusic.h"
 
-u16 * iconFrames[2];
-u16 * iconGfx;
-
-int consoleId;
 hword_t *consoleMap;
 unsigned int row, col;
 
@@ -30,6 +26,9 @@ void deinit3D(void){
 }
 void initVideo(void)
 {
+	u16 * iconFrames[2];
+	u16 * iconGfx;
+
 	/* We need access to DS hardware */
 	FeOS_DirectMode();
 	videoSetModeSub(MODE_0_2D);
@@ -61,7 +60,7 @@ void initVideo(void)
 }
 
 void initConsole(void){
-	
+	int consoleId;
 	u16* consoleGfx = bufferFile("font.img.bin");
 	u16* consolePal = bufferFile("font.pal.bin");
 	
