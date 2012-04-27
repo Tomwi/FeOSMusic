@@ -92,7 +92,7 @@ void putChar(char kar){
 	col++;
 }
 
-void print(char * string, int limit){
+void print(const char * string, int limit){
 	
 	int i;
 	if(limit < 0 || limit >strlen(string)){

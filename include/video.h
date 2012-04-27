@@ -9,7 +9,7 @@
 void initVideo(void);
 void deinitVideo(void);
 void initConsole(void);
-void print(char * string, int limit);
+void print(const char * string, int limit);
 void setConsoleCoo(int, int);
 void updateVideo(void);
 void clearConsole(void);
