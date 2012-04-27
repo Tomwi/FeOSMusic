@@ -35,6 +35,7 @@ DEFARCH		:= -marm
 CONF_DEFINES = -DAAC_MAX_NCHANS=2
 CONF_LIBDIRS = 
 CONF_LIBS = 
+CONF_CFLAGS	= -O3
 
 include $(FEOSMK)/dynlib.mk
 

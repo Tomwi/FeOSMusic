@@ -5,7 +5,6 @@
 
 #define SUB_SCREEN 0
 #define TOP_SCREEN 1
-#define GFX_PATH "/"
 
 void initVideo(void);
 void deinitVideo(void);

@@ -39,8 +39,8 @@ void initVideo(void)
 	oamInit(states(SUB_SCREEN), SpriteMapping_1D_128, true);
 
 	/* Load sprites */
-	void * pal = bufferFile(GFX_PATH"icon.pal.bin");
-	iconGfx = bufferFile(GFX_PATH"icon.img.bin");
+	void * pal = bufferFile("icon.pal.bin");
+	iconGfx = bufferFile("icon.img.bin");
 	if(pal && iconGfx) {
 		loadExtPalette(0, pal, SUB_SCREEN);
 		iconFrames[0] = loadFrame(iconGfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 0, SUB_SCREEN);
@@ -62,8 +62,8 @@ void initVideo(void)
 
 void initConsole(void){
 	
-	u16* consoleGfx = bufferFile(GFX_PATH"font.img.bin");
-	u16* consolePal = bufferFile(GFX_PATH"font.pal.bin");
+	u16* consoleGfx = bufferFile("font.img.bin");
+	u16* consolePal = bufferFile("font.pal.bin");
 	
 	vramSetBankC(VRAM_C_SUB_BG);
 	consoleId = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 20,0);

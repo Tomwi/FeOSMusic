@@ -35,7 +35,7 @@ DEFARCH		:= -marm
 CONF_DEFINES = -DFLAC__INTEGER_ONLY_LIBRARY \
                -DHAVE_CONFIG_H \
                -DFLaC__INLINE=inline
-
+CONF_CFLAGS	= -O3
 include $(FEOSMK)/dynlib.mk
 
 install: all
