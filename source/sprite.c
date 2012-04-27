@@ -1,8 +1,8 @@
 #include "sprite.h"
 
-hword_t * spritePalettes[2] = {
-	(hword_t*)0x05000200,
-	(hword_t*)0x05000600,
+hword_t * const const spritePalettes[2] = {
+	SPRITE_PALETTE,
+	SPRITE_PALETTE_SUB,
 };
 
 hword_t * loadFrame(hword_t * gfx, int color, int size, int index, bool screen)

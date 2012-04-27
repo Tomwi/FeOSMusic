@@ -9,7 +9,7 @@
 #define SPRITE_SIZE_SIZE(size)  (((size) >> 14) & 0x3)
 #define SPRITE_SIZE_PIXELS(size) (((size) & 0xFFF) << 5)
 
-extern hword_t * spritePalettes[2];
+extern hword_t * const const spritePalettes[2];
 
 typedef struct {
 	/* ATTR0 */
