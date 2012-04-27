@@ -2,7 +2,7 @@
 #define T_SPRITE_H
 
 #include <FeOSMusic.h>
-#define states(n) (n>0? FeOS_GetMainOAM():FeOS_GetSubOAM())
+#define states(n) ((n)>0? FeOS_GetMainOAM():FeOS_GetSubOAM())
 
 /* Straight from libnds */
 #define SPRITE_SIZE_SHAPE(size) (((size) >> 12) & 0x3)
