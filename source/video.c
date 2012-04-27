@@ -26,7 +26,6 @@ void deinit3D(void){
 }
 void initVideo(void)
 {
-	u16 * iconFrames[2];
 	u16 * iconGfx;
 
 	/* We need access to DS hardware */
