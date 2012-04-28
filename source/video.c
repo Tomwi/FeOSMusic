@@ -6,7 +6,7 @@ unsigned int row, col;
 void init3D(void){
 	videoSetMode(MODE_0_3D);
 	glInit();
-	glEnable( GL_TEXTURE_2D );
+	glEnable( GL_TEXTURE_2D | GL_ANTIALIAS );
 	glClearColor( 0, 0, 0, 31 ); 	// BG must be opaque for AA to work
 	glClearPolyID( 63 ); 			// BG must have a unique polygon ID for AA to work
 	glClearDepth( GL_MAX_DEPTH );
