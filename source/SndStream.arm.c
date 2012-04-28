@@ -70,8 +70,12 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 		/* sample is 2 bytes */
 		workBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
 		outBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
+		memset(workBuf.buffer, 0, STREAM_BUF_SIZE*2*nChans);
+		memset(outBuf.buffer, 0, STREAM_BUF_SIZE*2*nChans);
 		if(workBuf.buffer && outBuf.buffer) {
 			outBuf.bufOff = 0;
+			sampleCount[0] = 0;
+			sampleCount[1] = 0;
 			preFill(cdc);
 
 			msg.type = FIFO_AUDIO_START;
