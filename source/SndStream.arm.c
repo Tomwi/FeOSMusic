@@ -278,6 +278,14 @@ void visualizePlayingSMP(void){
 	glBegin( GL_TRIANGLE_STRIP);
 	glBindTexture( 0, 0 );
 	int i, j = (frequency/60)/128;
+
+	static int status = 0;
+	static int clr[3] = { 31, 0, 0 };
+	glColor(RGB15(clr[0], clr[1], clr[2]));
+
+	int st_1 = (status + 1) % 3;
+	clr[status] --; clr[st_1] ++;
+	if (clr[status] == 0) status = st_1;
 	
 	for(i = 0; i<128; i++) {
 		int val1 = (buffer[0]>>8);
@@ -288,9 +296,8 @@ void visualizePlayingSMP(void){
 			val2+=(buffer[STREAM_BUF_SIZE+1]>>8);
 			val2>>=1;
 		}
-		glColor3b(0,( val1 < 0? -val1*2 : val1*2	),255-val1);
 		drawLine(i*2, val1+96, i*2+2, val2+96);
-		glColor3b(0,( val2 < 0? -val2*2 : val2*2	),255-val2);
+
 		buffer+=j;
 		if(buffer >= (outBuf.buffer + STREAM_BUF_SIZE))
 			buffer -= STREAM_BUF_SIZE;
