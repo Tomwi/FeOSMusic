@@ -1,5 +1,4 @@
 #include "FeOSMusic.h"
-#include "browser.h"
 
 int main(int argc, char ** argv)
 {
@@ -7,14 +6,15 @@ int main(int argc, char ** argv)
 	chdir("/");
 	retrieveDir("");
 	initSoundStreamer();
-	keysSetRepeat(15, 6);
+	
+	FeOS_SetAutoUpdate(AUTOUPD_KEYS, false);
 
 	while(1) {
-		updateInput();
-		updateVideo();
 		
 		FeOS_WaitForVBlank();
-
+		updateInput();
+		drawList();
+		
 		/* Exit program */
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer(&cur_codec);
@@ -22,10 +22,9 @@ int main(int argc, char ** argv)
 			deinitVideo();
 			return 0;
 		}
-
 		switch(mixer_status) {
 		case STATUS_STOP:
-			updateBrowser();
+			
 			break;
 		case STATUS_WAIT:
 		case STATUS_PLAY:
@@ -50,6 +49,7 @@ int main(int argc, char ** argv)
 				resumeStream();
 			break;
 		}
+		updateBrowser();
 	}
 	return 0;
 }

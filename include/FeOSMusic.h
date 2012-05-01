@@ -17,5 +17,8 @@
 #include "sprite.h"
 #include "file.h"
 #include "decoder.h"
+#include "browser.h"
+
+#define CLAMP(n,l,u) ((n) = ((n) > (u) ? (u) : ((n)<l ? (l) : (n))))
 
 #endif

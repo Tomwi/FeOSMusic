@@ -4,7 +4,6 @@
 
 #include "CodecInterface.h"
 
-#define CLAMP(n,b,u) ((n) = ((n) >= (u)? (b) : (n)))
 #define BUS_CLOCK   (33513982)
 #define TIMER_IRQ_ENABLE	(1<<6)	
 #define TIMER_ENABLE		(1<<7)

@@ -11,6 +11,7 @@ void deinitVideo(void);
 void initConsole(void);
 void print(const char * string, int limit);
 void setConsoleCoo(int, int);
+void setConsoleCooAbs(int , int );
 void updateVideo(void);
 void clearConsole(void);
 void drawLine(int x, int y, int x2, int y2);

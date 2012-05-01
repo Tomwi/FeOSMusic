@@ -3,13 +3,14 @@
 #define ENTRY_TYPE (0)
 #define ENTRY_NAME (1)
 
-#define ICON_SZ (32)
-#define ENTS_AL (SCREEN_HEIGHT/ICON_SZ)
-
 char ** list;
 int numEnt;
-int cursor;
+int scrollY;
+int drgY[2];
+int drgTime;
 char cwd[FILENAME_MAX];
+
+static int scrolly = 0, beginY = 0, begin = 0;
 
 const char * Codecs [][2]= {
 	{".ogg", "ogg"},
@@ -86,9 +87,8 @@ void retrieveDir(char * path)
 			} else
 				return;
 		}
-
-		cursor = 0;
 		numEnt = 0;
+		scrollY = 0;
 		struct dirent *pent;
 
 		pdir=opendir(cwd);
@@ -110,76 +110,116 @@ void retrieveDir(char * path)
 						list[numEnt][ENTRY_TYPE] = pent->d_type;
 						strcpy(&list[numEnt][ENTRY_NAME], pent->d_name);
 						numEnt++;
-					} else
-						goto error;
+					} else {
+						freeDir();
+						closedir(pdir);
+						return;
+					}
 				}
 			}
+
 		} else {
-			printf ("opendir() failure; terminating\n");
+			closedir(pdir);
+			return;
 		}
-error:
+		if(numEnt == 0) {
+			free(list);
+			list = NULL;
+		}
 		qsort(list, numEnt, sizeof(char*), compare);
 		closedir(pdir);
 	}
 }
 
-void updateBrowser(void)
+void updateIcons()
 {
-	if(keysPres & KEY_DOWN) {
-		if(cursor < (numEnt-1))
-			cursor++;
+	int i;
+
+	for(i=0; i<7; i++, beginY+=ICON_SZ) {
+		if((i+begin) < numEnt) {
+			setSprXY(i, 0, beginY, SUB_SCREEN);
+			if(list[begin + i][ENTRY_TYPE]==DT_DIR) {
+				setFrame(iconFrames[0], i, SUB_SCREEN);
+			} else {
+				setFrame(iconFrames[1], i, SUB_SCREEN);
+			}
+
+		} else {
+			hideSprite(i, SUB_SCREEN);
+		}
 	}
-	if(keysPres & KEY_UP) {
-		if(cursor > 0)
-			cursor--;
-	}
-	if(keysPres & KEY_A) {
-		if(list[cursor][ENTRY_TYPE]==DT_DIR)
-			retrieveDir(&list[cursor][ENTRY_NAME]);
-		else {
-			if(mixer_status == STATUS_STOP) {
-				char * file = &list[cursor][ENTRY_NAME];
-				int i;
-				for(i =0; i<NUM_EXT; i++) {
-					if(strstr(file, Codecs[i][0])) {
-						if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1])))
-							unloadCodec(&cur_codec);
-						if(!loadCodec((Codecs[i][1]), &cur_codec))
-							return;
-						loadedCodec = i;
-						startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
-						mixer_status = STATUS_PLAY;
-						return;
-					}
-				}
+}
+
+void drawList()
+{
+	clearConsole();
+	if(numEnt) {
+		int i, j=((scrolly % ICON_SZ) ? 7 : 6);
+		CLAMP(j, 0, numEnt);
+
+		for(i=0; i<j; i++, beginY+=ICON_SZ) {
+
+			setConsoleCoo((ICON_SZ/8), i * (ICON_SZ/8) + 2);
+			if(list) {
+				print(&list[(begin+i)][ENTRY_NAME], 32-(ICON_SZ/8));
 			}
 		}
+
+	} else {
+		print("EMPTY\n",-1);
+	}
+
+}
+
+void updateBrowser(void)
+{
+	if(keysPres & KEY_TOUCH) {
+		drgY[0] = stylus.y;
 	}
 	if(keysPres & KEY_B) {
 		retrieveDir("..");
 	}
+	if(keysHold & KEY_TOUCH) {
+		drgY[1] = stylus.y;
+		drgTime++;
+	}
 
-	clearConsole();
-	int begin = ( cursor < (ENTS_AL-ENTS_AL/2)? 0 : cursor-(ENTS_AL-ENTS_AL/2));
-	if(begin > (numEnt - ENTS_AL)) {
-		begin = (numEnt- ENTS_AL);
-		if(begin < 0)
-			begin = 0;
-	}
-	int i;
-	for(i=begin; i<(begin+ENTS_AL); i++) {
-		if(i<numEnt) {
-			setSprXY(i-begin, 0, (i-begin)*ICON_SZ, SUB_SCREEN);
-			if(list[i][ENTRY_TYPE]==DT_DIR) {
-				setFrame(iconFrames[0], (i-begin), SUB_SCREEN);
-			} else {
-				setFrame(iconFrames[1], (i-begin), SUB_SCREEN);
+	if(keysReleased & KEY_TOUCH) {
+		if(drgTime < 30 && drgY[1] == drgY[0]) {
+			int selected = (scrollY + drgY[1])/ICON_SZ;
+			if(list[selected][ENTRY_TYPE]==DT_DIR)
+				retrieveDir(&list[selected][ENTRY_NAME]);
+			else {
+				if(mixer_status == STATUS_STOP) {
+					char * file = &list[selected][ENTRY_NAME];
+					int i;
+					for(i =0; i<NUM_EXT; i++) {
+						if(strstr(file, Codecs[i][0])) {
+							if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1])))
+								unloadCodec(&cur_codec);
+							if(!loadCodec((Codecs[i][1]), &cur_codec))
+								return;
+							loadedCodec = i;
+							startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
+							mixer_status = STATUS_PLAY;
+							return;
+						}
+					}
+				}
 			}
-			setConsoleCoo(ICON_SZ/8, (i-begin)*ICON_SZ/8+2);
-			print((i==cursor? "*" : "-"),1);
-			print(&list[i][ENTRY_NAME],(31-(ICON_SZ+1)/8));
-		} else {
-			hideSprite(i-begin, SUB_SCREEN);
 		}
+		scrollY+=(drgY[0]-drgY[1]);
+		drgY[1] = drgY[0] = 0;
+		drgTime = 0;
 	}
+
+	// Update scrolling variables used by drawList() in the next frame
+	CLAMP(scrollY, 0, (numEnt < (192 / ICON_SZ-192)? numEnt * ICON_SZ : (numEnt*ICON_SZ-192)));
+	scrolly = (scrollY + (drgY[0]-drgY[1]));
+	CLAMP(scrolly, 0, (numEnt < (192 / ICON_SZ-192)? numEnt * ICON_SZ : (numEnt*ICON_SZ-192)));
+	beginY = -(scrolly%ICON_SZ);
+	begin = (scrolly/ICON_SZ);
+	CLAMP(begin, 0, numEnt);
+	setConsoleCooAbs(0, -beginY);
+	updateIcons();
 }

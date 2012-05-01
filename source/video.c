@@ -2,8 +2,10 @@
 
 hword_t *consoleMap;
 unsigned int row, col;
+int consoleId;
 
-void init3D(void){
+void init3D(void)
+{
 	videoSetMode(MODE_0_3D);
 	glInit();
 	glEnable( GL_TEXTURE_2D | GL_ANTIALIAS );
@@ -21,7 +23,8 @@ void init3D(void){
 	            0.0, 1.0, 0.0);		//up
 }
 
-void deinit3D(void){
+void deinit3D(void)
+{
 	glDeinit();
 }
 void initVideo(void)
@@ -44,9 +47,9 @@ void initVideo(void)
 		iconFrames[0] = loadFrame(iconGfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 0, SUB_SCREEN);
 		iconFrames[1] = loadFrame(iconGfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 1, SUB_SCREEN);
 		int i;
-		for(i =0; i<6; i++) {
+		for(i =0; i<(ENTS_AL+1); i++) {
 			initSprite(i, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[0]),SpriteSize_32x32 ,SpriteColorFormat_256Color,SUB_SCREEN);
-			setSprXY(i, 0, i*32, SUB_SCREEN);
+			setSprXY(i, 0, i*ICON_SZ, SUB_SCREEN);
 		}
 		free(pal);
 		free(iconGfx);
@@ -58,14 +61,14 @@ void initVideo(void)
 	init3D();
 }
 
-void initConsole(void){
-	int consoleId;
+void initConsole(void)
+{
 	u16* consoleGfx = bufferFile("font.img.bin");
 	u16* consolePal = bufferFile("font.pal.bin");
-	
+
 	vramSetBankC(VRAM_C_SUB_BG);
 	consoleId = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 20,0);
-	
+
 	dmaCopy(consolePal, BG_PALETTE_SUB, 16*2);
 	dmaCopy(consoleGfx, bgGetGfxPtr(consoleId), 16348*2);
 	col = row = 0;
@@ -74,51 +77,64 @@ void initConsole(void){
 	free(consoleGfx);
 }
 
-void setConsoleCoo(int x, int y){
+void setConsoleCoo(int x, int y)
+{
 	col = x;
 	row = y;
 }
 
-void putChar(char kar){
-	
-	row += col >> 5;
-	if(row > 23){
-		row = 0;
+void setConsoleCooAbs(int x, int y){
+	bgSetScroll(consoleId, x, y);
+}
+void putChar(char kar)
+{
+	if(col >= 0 && col <= 31) {
+		if(row >= 0 && row<=31) {
+			row += col >> 5;
+			col &= 31;
+			row &= 31;
+			consoleMap[col+(row*32)] = kar;
+			col++;
+		}
 	}
-	col &= 31;
-	consoleMap[col+(row*32)] = kar;
-	col++;
 }
 
-void print(const char * string, int limit){
-	
+void print(const char * string, int limit)
+{
+
 	int i;
-	if(limit < 0 || limit >strlen(string)){
+	if(limit < 0 || limit >strlen(string)) {
 		limit = strlen(string);
 	}
 	limit+=col;
-	for(i = 0; col<limit && i<strlen(string); i++){
+	for(i = 0; col<limit && i<strlen(string); i++) {
 		int k = string[i];
-		switch(k){
-			case '\n':
+		switch(k) {
+		case '\n':
 			row++;
 			col = 0;
 			break;
-			default:
+		default:
 			putChar(k);
 			break;
 		}
 	}
 }
 
-void clearConsole(void){
+void clearConsole(void)
+{
 	dmaFillHalfWords(0, consoleMap, 32*32*2);
+	row = col = 0;
 }
 
-void updateVideo(void){
+void updateVideo(void)
+{
+	oamUpdate(states(SUB_SCREEN));
+	bgUpdate();
 }
 
-void deinitVideo(void){
+void deinitVideo(void)
+{
 	deinit3D();
 	FeOS_ConsoleMode();
 }
