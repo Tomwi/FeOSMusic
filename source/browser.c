@@ -8,6 +8,7 @@ int numEnt;
 int scrollY;
 int drgY[2];
 int drgTime;
+int kinEn;
 char cwd[FILENAME_MAX];
 
 static int scrolly = 0, beginY = 0, begin = 0;
@@ -195,11 +196,15 @@ void updateBrowser(void)
 					int i;
 					for(i =0; i<NUM_EXT; i++) {
 						if(strstr(file, Codecs[i][0])) {
-							if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1])))
+							if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1]))) {
 								unloadCodec(&cur_codec);
-							if(!loadCodec((Codecs[i][1]), &cur_codec))
-								return;
-							loadedCodec = i;
+							}
+							if(i != loadedCodec) {
+								if(!loadCodec((Codecs[i][1]), &cur_codec))
+									return;
+								loadedCodec = i;
+							}
+
 							startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
 							mixer_status = STATUS_PLAY;
 							return;
@@ -209,13 +214,16 @@ void updateBrowser(void)
 			}
 		}
 		scrollY+=(drgY[0]-drgY[1]);
+		kinEn = ((drgY[0]-drgY[1])/(drgTime));
 		drgY[1] = drgY[0] = 0;
 		drgTime = 0;
 	}
 
 	// Update scrolling variables used by drawList() in the next frame
 	CLAMP(scrollY, 0, (numEnt < (192 / ICON_SZ-192)? numEnt * ICON_SZ : (numEnt*ICON_SZ-192)));
-	scrolly = (scrollY + (drgY[0]-drgY[1]));
+	scrolly = (scrollY + (drgY[0]-drgY[1])) + kinEn;
+	kinEn-= (kinEn>>31);
+	CLAMP(kinEn, 0, 64);
 	CLAMP(scrolly, 0, (numEnt < (192 / ICON_SZ-192)? numEnt * ICON_SZ : (numEnt*ICON_SZ-192)));
 	beginY = -(scrolly%ICON_SZ);
 	begin = (scrolly/ICON_SZ);

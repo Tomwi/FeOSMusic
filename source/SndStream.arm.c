@@ -50,12 +50,15 @@ void deinitSoundStreamer(CODEC_INTERFACE * cdc)
 		msg.type = FIFO_AUDIO_STOP;
 		fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
 		cdc->freeDecoder();
-		free(outBuf.buffer);
-		free(workBuf.buffer);
-		unloadCodec(cdc);
+		
 		FeOS_TimerWrite(0, 0);
 		FeOS_TimerWrite(1, 0);
 	}
+	if(outBuf.buffer)
+		free(outBuf.buffer);
+	if(workBuf.buffer)
+		free(workBuf.buffer);
+	unloadCodec(cdc);
 	FeOS_FreeARM7(arm7_sndModule, fifoCh);
 }
 
@@ -70,12 +73,12 @@ int startStream(CODEC_INTERFACE * cdc, const char * codecFile, const char * file
 		/* sample is 2 bytes */
 		workBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
 		outBuf.buffer = malloc(STREAM_BUF_SIZE*2*nChans);
-		memset(workBuf.buffer, 0, STREAM_BUF_SIZE*2*nChans);
-		memset(outBuf.buffer, 0, STREAM_BUF_SIZE*2*nChans);
+		
 		if(workBuf.buffer && outBuf.buffer) {
+			memset(workBuf.buffer, 0, STREAM_BUF_SIZE*2*nChans);
+			memset(outBuf.buffer, 0, STREAM_BUF_SIZE*2*nChans);
 			outBuf.bufOff = 0;
 			preFill(cdc);
-
 			msg.type = FIFO_AUDIO_START;
 			msg.property = (frequency | (nChans << 16));
 			msg.buffer = outBuf.buffer;
@@ -145,6 +148,7 @@ void stopStream(CODEC_INTERFACE * cdc)
 	fifoSendDatamsg(fifoCh, sizeof(FIFO_AUD_MSG), &msg);
 	free(outBuf.buffer);
 	free(workBuf.buffer);
+	outBuf.buffer = workBuf.buffer = NULL;
 	FeOS_TimerWrite(0, 0);
 	FeOS_TimerWrite(1, 0);
 	cdc->freeDecoder();

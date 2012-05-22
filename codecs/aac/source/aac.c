@@ -14,6 +14,7 @@
 
 #define DEC_AAC 0
 #define DEC_MP4 1
+#define DEC_MP4_STOPPED 2
 
 int dec_state;
 
@@ -179,6 +180,9 @@ void freeDecoder(void)
 {
 	trackSample = 0;
 	dataLeft = 0;
+	
+	if(dec_state == DEC_MP4)
+		mp4ff_close(infile);
 	AACFreeDecoder(decoder);
 	memset(&inf, 0, sizeof(AACFrameInfo));
 	fclose(fp);
@@ -206,10 +210,10 @@ int decSamples(int length, short * destBuf)
 				ret = AACDecode(decoder, &readOff, &dataLeft, destBuf);
 				/* Either a sample read error occured , an decoding error occured or simply EOF */
 				if(!read || ret) {
-					printf("ret %d, read %d\n", ret, read);
 					mp4ff_close(infile);
 					if(!read)
 						return DEC_EOF;
+					dec_state = DEC_MP4_STOPPED;
 					return DEC_ERR;
 				}
 				return 1024;

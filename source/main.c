@@ -1,7 +1,10 @@
 #include "FeOSMusic.h"
 
+char cwd[1024];
+
 int main(int argc, char ** argv)
 {
+	getcwd(&cwd, sizeof(cwd));
 	initVideo();
 	chdir("/");
 	retrieveDir("");
@@ -19,7 +22,11 @@ int main(int argc, char ** argv)
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer(&cur_codec);
 			freeDir();
+			FeOS_SetAutoUpdate(AUTOUPD_KEYS, true);
 			deinitVideo();
+			
+			chdir(cwd);
+			FeOS_ConsoleMode();
 			return 0;
 		}
 		switch(mixer_status) {
