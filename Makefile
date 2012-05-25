@@ -21,6 +21,7 @@ clean:
 	@make --no-print-directory -C arm7SndMod clean
 	@for i in $(CODECS); do make --no-print-directory -C codecs/$$i clean; done
 	@rm -rf fs
+	@rm -f $(GFX)/*.bin
 
 install: all
 	@make --no-print-directory -f Makefile.FeOS install
@@ -29,8 +30,8 @@ install: all
 		
 convert: $(IMGBINS)
 	@[ -d fs ] || mkdir -p fs || exit 1
-	@for i in $(wildcard gfx/*.bin); do cp $$i fs; done
+	@cp $(GFX)/*.bin fs
 
 $(IMGBINS) : %.img.bin : $(GFX)/%.png $(GFX)/%.grit
 	@$(GRIT) $< -fh! -o$(CURDIR)/gfx/$*
-	
+
