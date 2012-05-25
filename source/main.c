@@ -4,7 +4,7 @@ char cwd[1024];
 
 int main(int argc, char ** argv)
 {
-	getcwd(&cwd, sizeof(cwd));
+	getcwd(cwd, sizeof(cwd));
 	initVideo();
 	chdir("/");
 	retrieveDir("");
