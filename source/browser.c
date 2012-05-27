@@ -73,21 +73,9 @@ void retrieveDir(char * path)
 {
 	DIR *pdir;
 	if(path) {
+		chdir(path);
 		getcwd(cwd, FILENAME_MAX);
-		if(strcmp(path, "..")) {
-			strcat(cwd, path);
-		} else {
-			int i;
-			if(!isRoot(cwd)) {
-				for(i=strlen(cwd)-2; i>1; i--) {
-					if(cwd[i] == '/')
-						break;
-					cwd[i] = 0;
-				}
 
-			} else
-				return;
-		}
 		numEnt = 0;
 		scrollY = 0;
 		struct dirent *pent;
