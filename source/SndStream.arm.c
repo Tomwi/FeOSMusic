@@ -59,6 +59,7 @@ void deinitSoundStreamer(CODEC_INTERFACE * cdc)
 	if(workBuf.buffer)
 		free(workBuf.buffer);
 	unloadCodec(cdc);
+	fifoSetValue32Handler(fifoCh, NULL, NULL);
 	FeOS_FreeARM7(arm7_sndModule, fifoCh);
 }
 

@@ -22,11 +22,9 @@ int main(int argc, char ** argv)
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer(&cur_codec);
 			freeDir();
-			FeOS_SetAutoUpdate(AUTOUPD_KEYS, true);
 			deinitVideo();
 			
 			chdir(cwd);
-			FeOS_ConsoleMode();
 			return 0;
 		}
 		switch(mixer_status) {

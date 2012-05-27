@@ -73,21 +73,9 @@ void retrieveDir(char * path)
 {
 	DIR *pdir;
 	if(path) {
+		chdir(path);
 		getcwd(cwd, FILENAME_MAX);
-		if(strcmp(path, "..")) {
-			strcat(cwd, path);
-		} else {
-			int i;
-			if(!isRoot(cwd)) {
-				for(i=strlen(cwd)-2; i>1; i--) {
-					if(cwd[i] == '/')
-						break;
-					cwd[i] = 0;
-				}
 
-			} else
-				return;
-		}
 		numEnt = 0;
 		scrollY = 0;
 		struct dirent *pent;
@@ -99,7 +87,7 @@ void retrieveDir(char * path)
 			freeDir();
 			while ((pent=readdir(pdir))!=NULL) {
 
-				if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
+				if(strcmp(".", pent->d_name) == 0)
 					continue;
 
 				void * temp = realloc(list, sizeof(char**)*(numEnt+1));
@@ -176,9 +164,6 @@ void updateBrowser(void)
 {
 	if(keysPres & KEY_TOUCH) {
 		drgY[0] = stylus.y;
-	}
-	if(keysPres & KEY_B) {
-		retrieveDir("..");
 	}
 	if(keysHold & KEY_TOUCH) {
 		drgY[1] = stylus.y;
