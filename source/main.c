@@ -25,7 +25,6 @@ int main(int argc, char ** argv)
 			deinitVideo();
 			
 			chdir(cwd);
-			FeOS_ConsoleMode();
 			return 0;
 		}
 		switch(mixer_status) {

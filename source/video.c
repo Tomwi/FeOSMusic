@@ -136,7 +136,7 @@ void updateVideo(void)
 void deinitVideo(void)
 {
 	deinit3D();
-	
+	FeOS_ConsoleMode();
 }
 
 void glVertex2v16(int x, int y)
