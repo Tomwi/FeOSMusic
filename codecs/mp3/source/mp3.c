@@ -92,6 +92,8 @@ int openFile(const char * name)
 		if(IS_ID3_V2(magic)) {
 			parseID3_V2(fp);
 		}
+		else
+			rewind(fp);
 		if((dataLeft = fread(readBuf, 1, READ_BUF_SIZE, fp))==READ_BUF_SIZE) {
 			mdecoder = MP3InitDecoder();
 			if(!findValidSync(&readOff, &dataLeft)) {
