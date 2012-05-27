@@ -87,7 +87,7 @@ void retrieveDir(char * path)
 			freeDir();
 			while ((pent=readdir(pdir))!=NULL) {
 
-				if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
+				if(strcmp(".", pent->d_name) == 0)
 					continue;
 
 				void * temp = realloc(list, sizeof(char**)*(numEnt+1));
@@ -164,9 +164,6 @@ void updateBrowser(void)
 {
 	if(keysPres & KEY_TOUCH) {
 		drgY[0] = stylus.y;
-	}
-	if(keysPres & KEY_B) {
-		retrieveDir("..");
 	}
 	if(keysHold & KEY_TOUCH) {
 		drgY[1] = stylus.y;
