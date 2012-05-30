@@ -12,18 +12,24 @@ int main(int argc, char ** argv)
 	
 	FeOS_SetAutoUpdate(AUTOUPD_KEYS, false);
 
+	int oldSuspMode = FeOS_SetSuspendMode(SuspendMode_Headphones);
+
 	while(1) {
 		
 		FeOS_WaitForVBlank();
 		updateInput();
-		drawList();
+
+		int inSleepMode = keysHold & KEY_LID;
+
+		if (!inSleepMode)
+			drawList();
 		
 		/* Exit program */
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer();
 			freeDir();
 			deinitVideo();
-			
+			FeOS_SetSuspendMode(oldSuspMode);
 			chdir(cwd);
 			return 0;
 		}
@@ -33,11 +39,17 @@ int main(int argc, char ** argv)
 			break;
 		case STREAM_WAIT:
 		case STREAM_PLAY:
-		visualizePlayingSMP();
+			if (!inSleepMode)
+				visualizePlayingSMP();
+
 			if(!updateStream()) {
 				setStreamState(STREAM_STOP);
 				break;
 			}
+
+			if (inSleepMode)
+				break;
+
 			if(keysPres & KEY_A){
 				pauseStream();
 				break;
@@ -50,11 +62,12 @@ int main(int argc, char ** argv)
 			
 			break;
 		case STREAM_PAUSE:
-			if(keysPres & KEY_A)
+			if(!inSleepMode && (keysPres & KEY_A))
 				resumeStream();
 			break;
 		}
-		updateBrowser();
+		if (!inSleepMode)
+			updateBrowser();
 	}
 	return 0;
 }
