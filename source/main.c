@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
 			break;
 		case STREAM_WAIT:
 		case STREAM_PLAY:
-		//visualizePlayingSMP();
+		visualizePlayingSMP();
 			if(!updateStream()) {
 				setStreamState(STREAM_STOP);
 				break;

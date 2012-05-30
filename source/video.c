@@ -83,7 +83,8 @@ void setConsoleCoo(int x, int y)
 	row = y;
 }
 
-void setConsoleCooAbs(int x, int y){
+void setConsoleCooAbs(int x, int y)
+{
 	bgSetScroll(consoleId, x, y);
 }
 void putChar(char kar)
@@ -149,4 +150,41 @@ void drawLine(int x, int y, int x2, int y2)
 	glVertex3v16(x,y,0);
 	glVertex2v16(x2,y2);
 	glVertex2v16(x2,y2);
+}
+
+void visualizePlayingSMP(void)
+{
+	int off = getPlayingSample();
+	short * buffer = &(getoutBuf()[off]);
+
+	glBegin( GL_TRIANGLE_STRIP);
+	glBindTexture( 0, 0 );
+	int i, j = (cur_codec.getSampleRate()/60)/128;
+
+	static int status = 0;
+	static int clr[3] = { 31, 0, 0 };
+	glColor(RGB15(clr[0], clr[1], clr[2]));
+
+	int st_1 = (status + 1) % 3;
+	clr[status] --;
+	clr[st_1] ++;
+	if (clr[status] == 0) status = st_1;
+
+	for(i = 0; i<128; i++) {
+		int val1 = (buffer[0]>>8);
+		int val2 = (buffer[1]>>8);
+		if(cur_codec.getnChannels()>1) {
+			val1+=(buffer[STREAM_BUF_SIZE]>>8);
+			val1>>=1;
+			val2+=(buffer[STREAM_BUF_SIZE+1]>>8);
+			val2>>=1;
+		}
+		drawLine(i*2, val1+96, i*2+2, val2+96);
+
+		buffer+=j;
+		if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
+			buffer -= STREAM_BUF_SIZE;
+	}
+	glColor3b(255,255,255);
+	glFlush(0);
 }
