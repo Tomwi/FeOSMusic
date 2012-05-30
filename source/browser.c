@@ -176,7 +176,7 @@ void updateBrowser(void)
 			if(list[selected][ENTRY_TYPE]==DT_DIR)
 				retrieveDir(&list[selected][ENTRY_NAME]);
 			else {
-				if(mixer_status == STATUS_STOP) {
+				if(getStreamState() == STREAM_STOP) {
 					char * file = &list[selected][ENTRY_NAME];
 					int i;
 					for(i =0; i<NUM_EXT; i++) {
@@ -189,10 +189,10 @@ void updateBrowser(void)
 									return;
 								loadedCodec = i;
 							}
-
-							startStream(&cur_codec, (const char*)(Codecs[i][1]), file);
-							mixer_status = STATUS_PLAY;
-							return;
+							if(cur_codec.openFile(file)) {
+								startStream(cur_codec.getSampleRate(), cur_codec.getnChannels(), cur_codec.decSamples);
+								return;
+							}
 						}
 					}
 				}

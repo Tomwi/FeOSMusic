@@ -3,6 +3,7 @@
 
 #include <feos.h>
 #include <feos3d.h>
+#include <SndStream.h>
 #include <far.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 #include <dirent.h>
 
 #include "CodecInterface.h"
-#include "SndStream.h"
+
 #include "input.h"
 #include "video.h"
 #include "sprite.h"
