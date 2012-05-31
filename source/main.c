@@ -56,7 +56,7 @@ int main(int argc, char ** argv)
 			}
 			if(keysPres & KEY_B) {
 				stopStream();
-				setStreamState(STREAM_STOP);
+				glFlush(0);
 				break;
 			}
 			
