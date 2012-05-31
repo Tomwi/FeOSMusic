@@ -43,7 +43,7 @@ int main(int argc, char ** argv)
 				visualizePlayingSMP();
 
 			if(!updateStream()) {
-				setStreamState(STREAM_STOP);
+				glFlush(0);
 				break;
 			}
 
