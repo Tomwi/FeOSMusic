@@ -27,6 +27,7 @@ int main(int argc, char ** argv)
 		/* Exit program */
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer();
+			unloadCodec(&cur_codec);
 			freeDir();
 			deinitVideo();
 			FeOS_SetSuspendMode(oldSuspMode);
@@ -43,6 +44,7 @@ int main(int argc, char ** argv)
 				visualizePlayingSMP();
 
 			if(!updateStream()) {
+				cur_codec.freeDecoder();
 				glFlush(0);
 				break;
 			}
@@ -57,6 +59,7 @@ int main(int argc, char ** argv)
 			if(keysPres & KEY_B) {
 				stopStream();
 				glFlush(0);
+				cur_codec.freeDecoder();
 				break;
 			}
 			

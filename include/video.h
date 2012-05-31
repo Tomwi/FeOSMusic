@@ -16,5 +16,6 @@ void updateVideo(void);
 void clearConsole(void);
 void drawLine(int x, int y, int x2, int y2);
 void visualizePlayingSMP(void);
+void initPrgrBar(void);
 extern u16 * iconFrames[2];
 #endif
