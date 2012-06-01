@@ -1,8 +1,9 @@
 #include "FeOSMusic.h"
 
+#define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
 hword_t *consoleMap;
 unsigned int row, col;
-int consoleId;
+int consoleId, prgrBar;
 
 void init3D(void)
 {
@@ -30,18 +31,24 @@ void deinit3D(void)
 void initVideo(void)
 {
 	u16 * iconGfx;
+	int sz = 0;
 
 	/* We need access to DS hardware */
 	FeOS_DirectMode();
 	videoSetModeSub(MODE_0_2D);
+	vramSetBankC(VRAM_C_SUB_BG);
+	u16* sharedPal = bufferFile("shared.pal.bin", &sz);
+	dmaCopy(sharedPal, BG_PALETTE_SUB, sz);
+	free(sharedPal);
 	initConsole();
+	initPrgrBar();
 	vramSetBankD(VRAM_D_SUB_SPRITE);
 	oamEnable(states(SUB_SCREEN));
 	oamInit(states(SUB_SCREEN), SpriteMapping_1D_128, true);
 
 	/* Load sprites */
-	void * pal = bufferFile("icon.pal.bin");
-	iconGfx = bufferFile("icon.img.bin");
+	void * pal = bufferFile("icon.pal.bin",NULL);
+	iconGfx = bufferFile("icon.img.bin",NULL);
 	if(pal && iconGfx) {
 		loadExtPalette(0, pal, SUB_SCREEN);
 		iconFrames[0] = loadFrame(iconGfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 0, SUB_SCREEN);
@@ -63,20 +70,24 @@ void initVideo(void)
 
 void initConsole(void)
 {
-	u16* consoleGfx = bufferFile("font.img.bin");
-	u16* consolePal = bufferFile("font.pal.bin");
+	int sz = 0;
+	u16* consoleGfx = bufferFile("font.img.bin", &sz);
 
-	vramSetBankC(VRAM_C_SUB_BG);
-	consoleId = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 20,0);
+	consoleId = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 2,0);
 
-	dmaCopy(consolePal, BG_PALETTE_SUB, 16*2);
-	dmaCopy(consoleGfx, bgGetGfxPtr(consoleId), 16348*2);
+	dmaCopy(consoleGfx, bgGetGfxPtr(consoleId), sz);
 	col = row = 0;
 	consoleMap = bgGetMapPtr(consoleId);
-	free(consolePal);
 	free(consoleGfx);
 }
 
+void hideConsole(void){
+	bgHide(consoleId);
+}
+
+void showConsole(void){
+	bgShow(consoleId);
+}
 void setConsoleCoo(int x, int y)
 {
 	col = x;
@@ -187,4 +198,34 @@ void visualizePlayingSMP(void)
 	}
 	glColor3b(255,255,255);
 	glFlush(0);
+}
+
+void initPrgrBar(void)
+{
+	int sz = 0;
+	u16* prgrGfx = bufferFile("prgr.img.bin", &sz);
+
+	prgrBar = bgInitSub(1, BgType_Text4bpp, BgSize_T_512x256, 3,1);
+
+	dmaCopy(prgrGfx, bgGetGfxPtr(prgrBar), sz);
+	free(prgrGfx);
+	u16 * map = bgGetMapPtr(prgrBar);
+	dmaFillHalfWords(0, map, 64*32*2);
+	map += PRGRBAR_Y*32 + 32*32;
+	int i,j;
+	for(i=1; i<3; i++) {
+		for(j = 0; j<32; j++) {
+			map[j] = i;
+		}
+		map+=32;
+	}
+	bgHide(prgrBar);
+}
+
+void updatePrgrBar(void){
+	if(keysHold & KEY_TOUCH){
+		if(stylus.y > PRGRBAR_Y && stylus.y < (PRGRBAR_Y + 4*8)){
+			bgSetScroll(prgrBar, stylus.x, 0);
+		}
+	}
 }

@@ -169,6 +169,9 @@ int getnChannels(void)
 
 int getPercentage(void)
 {
+	if(dec_state == DEC_MP4) {
+		return (trackSample/(mp4ff_num_samples(infile, track)>>8));
+	}
 	return 0;
 }
 int seekPercentage(int perc)
@@ -180,7 +183,7 @@ void freeDecoder(void)
 {
 	trackSample = 0;
 	dataLeft = 0;
-	
+
 	if(dec_state == DEC_MP4)
 		mp4ff_close(infile);
 	AACFreeDecoder(decoder);
@@ -188,9 +191,8 @@ void freeDecoder(void)
 	fclose(fp);
 }
 
-int decSamples(int length, short * destBuf)
+int decSamples(int length, short * destBuf, void * context)
 {
-
 	int ret = 0;
 	/* We'll always output 1024 (nah almost) samples */
 	if(length >=1024) {

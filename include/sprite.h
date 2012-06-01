@@ -59,7 +59,7 @@ bool loadExtPalette(u8 no, void * data, bool screen);
 void initSprite(u8 no, u8 pal, hword_t name, int size, int format,  bool screen);
 void setSprXY(int no, hword_t x, hword_t y, bool screen);
 void setFrame(hword_t * ptr, int no, int screen);
-void hideSprite(int no, int screen);
+void setSpriteVisiblity(bool hidden, int no, int screen);
 #endif
 
 

@@ -39,20 +39,20 @@ int getnChannels(void)
 }
 int getPercentage(void)
 {
-	return (int)((ov_time_tell(&vf)*16)/(ov_time_total(&vf, -1)/100));
+	return (int)((ov_time_tell(&vf))/(ov_time_total(&vf, -1)>>8));
 }
 int seekPercentage(int perc)
 {
-	int ret = ov_time_seek(&vf,perc*(ov_time_total(&vf, -1)/100));
+	int ret = ov_time_seek(&vf,perc*(ov_time_total(&vf, -1)>>8));
 	if(ret == 0)
 		return 0;
 	return -1;
 }
 
-int decSamples(int length, short * destBuf)
+int decSamples(int length, short * destBuf, void * context)
 {
 
-	char *target = destBuf;
+	char *target = (char*)destBuf;
 	if(length >= 1024) {
 		int tlength = length*vi->channels*2;
 

@@ -124,16 +124,19 @@ int getPercentage()
 {
 	u32 current = ftell(fp);
 	current -= firstFrame;
-	return ((current*16)/(fileSize/100));
+	return ((current)/(fileSize>>8));
 }
 
 void freeDecoder(void)
 {
 	MP3FreeDecoder(mdecoder);
 	fclose(fp);
+	fp = NULL;
+	firstFrame = 0;
+	fileSize = 0;
 }
 
-int decSamples(int length, short * destBuf)
+int decSamples(int length, short * destBuf, void * context)
 {
 	int samps =0;
 	/* Otherwhise we can possibly overwrite the data behind the buffer */

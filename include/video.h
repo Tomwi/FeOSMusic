@@ -9,6 +9,8 @@
 void initVideo(void);
 void deinitVideo(void);
 void initConsole(void);
+void hideConsole(void);
+void showConsole(void);
 void print(const char * string, int limit);
 void setConsoleCoo(int, int);
 void setConsoleCooAbs(int , int );
@@ -16,5 +18,7 @@ void updateVideo(void);
 void clearConsole(void);
 void drawLine(int x, int y, int x2, int y2);
 void visualizePlayingSMP(void);
+void initPrgrBar(void);
 extern u16 * iconFrames[2];
+extern int prgrBar;
 #endif

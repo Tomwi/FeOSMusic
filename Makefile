@@ -24,8 +24,10 @@ install: all
 	@for i in $(CODECS); do make --no-print-directory -C codecs/$$i install; done
 		
 convert: $(IMGBINS)
+	@make -C gfx/shared/
 	@[ -d fs ] || mkdir -p fs || exit 1
 	@cp $(GFX)/*.bin fs
+	@cp $(GFX)/shared/*.bin fs
 
 $(IMGBINS) : %.img.bin : $(GFX)/%.png $(GFX)/%.grit
 	@$(GRIT) $< -fh! -o$(CURDIR)/gfx/$*

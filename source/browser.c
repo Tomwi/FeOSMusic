@@ -23,7 +23,7 @@ const char * Codecs [][2]= {
 
 #define NUM_EXT (sizeof(Codecs)/sizeof(Codecs[0]))
 
-CODEC_INTERFACE cur_codec;
+
 int loadedCodec = -1;
 
 u16 * iconFrames[2] = {
@@ -134,7 +134,7 @@ void updateIcons()
 			}
 
 		} else {
-			hideSprite(i, SUB_SCREEN);
+			setSpriteVisiblity(true, i, SUB_SCREEN);
 		}
 	}
 }
@@ -172,26 +172,30 @@ void updateBrowser(void)
 
 	if(keysReleased & KEY_TOUCH) {
 		if(drgTime < 30 && drgY[1] == drgY[0]) {
-			int selected = (scrollY + drgY[1])/ICON_SZ;
-			if(list[selected][ENTRY_TYPE]==DT_DIR)
-				retrieveDir(&list[selected][ENTRY_NAME]);
-			else {
-				if(getStreamState() == STREAM_STOP) {
-					char * file = &list[selected][ENTRY_NAME];
-					int i;
-					for(i =0; i<NUM_EXT; i++) {
-						if(strstr(file, Codecs[i][0])) {
-							if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1]))) {
-								unloadCodec(&cur_codec);
-							}
-							if(i != loadedCodec) {
-								if(!loadCodec((Codecs[i][1]), &cur_codec))
+			if(drgY[1] < numEnt * ICON_SZ) {
+				int selected = (scrollY + drgY[1])/ICON_SZ;
+				CLAMP(selected, 0, numEnt);
+				if(list[selected][ENTRY_TYPE]==DT_DIR)
+					retrieveDir(&list[selected][ENTRY_NAME]);
+				else {
+					if(getStreamState() == STREAM_STOP) {
+						char * file = &list[selected][ENTRY_NAME];
+						int i;
+						for(i =0; i<NUM_EXT; i++) {
+							if(strstr(file, Codecs[i][0])) {
+								if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1]))) {
+									unloadCodec();
+								}
+								if(i != loadedCodec) {
+									if(!loadCodec((Codecs[i][1])))
+										return;
+									loadedCodec = i;
+								}
+								if((streamIdx = createStream(&audioCallbacks))>=0)
+								{
+									startStream(file, streamIdx);
 									return;
-								loadedCodec = i;
-							}
-							if(cur_codec.openFile(file)) {
-								startStream(cur_codec.getSampleRate(), cur_codec.getnChannels(), cur_codec.decSamples);
-								return;
+								}
 							}
 						}
 					}
