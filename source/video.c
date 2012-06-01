@@ -1,5 +1,6 @@
 #include "FeOSMusic.h"
 
+#define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
 hword_t *consoleMap;
 unsigned int row, col;
 int consoleId, prgrBar;
@@ -80,6 +81,13 @@ void initConsole(void)
 	free(consoleGfx);
 }
 
+void hideConsole(void){
+	bgHide(consoleId);
+}
+
+void showConsole(void){
+	bgShow(consoleId);
+}
 void setConsoleCoo(int x, int y)
 {
 	col = x;
@@ -203,7 +211,7 @@ void initPrgrBar(void)
 	free(prgrGfx);
 	u16 * map = bgGetMapPtr(prgrBar);
 	dmaFillHalfWords(0, map, 64*32*2);
-	map += 11*32;
+	map += PRGRBAR_Y*32 + 32*32;
 	int i,j;
 	for(i=1; i<3; i++) {
 		for(j = 0; j<32; j++) {
@@ -212,4 +220,12 @@ void initPrgrBar(void)
 		map+=32;
 	}
 	bgHide(prgrBar);
+}
+
+void updatePrgrBar(void){
+	if(keysHold & KEY_TOUCH){
+		if(stylus.y > PRGRBAR_Y && stylus.y < (PRGRBAR_Y + 4*8)){
+			bgSetScroll(prgrBar, stylus.x, 0);
+		}
+	}
 }

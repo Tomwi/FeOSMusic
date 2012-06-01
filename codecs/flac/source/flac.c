@@ -82,7 +82,7 @@ void freeDecoder(void)
 	decoder = NULL;
 }
 
-int decSamples(int length, short * destBuf)
+int decSamples(int length, short * destBuf, void * context)
 {
 	int decoded = 0;
 	FLAC__bool success = false;

@@ -27,7 +27,7 @@ int main(int argc, char ** argv)
 		/* Exit program */
 		if(keysPres & KEY_START) {
 			deinitSoundStreamer();
-			unloadCodec(&cur_codec);
+			unloadCodec();
 			freeDir();
 			deinitVideo();
 			FeOS_SetSuspendMode(oldSuspMode);
@@ -35,17 +35,13 @@ int main(int argc, char ** argv)
 			return 0;
 		}
 		switch(getStreamState()) {
-		case STREAM_STOP:
-			
-			break;
 		case STREAM_WAIT:
 		case STREAM_PLAY:
 			if (!inSleepMode)
 				visualizePlayingSMP();
 
-			if(!updateStream()) {
-				cur_codec.freeDecoder();
-				glFlush(0);
+			if(updateStream()< 0){
+				destroyStream(streamIdx);
 				break;
 			}
 
@@ -57,9 +53,7 @@ int main(int argc, char ** argv)
 				break;
 			}
 			if(keysPres & KEY_B) {
-				stopStream();
-				glFlush(0);
-				cur_codec.freeDecoder();
+				destroyStream(streamIdx);
 				break;
 			}
 			
@@ -69,8 +63,10 @@ int main(int argc, char ** argv)
 				resumeStream();
 			break;
 		}
-		if (!inSleepMode)
-			updateBrowser();
+		if (!inSleepMode){ 
+			if(getStreamState()==STREAM_STOP)
+				updateBrowser();
+		}
 	}
 	return 0;
 }

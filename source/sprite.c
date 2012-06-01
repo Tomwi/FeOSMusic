@@ -75,7 +75,7 @@ void setFrame(hword_t * ptr, int no, int screen){
 	oamMem[no].name = oamGfxPtrToOffset(states(screen), ptr);
 	oamMem[no].disabled = false;
 }
-void hideSprite(int no, int screen){
+void setSpriteVisiblity(bool hidden, int no, int screen){
 	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
-	oamMem[no].disabled = true;
+	oamMem[no].disabled = hidden;
 }
