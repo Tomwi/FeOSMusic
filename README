@@ -1,5 +1,10 @@
 Installation:
 
-arm7SndMod.fx2 	-> into FeOS/data/FeOS/arm7
-codecs 		-> into FeOS/data/FeOS/lib
-music.fx2 	-> into FeOS/data/FeOS/bin
+FeOSMusic requires the soundStream lib for FeOS. You can find it here:
+
+https://github.com/Tomwi/soundStream
+
+steps:
+1) place soundStream in $(FEOSSDK)/userlib/
+2) Compile soundStream ('make install')
+3) Compile FeOSMusic   ('make install')
