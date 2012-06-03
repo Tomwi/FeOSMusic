@@ -172,8 +172,8 @@ void updateBrowser(void)
 
 	if(keysReleased & KEY_TOUCH) {
 		if(drgTime < 30 && drgY[1] == drgY[0]) {
-			if(drgY[1] < numEnt * ICON_SZ) {
-				int selected = (scrollY + drgY[1])/ICON_SZ;
+			if(drgY[0] < (numEnt * ICON_SZ)) {
+				int selected = (scrollY + drgY[0])/ICON_SZ;
 				CLAMP(selected, 0, numEnt);
 				if(list[selected][ENTRY_TYPE]==DT_DIR)
 					retrieveDir(&list[selected][ENTRY_NAME]);

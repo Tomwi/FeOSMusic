@@ -3,11 +3,12 @@
 #define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
 hword_t *consoleMap;
 unsigned int row, col;
-int consoleId, prgrBar;
+int consoleId, prgrBar, prgr;
 
 void init3D(void)
 {
 	videoSetMode(MODE_0_3D);
+	//consoleDebugInit(DebugDevice_NOCASH);
 	glInit();
 	glEnable( GL_TEXTURE_2D | GL_ANTIALIAS );
 	glClearColor( 0, 0, 0, 31 ); 	// BG must be opaque for AA to work
@@ -224,8 +225,20 @@ void initPrgrBar(void)
 
 void updatePrgrBar(void){
 	if(keysHold & KEY_TOUCH){
-		if(stylus.y > PRGRBAR_Y && stylus.y < (PRGRBAR_Y + 4*8)){
-			bgSetScroll(prgrBar, stylus.x, 0);
+		if(stylus.y > PRGRBAR_Y*8 && stylus.y < (PRGRBAR_Y*8 + 2*8)){
+			prgr = stylus.x;
+			bgSetScroll(prgrBar, -stylus.x, 0);
 		}
+	}
+	else if(keysReleased & KEY_TOUCH){
+		if(prgr){
+			int seek = (cur_codec.getResolution()>>8)*prgr;
+			cur_codec.seek(seek);
+			prgr = 0;
+		}
+	}
+	else{
+		u64 pos = (cur_codec.getPosition()<<8)/(cur_codec.getResolution());
+		bgSetScroll(prgrBar, -pos, 0);
 	}
 }

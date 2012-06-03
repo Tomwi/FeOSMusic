@@ -4,10 +4,12 @@
 #include <stdio.h>
 
 typedef struct {
-	int (*openFile)(char*);
+	int (*openFile)(const char*);
 	int (*getSampleRate)(void);
 	int (*getnChannels)(void);
-	int (*seekPercentage)(int perc);
+	int (*getPosition)(void);
+	int (*getResolution)(void);
+	int (*seek)(int pos);
 	int (*getPercentage) (void);
 	void (*freeDecoder)(void * context);
 	int (*decSamples)(int length, short * buf, void * context);

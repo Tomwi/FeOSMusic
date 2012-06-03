@@ -44,10 +44,12 @@ int main(int argc, char ** argv)
 				destroyStream(streamIdx);
 				break;
 			}
-
+			
 			if (inSleepMode)
 				break;
 
+			updatePrgrBar();
+			
 			if(keysPres & KEY_A){
 				pauseStream();
 				break;
@@ -62,11 +64,13 @@ int main(int argc, char ** argv)
 			if(!inSleepMode && (keysPres & KEY_A))
 				resumeStream();
 			break;
-		}
-		if (!inSleepMode){ 
-			if(getStreamState()==STREAM_STOP)
+		case STREAM_STOP:
+			if (!inSleepMode){ 
 				updateBrowser();
+			}
 		}
+		
+		
 	}
 	return 0;
 }

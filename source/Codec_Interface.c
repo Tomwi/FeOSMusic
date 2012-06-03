@@ -4,7 +4,7 @@ CODEC_INTERFACE cur_codec;
 AUDIO_CALLBACKS audioCallbacks;
 int streamIdx;
 
-int onOpen(char* name, AUDIO_INFO* inf, void** context)
+int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 {
 	if(cur_codec.openFile(name)) {
 		inf->channelCount = cur_codec.getnChannels();
@@ -23,9 +23,9 @@ int onOpen(char* name, AUDIO_INFO* inf, void** context)
 
 int onRead(int length, short * buf, void * context)
 {
-	bgSetScroll(prgrBar, -cur_codec.getPercentage(), 0);
 	return cur_codec.decSamples(length, buf, context);
 }
+
 void onClose(void * context)
 {
 	cur_codec.freeDecoder(context);
@@ -48,8 +48,9 @@ int loadCodec(const char * codecFile)
 		cur_codec.openFile       = FeOS_FindSymbol(mdl, "openFile");
 		cur_codec.getSampleRate  = FeOS_FindSymbol(mdl, "getSampleRate");
 		cur_codec.getnChannels   = FeOS_FindSymbol(mdl, "getnChannels");
-		cur_codec.seekPercentage = FeOS_FindSymbol(mdl, "seekPercentage");
-		cur_codec.getPercentage  = FeOS_FindSymbol(mdl, "getPercentage");
+		cur_codec.seek			 = FeOS_FindSymbol(mdl, "seek");
+		cur_codec.getPosition  	 = FeOS_FindSymbol(mdl, "getPosition");
+		cur_codec.getResolution	 = FeOS_FindSymbol(mdl, "getResolution");
 		cur_codec.freeDecoder    = FeOS_FindSymbol(mdl, "freeDecoder");
 		cur_codec.decSamples     = FeOS_FindSymbol(mdl, "decSamples");
 		cur_codec.deFragReadbuf  = FeOS_FindSymbol(mdl, "deFragReadbuf");

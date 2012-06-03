@@ -12,6 +12,7 @@
 #include "mp4ff.h"
 #include "aac.h"
 
+#define RESOLUTION (256)
 #define DEC_AAC 0
 #define DEC_MP4 1
 #define DEC_MP4_STOPPED 2
@@ -167,15 +168,24 @@ int getnChannels(void)
 	return inf.nChans;
 }
 
-int getPercentage(void)
+int getPosition(void)
 {
 	if(dec_state == DEC_MP4) {
-		return (trackSample/(mp4ff_num_samples(infile, track)>>8));
+		return (trackSample/(mp4ff_num_samples(infile, track)/RESOLUTION));
 	}
 	return 0;
 }
-int seekPercentage(int perc)
+
+int getResolution(void)
 {
+	return RESOLUTION;
+}
+
+int seek(int pos)
+{
+	if(dec_state == DEC_MP4) {
+		trackSample = (mp4ff_num_samples(infile, track)/RESOLUTION) * pos;
+	}
 	return 0;
 }
 
