@@ -6,6 +6,8 @@
 #include "flac.h"
 #include "decoder.h"
 
+#define RESOLUTION (256)
+
 typedef struct {
 	const FLAC__Frame *frame;
 	const FLAC__int32 * const *buffer;
@@ -66,14 +68,18 @@ int getnChannels(void)
 	return channels;
 }
 
-int seekPercentage(int perc)
+int seek(int pos)
 {
 	return 0;
 }
 
-int getPercentage(void)
+int getPosition(void)
 {
 	return 0;
+}
+
+int getResolution(void){
+	return RESOLUTION;
 }
 
 void freeDecoder(void)

@@ -3,6 +3,7 @@
 #include <feos.h>
 #include "decoder.h"
 
+#define RESOLUTION (256)
 FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
 FEOS_EXPORT unsigned char *readOff;
 FEOS_EXPORT int dataLeft;
@@ -37,16 +38,21 @@ int getnChannels(void)
 {
 	return vi->channels;
 }
-int getPercentage(void)
+int getPosition(void)
 {
-	return (int)((ov_time_tell(&vf))/(ov_time_total(&vf, -1)>>8));
+	return (int)((ov_time_tell(&vf))/(ov_time_total(&vf, -1)/RESOLUTION));
 }
-int seekPercentage(int perc)
+
+int seek(int pos)
 {
-	int ret = ov_time_seek(&vf,perc*(ov_time_total(&vf, -1)>>8));
+	int ret = ov_time_seek(&vf,pos*(ov_time_total(&vf, -1)/RESOLUTION));
 	if(ret == 0)
 		return 0;
 	return -1;
+}
+
+int getResolution(void){
+	return RESOLUTION;
 }
 
 int decSamples(int length, short * destBuf, void * context)

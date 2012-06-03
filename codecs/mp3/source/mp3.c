@@ -8,6 +8,7 @@
 #include "mp3.h"
 #include "decoder.h"
 
+#define RESOLUTION (256)
 HMP3Decoder * mdecoder;
 MP3FrameInfo inf;
 
@@ -115,16 +116,19 @@ int getnChannels(void)
 {
 	return inf.nChans;
 }
-int seekPercentage(int perc)
+int seek(int pos)
 {
 	return 0;
 }
 
-int getPercentage()
+int getResolution(){
+	return RESOLUTION;
+}
+int getPosition()
 {
 	u32 current = ftell(fp);
 	current -= firstFrame;
-	return ((current)/(fileSize>>8));
+	return ((current)/(fileSize/RESOLUTION));
 }
 
 void freeDecoder(void)
