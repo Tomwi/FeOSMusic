@@ -7,6 +7,7 @@
 #include "mp3common.h"
 #include "mp3.h"
 #include "decoder.h"
+#include "coder.h"
 
 #define RESOLUTION (256)
 HMP3Decoder * mdecoder;
@@ -52,8 +53,6 @@ findsync:
 	if(((MP3DecInfo *)mdecoder)->layer!=3){
 		goto findsync;
 	}
-		
-
 	return 0;
 }
 
@@ -118,12 +117,24 @@ int getnChannels(void)
 }
 int seek(int pos)
 {
-	return 0;
+	fseek(fp, (fileSize / RESOLUTION )* pos + firstFrame, SEEK_SET);
+	dataLeft = 0;
+	
+	int ret = fread(readBuf, 1, READ_BUF_SIZE, fp);
+	dataLeft += ret;
+	readOff = readBuf;
+	
+	/* HUFF ERRORS can occur. TODO: prefill buffer with correct data
+	 * to prevent noise if bad frames are processed
+	 */
+	findValidSync(&readOff, &dataLeft);
+	return 1;
 }
 
 int getResolution(){
 	return RESOLUTION;
 }
+
 int getPosition()
 {
 	u32 current = ftell(fp);

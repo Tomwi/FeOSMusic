@@ -176,12 +176,16 @@ int getPosition(void)
 	return 0;
 }
 
-int getResolution(void){
+int getResolution(void)
+{
 	return RESOLUTION;
 }
 
 int seek(int pos)
 {
+	if(dec_state == DEC_MP4) {
+		trackSample = (mp4ff_num_samples(infile, track)/RESOLUTION) * pos;
+	}
 	return 0;
 }
 

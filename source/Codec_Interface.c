@@ -23,10 +23,9 @@ int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 
 int onRead(int length, short * buf, void * context)
 {
-	u64 pos = (cur_codec.getPosition()<<8)/(cur_codec.getResolution());
-	bgSetScroll(prgrBar, -pos, 0);
 	return cur_codec.decSamples(length, buf, context);
 }
+
 void onClose(void * context)
 {
 	cur_codec.freeDecoder(context);
