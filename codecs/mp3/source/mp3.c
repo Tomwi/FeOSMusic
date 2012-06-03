@@ -22,7 +22,7 @@ unsigned char readBuf[READ_BUF_SIZE];
 unsigned char *readOff;
 int dataLeft;
 
-FEOS_EXPORT void (*deFragReadbuf)(unsigned char * readBuf, unsigned char ** readOff, int dataLeft); 
+FEOS_EXPORT void (*deFragReadbuf)(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);
 
 unsigned int get_fileSize(FILE * fp)
 {
@@ -50,7 +50,7 @@ findsync:
 		*bytes -=ret;
 	}
 	// eh we're decoding mp3, get back!
-	if(((MP3DecInfo *)mdecoder)->layer!=3){
+	if(((MP3DecInfo *)mdecoder)->layer!=3) {
 		goto findsync;
 	}
 	return 0;
@@ -84,15 +84,14 @@ int openFile(const char * name)
 {
 	memset(&inf, 0, sizeof(inf));
 	readOff = readBuf;
-	
+
 	if((fp = fopen(name, "rb"))) {
 		fileSize = get_fileSize(fp);
 		char magic[3];
 		fread(&magic, 1, 3, fp);
 		if(IS_ID3_V2(magic)) {
 			parseID3_V2(fp);
-		}
-		else
+		} else
 			rewind(fp);
 		if((dataLeft = fread(readBuf, 1, READ_BUF_SIZE, fp))==READ_BUF_SIZE) {
 			mdecoder = MP3InitDecoder();
@@ -115,23 +114,22 @@ int getnChannels(void)
 {
 	return inf.nChans;
 }
+
 int seek(int pos)
 {
 	fseek(fp, (fileSize / RESOLUTION )* pos + firstFrame, SEEK_SET);
 	dataLeft = 0;
-	
+
 	int ret = fread(readBuf, 1, READ_BUF_SIZE, fp);
 	dataLeft += ret;
 	readOff = readBuf;
-	
-	/* HUFF ERRORS can occur. TODO: prefill buffer with correct data
-	 * to prevent noise if bad frames are processed
-	 */
+
 	findValidSync(&readOff, &dataLeft);
 	return 1;
 }
 
-int getResolution(){
+int getResolution()
+{
 	return RESOLUTION;
 }
 
@@ -168,15 +166,17 @@ int decSamples(int length, short * destBuf, void * context)
 		/* check for errors */
 		if((ret = MP3Decode(mdecoder, &readOff, &dataLeft, destBuf,0))) {
 			switch(ret) {
-			case ERR_MP3_INDATA_UNDERFLOW :
-			case ERR_MP3_MAINDATA_UNDERFLOW:
-				return 0;
-			case ERR_MP3_INVALID_FRAMEHEADER:
-				findValidSync(&readOff, &dataLeft);
-				return 0;
-			default:
+
+			case ERR_MP3_FREE_BITRATE_SYNC:
+			case ERR_MP3_OUT_OF_MEMORY :
+			case ERR_MP3_NULL_POINTER :
+			case ERR_UNKNOWN :
 				printf("HELIX MP3 ERROR: %d", ret);
 				return DEC_ERR;
+
+			default:
+				findValidSync(&readOff, &dataLeft);
+				return 0;
 			}
 		}
 		/* GCC can't know channels being only 1 or 2 */
