@@ -96,7 +96,6 @@ int openFile(const char * name)
 		if((dataLeft = fread(readBuf, 1, READ_BUF_SIZE, fp))==READ_BUF_SIZE) {
 			mdecoder = MP3InitDecoder();
 			if(!findValidSync(&readOff, &dataLeft)) {
-				/* Get info for mm stream init */
 				MP3GetLastFrameInfo(mdecoder, &inf);
 				bitrate = inf.bitrate;
 				return 1;
@@ -155,6 +154,7 @@ int decSamples(int length, short * destBuf, void * context)
 	/* Otherwhise we can possibly overwrite the data behind the buffer */
 	if(length >= MAX_NGRAN*inf.nChans*MAX_NSAMP) {
 		int ret = 0;
+		decode:
 		/* Possible buffer-underrun */
 		if(dataLeft < READ_BUF_SIZE) {
 			deFragReadbuf(readBuf, &readOff, dataLeft);
@@ -171,12 +171,13 @@ int decSamples(int length, short * destBuf, void * context)
 			case ERR_MP3_OUT_OF_MEMORY :
 			case ERR_MP3_NULL_POINTER :
 			case ERR_UNKNOWN :
-				printf("HELIX MP3 ERROR: %d", ret);
+				printf("HELIX MP3 ERROR: %d\n", ret);
 				return DEC_ERR;
 
 			default:
 				findValidSync(&readOff, &dataLeft);
-				return 0;
+				printf("Seeking error!\n");
+				goto decode;
 			}
 		}
 		/* GCC can't know channels being only 1 or 2 */

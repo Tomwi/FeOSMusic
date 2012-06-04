@@ -78,6 +78,7 @@ void retrieveDir(char * path)
 
 		numEnt = 0;
 		scrollY = 0;
+		drgY[1] = drgY[0] = 0;
 		struct dirent *pent;
 
 		pdir=opendir(cwd);
@@ -123,10 +124,10 @@ void retrieveDir(char * path)
 void updateIcons()
 {
 	int i;
-
-	for(i=0; i<7; i++, beginY+=ICON_SZ) {
+	
+	for(i=0; i<7; i++) {
 		if((i+begin) < numEnt) {
-			setSprXY(i, 0, beginY, SUB_SCREEN);
+			setSprXY(i, 0, (beginY+ICON_SZ*i), SUB_SCREEN);
 			if(list[begin + i][ENTRY_TYPE]==DT_DIR) {
 				setFrame(iconFrames[0], i, SUB_SCREEN);
 			} else {
@@ -146,7 +147,7 @@ void drawList()
 		int i, j=((scrolly % ICON_SZ) ? 7 : 6);
 		CLAMP(j, 0, numEnt);
 
-		for(i=0; i<j; i++, beginY+=ICON_SZ) {
+		for(i=0; i<j; i++) {
 
 			setConsoleCoo((ICON_SZ/8), i * (ICON_SZ/8) + 2);
 			if(list) {
@@ -171,7 +172,7 @@ void updateBrowser(void)
 	}
 
 	if(keysReleased & KEY_TOUCH) {
-		if(drgTime < 30 && drgY[1] == drgY[0]) {
+		if(drgTime < 30 && abs(drgY[1]-drgY[0])<3) {
 			if(drgY[0] < (numEnt * ICON_SZ)) {
 				int selected = (scrollY + drgY[0])/ICON_SZ;
 				CLAMP(selected, 0, numEnt);
@@ -203,17 +204,15 @@ void updateBrowser(void)
 			}
 		}
 		scrollY+=(drgY[0]-drgY[1]);
-		kinEn = ((drgY[0]-drgY[1])/(drgTime));
+		CLAMP(scrollY, 0, ((numEnt+1)<=(192/ICON_SZ))? 0 :  ((numEnt * ICON_SZ)-192));
 		drgY[1] = drgY[0] = 0;
 		drgTime = 0;
 	}
 
 	// Update scrolling variables used by drawList() in the next frame
-	CLAMP(scrollY, 0, (numEnt < (192 / ICON_SZ-192)? numEnt * ICON_SZ : (numEnt*ICON_SZ-192)));
-	scrolly = (scrollY + (drgY[0]-drgY[1])) + kinEn;
-	kinEn-= (kinEn>>31);
-	CLAMP(kinEn, 0, 64);
-	CLAMP(scrolly, 0, (numEnt < (192 / ICON_SZ-192)? numEnt * ICON_SZ : (numEnt*ICON_SZ-192)));
+	CLAMP(scrollY, 0, ((numEnt+1)<=(192/ICON_SZ))? 0 :  ((numEnt * ICON_SZ)-192));
+	scrolly = (scrollY + (drgY[0]-drgY[1]));
+	CLAMP(scrolly, 0, ((numEnt+1)<=(192/ICON_SZ))? 0 :  ((numEnt * ICON_SZ)-192));
 	beginY = -(scrolly%ICON_SZ);
 	begin = (scrolly/ICON_SZ);
 	CLAMP(begin, 0, numEnt);
