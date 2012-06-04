@@ -232,7 +232,7 @@ void updatePrgrBar(void){
 	}
 	else if(keysReleased & KEY_TOUCH){
 		if(prgr){
-			int seek = (cur_codec.getResolution()>>8)*prgr;
+			int seek = ((cur_codec.getResolution())*prgr)>>8;
 			cur_codec.seek(seek);
 			prgr = 0;
 		}
