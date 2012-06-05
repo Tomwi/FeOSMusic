@@ -4,12 +4,18 @@ CODEC_INTERFACE cur_codec;
 AUDIO_CALLBACKS audioCallbacks;
 int streamIdx;
 
+void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft)
+{
+	memmove(readBuf, *readOff, dataLeft);
+	*readOff = readBuf;
+}
+
 int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 {
 	if(cur_codec.openFile(name)) {
 		inf->channelCount = cur_codec.getnChannels();
 		inf->frequency = cur_codec.getSampleRate();
-
+		cur_codec.getFlags(&inf->flags);
 		hideConsole();
 		int i;
 		for(i =0; i<(ENTS_AL+1); i++) {
@@ -45,6 +51,7 @@ int loadCodec(const char * codecFile)
 
 	if(mdl) {
 		cur_codec.codecModule    = mdl;
+		cur_codec.getFlags		 = FeOS_FindSymbol(mdl, "getFlags");
 		cur_codec.openFile       = FeOS_FindSymbol(mdl, "openFile");
 		cur_codec.getSampleRate  = FeOS_FindSymbol(mdl, "getSampleRate");
 		cur_codec.getnChannels   = FeOS_FindSymbol(mdl, "getnChannels");

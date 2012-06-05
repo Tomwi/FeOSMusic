@@ -33,7 +33,7 @@ INCLUDES      := include ../../include
 DEFARCH		:= -marm
 
 CONF_DEFINES = 
-CONF_LIBDIRS = 
+CONF_USERLIBS = soundStream
 CONF_LIBS = 
 CONF_CFLAGS	= -O3
 

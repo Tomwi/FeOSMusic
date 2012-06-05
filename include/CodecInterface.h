@@ -6,6 +6,7 @@
 typedef struct {
 	int (*openFile)(const char*);
 	int (*getSampleRate)(void);
+	void(*getFlags)(int* flags);
 	int (*getnChannels)(void);
 	int (*getPosition)(void);
 	int (*getResolution)(void);

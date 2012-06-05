@@ -2,6 +2,7 @@
 #define OGG_H
 
 #include <feos.h>
+#include <SndStream.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,5 +17,6 @@ FEOS_EXPORT int getPosition(void);
 FEOS_EXPORT int getResolution(void);
 FEOS_EXPORT void freeDecoder(void);
 FEOS_EXPORT int decSamples(int length, short * destBuf, void * context);
+FEOS_EXPORT void getFlags(int* flags);
 
 #endif /* OGG_H */

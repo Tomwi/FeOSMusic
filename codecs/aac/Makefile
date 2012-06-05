@@ -28,12 +28,12 @@ TARGET        := $(shell basename $(CURDIR))
 BUILD         := build
 SOURCES       := source source/mp4ff
 DATA          := data
-INCLUDES      := include ../../include
+INCLUDES      := include ../../include 
 
 DEFARCH		:= -marm
 
 CONF_DEFINES = -DAAC_MAX_NCHANS=2
-CONF_LIBDIRS = 
+CONF_USERLIBS = soundStream
 CONF_LIBS = 
 CONF_CFLAGS	= -O3
 
