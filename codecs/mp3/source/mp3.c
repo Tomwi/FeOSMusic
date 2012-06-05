@@ -2,7 +2,7 @@
  * Sources:
  * http://www.codeproject.com/KB/audio-video/mpegaudioinfo.aspx
  */
-
+#include <SndStream.h>
 #include "mp3dec.h"
 #include "mp3common.h"
 #include "mp3.h"
@@ -103,6 +103,10 @@ int openFile(const char * name)
 		}
 	}
 	return 0;
+}
+
+void getFlags(int* flags){
+	*flags = (AUDIO_INTERLEAVED | AUDIO_16BIT);
 }
 
 int getSampleRate(void)

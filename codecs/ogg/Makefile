@@ -33,8 +33,7 @@ INCLUDES      := include ../../include
 DEFARCH		:= -marm
 
 CONF_DEFINES = -DLITTLE_ENDIAN -D_ARM_ASSEM_
-CONF_LIBDIRS = 
-CONF_LIBS = 
+CONF_USERLIBS = soundStream
 CONF_CFLAGS	= -O3
 
 include $(FEOSMK)/dynlib.mk

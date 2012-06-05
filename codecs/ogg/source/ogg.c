@@ -29,6 +29,10 @@ int openFile(const char * name)
 	return 0;
 }
 
+void getFlags(int* flags){
+	*flags = (AUDIO_INTERLEAVED | AUDIO_16BIT);
+}
+
 int getSampleRate(void)
 {
 	return vi->rate;

@@ -19,5 +19,6 @@ FEOS_EXPORT int getPosition(void);
 FEOS_EXPORT int getResolution(void);
 FEOS_EXPORT void freeDecoder(void);
 FEOS_EXPORT int decSamples(int length, short * destBuf, void * context);
+FEOS_EXPORT void getFlags(int* flags);
 
 #endif /* MP3_H */

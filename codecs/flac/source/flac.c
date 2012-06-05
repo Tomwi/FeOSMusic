@@ -2,6 +2,7 @@
 #include <config.h>
 #endif
 #include <stdio.h>
+#include <SndStream.h>
 #include "FLAC/stream_decoder.h"
 #include "flac.h"
 #include "decoder.h"
@@ -58,6 +59,11 @@ int openFile(const char * name)
 	return FLAC__stream_decoder_process_until_end_of_metadata(decoder);
 }
 
+void getFlags(int* flags)
+{
+	*flags = (AUDIO_16BIT | AUDIO_INTERLEAVED);
+}
+
 int getSampleRate(void)
 {
 	return sample_rate;
@@ -78,7 +84,8 @@ int getPosition(void)
 	return 0;
 }
 
-int getResolution(void){
+int getResolution(void)
+{
 	return RESOLUTION;
 }
 
@@ -103,7 +110,6 @@ int decSamples(int length, short * destBuf, void * context)
 	else if(state == FLAC__STREAM_DECODER_ABORTED)
 		return DEC_ERR;
 
-
 	while(decoded < length) {
 		if(finfo.frame == NULL || finfo.pos == finfo.frame->header.blocksize) {
 			success = FLAC__stream_decoder_process_single(decoder);
@@ -123,7 +129,6 @@ int decSamples(int length, short * destBuf, void * context)
 			destBuf[decoded*2+1] = finfo.buffer[1][finfo.pos];
 		}
 	}
-
 	return decoded;
 }
 

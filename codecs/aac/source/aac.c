@@ -6,6 +6,7 @@
 * 	aac decoder source
 */
 #include <feos.h>
+#include <SndStream.h>
 #include "decoder.h"
 #include "aacdec.h"
 #include "aaccommon.h"
@@ -151,6 +152,10 @@ int openFile(const char * name)
 		}
 	}
 	return 0;
+}
+
+void getFlags(int* flags){
+	*flags = (AUDIO_INTERLEAVED | AUDIO_16BIT);
 }
 
 /*
