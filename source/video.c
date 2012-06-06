@@ -2,10 +2,10 @@
 #include "fix_fft.h"
 
 #define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
-#define FFT_SAMP (8)
+#define FFT_SAMP (9)
 #define NUM_FREQS (16)
-
-
+#define SEPERATION ((256/NUM_FREQS))
+#define PRECISION (16)
 
 hword_t *consoleMap;
 unsigned int row, col;
@@ -14,6 +14,9 @@ int visualizer = NORMAL;
 
 s16 FFT[(1<<FFT_SAMP)];
 int frequencies[NUM_FREQS];
+int curfreqs[NUM_FREQS];
+int oldfreqs[NUM_FREQS];
+int core;
 
 void init3D(void)
 {
@@ -210,37 +213,45 @@ void visualizePlayingSMP(void)
 		}
 		glColor3b(255,255,255);
 		glFlush(0);
-	} else if(visualizer == BORKUALIZER) {
-		if(getStreamInfo(streamIdx)->channelCount == 1)
-			memcpy(FFT, buffer, (1<<FFT_SAMP)*2);
-		else{
-			int i;
-			s16* out = FFT;
-			for(i=0; i<(1<<FFT_SAMP); i++, buffer++){
-				if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
-					buffer -= STREAM_BUF_SIZE;
-				*out++ = ((*buffer + *(buffer +STREAM_BUF_SIZE))>>1);
+	}
+	/* if it doesn't do what you expect well duh... it's b0rked!*/
+	else if(visualizer == BORKUALIZER) {
+	
+		if(!(core & 3)) {
+			memcpy(oldfreqs, frequencies, sizeof(int)*NUM_FREQS);
+			memcpy(curfreqs, frequencies, sizeof(int)*NUM_FREQS);
+			memset(frequencies, 0, sizeof(int)*NUM_FREQS);
+			if(getStreamInfo(streamIdx)->channelCount == 1)
+				memcpy(FFT, buffer, (1<<FFT_SAMP)*2);
+			else {
+				int i;
+				s16* out = FFT;
+				for(i=0; i<(1<<FFT_SAMP); i++, buffer++) {
+					if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
+						buffer -= STREAM_BUF_SIZE;
+					*out++ = ((*buffer + *(buffer +STREAM_BUF_SIZE))>>1);
+				}
 			}
+			fix_fftr(FFT, FFT_SAMP, 0);
+			_visua(FFT, (1<<FFT_SAMP), frequencies);
 		}
-		fix_fftr(FFT, FFT_SAMP, 0);
-		_visua(FFT, (1<<FFT_SAMP), frequencies);
-		glBindTexture( 0, 0 );
 		int i;
-		//glBegin( GL_TRIANGLE_STRIP);
+		glBindTexture( 0, 0 );
 		for(i=0; i<(NUM_FREQS); i++) {
 			glBegin(GL_QUAD);
 			glColor3b(0,128,255);
-			glVertex3v16(i*(256/(NUM_FREQS-1))+15, 191,0);
-			glColor3b(frequencies[i]*2,128,255);
-			glVertex3v16(i*(256/(NUM_FREQS-1))+15, 191-frequencies[i], 0);
-			glVertex3v16(i*(256/(NUM_FREQS-1)), 191-frequencies[i], 0);
+			glVertex3v16((i*SEPERATION)+(SEPERATION), 191,0);
+			glColor3b((curfreqs[i]>>PRECISION)*2,128,255);
+			glVertex3v16((i*SEPERATION)+(SEPERATION), 191-(curfreqs[i]>>PRECISION), 0);
+			glVertex3v16(i*SEPERATION, 191-(curfreqs[i]>>PRECISION), 0);
 			glColor3b(0,128,255);
-			glVertex3v16(i*(256/(NUM_FREQS-1)), 191, 0);
+			glVertex3v16(i*SEPERATION, 191, 0);
 			glEnd();
-			frequencies[i] = 0;
+			
+			curfreqs[i] += (frequencies[i] - oldfreqs[i])>>2;
 		}
-		frequencies[NUM_FREQS-1] = 0;
 		glFlush(0);
+		core++;
 	}
 
 }
