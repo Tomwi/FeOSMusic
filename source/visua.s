@@ -1,3 +1,4 @@
+.equ PRECISION, (1<<16)
 .global _visua
 .hidden _visua
 .type _visua, %function
@@ -25,7 +26,7 @@ clzmi ip, r3
 rsb ip, ip, #31
 ldr r4, [r2, ip, lsl #2]
 subs r1,#1
-add r4,#1
+add r4,#PRECISION
 str r4, [r2, ip, lsl #2]
 
 bpl .loop
