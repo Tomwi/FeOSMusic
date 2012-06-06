@@ -58,7 +58,12 @@ int main(int argc, char ** argv)
 				destroyStream(streamIdx);
 				break;
 			}
-			
+			if(keysPres & KEY_X){
+				if(visualizer == BORKUALIZER)
+					visualizer = NORMAL;
+				else
+					visualizer = BORKUALIZER;
+			}
 			break;
 		case STREAM_PAUSE:
 			if(!inSleepMode && (keysPres & KEY_A))

@@ -1,14 +1,23 @@
 #include "FeOSMusic.h"
+#include "fix_fft.h"
 
 #define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
+#define FFT_SAMP (8)
+#define NUM_FREQS (16)
+
+
+
 hword_t *consoleMap;
 unsigned int row, col;
 int consoleId, prgrBar, prgr;
+int visualizer = NORMAL;
+
+s16 FFT[(1<<FFT_SAMP)];
+int frequencies[NUM_FREQS];
 
 void init3D(void)
 {
 	videoSetMode(MODE_0_3D);
-	//consoleDebugInit(DebugDevice_NOCASH);
 	glInit();
 	glEnable( GL_TEXTURE_2D | GL_ANTIALIAS );
 	glClearColor( 0, 0, 0, 31 ); 	// BG must be opaque for AA to work
@@ -82,11 +91,13 @@ void initConsole(void)
 	free(consoleGfx);
 }
 
-void hideConsole(void){
+void hideConsole(void)
+{
 	bgHide(consoleId);
 }
 
-void showConsole(void){
+void showConsole(void)
+{
 	bgShow(consoleId);
 }
 void setConsoleCoo(int x, int y)
@@ -168,37 +179,70 @@ void visualizePlayingSMP(void)
 {
 	int off = getPlayingSample();
 	short * buffer = &(getoutBuf()[off]);
+	if(visualizer == NORMAL) {
+		glBegin( GL_TRIANGLE_STRIP);
+		glBindTexture( 0, 0 );
+		int i, j = (cur_codec.getSampleRate()/60)/128;
 
-	glBegin( GL_TRIANGLE_STRIP);
-	glBindTexture( 0, 0 );
-	int i, j = (cur_codec.getSampleRate()/60)/128;
+		static int status = 0;
+		static int clr[3] = { 31, 0, 0 };
+		glColor(RGB15(clr[0], clr[1], clr[2]));
 
-	static int status = 0;
-	static int clr[3] = { 31, 0, 0 };
-	glColor(RGB15(clr[0], clr[1], clr[2]));
+		int st_1 = (status + 1) % 3;
+		clr[status] --;
+		clr[st_1] ++;
+		if (clr[status] == 0) status = st_1;
 
-	int st_1 = (status + 1) % 3;
-	clr[status] --;
-	clr[st_1] ++;
-	if (clr[status] == 0) status = st_1;
+		for(i = 0; i<128; i++) {
+			int val1 = (buffer[0]>>8);
+			int val2 = (buffer[1]>>8);
+			if(cur_codec.getnChannels()>1) {
+				val1+=(buffer[STREAM_BUF_SIZE]>>8);
+				val1>>=1;
+				val2+=(buffer[STREAM_BUF_SIZE+1]>>8);
+				val2>>=1;
+			}
+			drawLine(i*2, val1+96, i*2+2, val2+96);
 
-	for(i = 0; i<128; i++) {
-		int val1 = (buffer[0]>>8);
-		int val2 = (buffer[1]>>8);
-		if(cur_codec.getnChannels()>1) {
-			val1+=(buffer[STREAM_BUF_SIZE]>>8);
-			val1>>=1;
-			val2+=(buffer[STREAM_BUF_SIZE+1]>>8);
-			val2>>=1;
+			buffer+=j;
+			if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
+				buffer -= STREAM_BUF_SIZE;
 		}
-		drawLine(i*2, val1+96, i*2+2, val2+96);
-
-		buffer+=j;
-		if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
-			buffer -= STREAM_BUF_SIZE;
+		glColor3b(255,255,255);
+		glFlush(0);
+	} else if(visualizer == BORKUALIZER) {
+		if(getStreamInfo(streamIdx)->channelCount == 1)
+			memcpy(FFT, buffer, (1<<FFT_SAMP)*2);
+		else{
+			int i;
+			s16* out = FFT;
+			for(i=0; i<(1<<FFT_SAMP); i++, buffer++){
+				if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
+					buffer -= STREAM_BUF_SIZE;
+				*out++ = ((*buffer + *(buffer +STREAM_BUF_SIZE))>>1);
+			}
+		}
+		fix_fftr(FFT, FFT_SAMP, 0);
+		_visua(FFT, (1<<FFT_SAMP), frequencies);
+		glBindTexture( 0, 0 );
+		int i;
+		//glBegin( GL_TRIANGLE_STRIP);
+		for(i=0; i<(NUM_FREQS); i++) {
+			glBegin(GL_QUAD);
+			glColor3b(0,128,255);
+			glVertex3v16(i*(256/(NUM_FREQS-1))+15, 191,0);
+			glColor3b(frequencies[i]*2,128,255);
+			glVertex3v16(i*(256/(NUM_FREQS-1))+15, 191-frequencies[i], 0);
+			glVertex3v16(i*(256/(NUM_FREQS-1)), 191-frequencies[i], 0);
+			glColor3b(0,128,255);
+			glVertex3v16(i*(256/(NUM_FREQS-1)), 191, 0);
+			glEnd();
+			frequencies[i] = 0;
+		}
+		frequencies[NUM_FREQS-1] = 0;
+		glFlush(0);
 	}
-	glColor3b(255,255,255);
-	glFlush(0);
+
 }
 
 void initPrgrBar(void)
@@ -223,21 +267,20 @@ void initPrgrBar(void)
 	bgHide(prgrBar);
 }
 
-void updatePrgrBar(void){
-	if(keysHold & KEY_TOUCH){
-		if(stylus.y > PRGRBAR_Y*8 && stylus.y < (PRGRBAR_Y*8 + 2*8)){
+void updatePrgrBar(void)
+{
+	if(keysHold & KEY_TOUCH) {
+		if(stylus.y > PRGRBAR_Y*8 && stylus.y < (PRGRBAR_Y*8 + 2*8)) {
 			prgr = stylus.x;
 			bgSetScroll(prgrBar, -stylus.x, 0);
 		}
-	}
-	else if(keysReleased & KEY_TOUCH){
-		if(prgr){
+	} else if(keysReleased & KEY_TOUCH) {
+		if(prgr) {
 			int seek = ((cur_codec.getResolution())*prgr)>>8;
 			cur_codec.seek(seek);
 			prgr = 0;
 		}
-	}
-	else{
+	} else {
 		u64 pos = (cur_codec.getPosition()<<8)/(cur_codec.getResolution());
 		bgSetScroll(prgrBar, -pos, 0);
 	}
