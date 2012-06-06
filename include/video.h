@@ -6,6 +6,11 @@
 #define SUB_SCREEN (0)
 #define TOP_SCREEN (1)
 
+enum VISUALIZER {
+    NORMAL,
+    BORKUALIZER,
+};
+
 void initVideo(void);
 void deinitVideo(void);
 void initConsole(void);
@@ -22,4 +27,5 @@ void initPrgrBar(void);
 void updatePrgrBar(void);
 extern u16 * iconFrames[2];
 extern int prgrBar;
+extern int visualizer;
 #endif
