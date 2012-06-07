@@ -13,12 +13,17 @@ char cwd[FILENAME_MAX];
 
 static int scrolly = 0, beginY = 0, begin = 0;
 
+
+#define SCHUIF (2)
+#define MAX_EN (10<<SCHUIF)
+
 const char * Codecs [][2]= {
 	{".ogg", "ogg"},
 	{".m4a", "aac"},
 	{".aac", "aac"},
 	{".mp3", "mp3"},
 	{".flac", "flac"},
+	{".wav", "wav"},
 };
 
 #define NUM_EXT (sizeof(Codecs)/sizeof(Codecs[0]))
@@ -202,10 +207,22 @@ void updateBrowser(void)
 		}
 		scrollY+=(drgY[0]-drgY[1]);
 		CLAMP(scrollY, 0, ((numEnt+1)<=(192/ICON_SZ))? 0 :  ((numEnt * ICON_SZ)-192));
+		kinEn = ((drgY[0]-drgY[1])/(drgTime))<<SCHUIF;
+		if(abs(kinEn) > MAX_EN ) {
+			if(kinEn >0)
+				kinEn = MAX_EN;
+			else
+				kinEn = -MAX_EN;
+		}
 		drgY[1] = drgY[0] = 0;
 		drgTime = 0;
-	}
 
+	}
+	scrollY += (kinEn>>SCHUIF);
+	if(kinEn > 0)
+		kinEn--;
+	else if(kinEn < 0)
+		kinEn++;
 	// Update scrolling variables used by drawList() in the next frame
 	CLAMP(scrollY, 0, ((numEnt+1)<=(192/ICON_SZ))? 0 :  ((numEnt * ICON_SZ)-192));
 	scrolly = (scrollY + (drgY[0]-drgY[1]));
