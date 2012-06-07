@@ -19,6 +19,7 @@ FEOS_EXPORT int seek(int pos);
 FEOS_EXPORT int getPosition(void);
 FEOS_EXPORT int getResolution(void);
 FEOS_EXPORT void freeDecoder(void);
+FEOS_EXPORT void getFlags(int* flags);
 FEOS_EXPORT int decSamples(int length, short * destBuf, void * context);
 
 #endif /* AAC_H */
