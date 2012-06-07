@@ -218,13 +218,13 @@ void visualizePlayingSMP(void)
 	else if(visualizer == BORKUALIZER) {
 	
 		if(!(core & 3)) {
+			int i;
 			memcpy(oldfreqs, frequencies, sizeof(int)*NUM_FREQS);
 			memcpy(curfreqs, frequencies, sizeof(int)*NUM_FREQS);
 			memset(frequencies, 0, sizeof(int)*NUM_FREQS);
 			if(getStreamInfo(streamIdx)->channelCount == 1)
 				memcpy(FFT, buffer, (1<<FFT_SAMP)*2);
 			else {
-				int i;
 				s16* out = FFT;
 				for(i=0; i<(1<<FFT_SAMP); i++, buffer++) {
 					if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
@@ -233,7 +233,12 @@ void visualizePlayingSMP(void)
 				}
 			}
 			fix_fftr(FFT, FFT_SAMP, 0);
-			_visua(FFT, (1<<FFT_SAMP), frequencies);
+			for(i=0; i<(1<<FFT_SAMP); i++){
+				int ret;
+				if((ret = binLog(abs(FFT[i])))>=0){
+					frequencies[ret] += (1<<PRECISION);
+				}
+			}
 		}
 		int i;
 		glBindTexture( 0, 0 );

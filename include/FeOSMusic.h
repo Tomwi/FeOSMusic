@@ -21,5 +21,5 @@
 #include "browser.h"
 
 #define CLAMP(n,l,u) ((n) = ((n) > (u) ? (u) : ((n)<l ? (l) : (n))))
-void _visua(s16* buf, int len, int* arr);
+int binLog(int no);
 #endif
