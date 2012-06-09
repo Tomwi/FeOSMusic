@@ -27,7 +27,7 @@ int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 	return 0;
 }
 
-int onRead(int length, short * buf, void * context)
+int onRead(int length, void* buf, void * context)
 {
 	return cur_codec.decSamples(length, buf, context);
 }
