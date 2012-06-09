@@ -60,11 +60,21 @@ void freeDecoder(void)
 int decSamples(int length, short * destBuf, void * context)
 {
 	if(!feof(fp)) {
-		fread(destBuf, 1, length*bytSmp*fmt.nChans, fp);
+		int ret = fread(destBuf, 1, length*bytSmp*fmt.nChans, fp);
+		if(ret){
+		/* convert unsigned to signed PCM */
+		if(fmt.bitSmp == 8){
+			int i;
+			u8* buf = (u8*)destBuf;
+			for(i=0; i< ret/(bytSmp); i++){
+				*buf++ ^= (1<<7);
+			}
+		}
 		if(feof(fp)) {
 			return DEC_EOF;
 		}
-		return length;
+		return ret/(bytSmp*fmt.nChans);
+		}
 	}
 	return DEC_EOF;
 }

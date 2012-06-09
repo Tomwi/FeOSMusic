@@ -178,10 +178,13 @@ void drawLine(int x, int y, int x2, int y2)
 	glVertex2v16(x2,y2);
 }
 
+/* TODO:
+ * add 8bit support
+ */
 void visualizePlayingSMP(void)
 {
 	int off = getPlayingSample();
-	short * buffer = &(getoutBuf()[off]);
+	short * buffer = &((short*)(getoutBuf()))[off];
 	if(visualizer == NORMAL) {
 		glBegin( GL_TRIANGLE_STRIP);
 		glBindTexture( 0, 0 );
@@ -208,7 +211,7 @@ void visualizePlayingSMP(void)
 			drawLine(i*2, val1+96, i*2+2, val2+96);
 
 			buffer+=j;
-			if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
+			if(buffer >= (((short*)getoutBuf()) + STREAM_BUF_SIZE))
 				buffer -= STREAM_BUF_SIZE;
 		}
 		glColor3b(255,255,255);
@@ -227,7 +230,7 @@ void visualizePlayingSMP(void)
 			else {
 				s16* out = FFT;
 				for(i=0; i<(1<<FFT_SAMP); i++, buffer++) {
-					if(buffer >= (getoutBuf() + STREAM_BUF_SIZE))
+					if(buffer >= (((short*)getoutBuf()) + STREAM_BUF_SIZE))
 						buffer -= STREAM_BUF_SIZE;
 					*out++ = ((*buffer + *(buffer +STREAM_BUF_SIZE))>>1);
 				}
