@@ -21,5 +21,7 @@
 #include "browser.h"
 
 #define CLAMP(n,l,u) ((n) = ((n) > (u) ? (u) : ((n)<l ? (l) : (n))))
+void initFeOSMusic(void);
+void deinitFeOSMusic(void);
 int binLog(int no);
 #endif

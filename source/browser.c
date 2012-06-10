@@ -196,10 +196,9 @@ void updateBrowser(void)
 									return;
 								loadedCodec = i;
 							}
-							if((streamIdx = createStream(&audioCallbacks))>=0) {
-								startStream(file, streamIdx);
-								return;
-							}
+							startStream(file, streamIdx);
+							return;
+							
 						}
 					}
 				}

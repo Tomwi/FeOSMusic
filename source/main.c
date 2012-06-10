@@ -1,21 +1,11 @@
 #include "FeOSMusic.h"
 
-char cwd[1024];
-
 int main(int argc, char ** argv)
 {
-	getcwd(cwd, sizeof(cwd));
-	initVideo();
-	chdir("/");
-	retrieveDir("");
-	initSoundStreamer();
+	initFeOSMusic();
 	
-	FeOS_SetAutoUpdate(AUTOUPD_KEYS, false);
-
-	int oldSuspMode = FeOS_SetSuspendMode(SuspendMode_Headphones);
-
 	while(1) {
-		
+
 		FeOS_WaitForVBlank();
 		updateInput();
 
@@ -23,16 +13,10 @@ int main(int argc, char ** argv)
 
 		if (!inSleepMode)
 			drawList();
-		
+
 		/* Exit program */
 		if(keysPres & KEY_START) {
-			deinitSoundStreamer();
-			unloadCodec();
-			freeDir();
-			deinitVideo();
-			FeOS_SetSuspendMode(oldSuspMode);
-			chdir(cwd);
-			return 0;
+			deinitFeOSMusic();
 		}
 		switch(getStreamState()) {
 		case STREAM_WAIT:
@@ -40,17 +24,17 @@ int main(int argc, char ** argv)
 			if (!inSleepMode)
 				visualizePlayingSMP();
 
-			if(updateStream()< 0){
+			if(updateStream()< 0) {
 				destroyStream(streamIdx);
 				break;
 			}
-			
+
 			if (inSleepMode)
 				break;
 
 			updatePrgrBar();
-			
-			if(keysPres & KEY_A){
+
+			if(keysPres & KEY_A) {
 				pauseStream();
 				break;
 			}
@@ -58,7 +42,7 @@ int main(int argc, char ** argv)
 				destroyStream(streamIdx);
 				break;
 			}
-			if(keysPres & KEY_X){
+			if(keysPres & KEY_X) {
 				if(visualizer == BORKUALIZER)
 					visualizer = NORMAL;
 				else
@@ -70,12 +54,12 @@ int main(int argc, char ** argv)
 				resumeStream();
 			break;
 		case STREAM_STOP:
-			if (!inSleepMode){ 
+			if (!inSleepMode) {
 				updateBrowser();
 			}
 		}
-		
-		
+
+
 	}
 	return 0;
 }
