@@ -1,10 +1,7 @@
 #include "FeOSMusic.h"
 
-#define ENTRY_TYPE (0)
-#define ENTRY_NAME (1)
-
-char ** list;
-int numEnt;
+char** list;
+int numEnt, lastDir;
 int scrollY;
 int drgY[2];
 int drgTime;
@@ -16,20 +13,6 @@ static int scrolly = 0, beginY = 0, begin = 0;
 
 #define SCHUIF (2)
 #define MAX_EN (10<<SCHUIF)
-
-const char * Codecs [][2]= {
-	{".ogg", "ogg"},
-	{".m4a", "aac"},
-	{".aac", "aac"},
-	{".mp3", "mp3"},
-	{".flac", "flac"},
-	{".wav", "wav"},
-};
-
-#define NUM_EXT (sizeof(Codecs)/sizeof(Codecs[0]))
-
-
-int loadedCodec = -1;
 
 u16 * iconFrames[2] = {
 	NULL,
@@ -94,8 +77,12 @@ void retrieveDir(char * path)
 			while ((pent=readdir(pdir))!=NULL) {
 
 				if(strcmp(".", pent->d_name) == 0)
-					continue;
 
+					continue;
+				if(pent->d_type==DT_REG) {
+					if(isPlayable(pent->d_name)<0)
+						continue;
+				}
 				void * temp = realloc(list, sizeof(char**)*(numEnt+1));
 				if(temp) {
 					list = temp;
@@ -123,6 +110,12 @@ void retrieveDir(char * path)
 		}
 		qsort(list, numEnt, sizeof(char*), compare);
 		closedir(pdir);
+		int i;
+		for(i=0; i<numEnt; i++) {
+			if(list[i][ENTRY_TYPE] == DT_REG)
+				break;
+			lastDir = i;
+		}
 	}
 }
 
@@ -185,22 +178,8 @@ void updateBrowser(void)
 			else {
 				if(getStreamState() == STREAM_STOP) {
 					char * file = &list[selected][ENTRY_NAME];
-					int i;
-					for(i =0; i<NUM_EXT; i++) {
-						if(strstr(file, Codecs[i][0])) {
-							if(loadedCodec != -1 && strcmp(Codecs[loadedCodec][1],(Codecs[i][1]))) {
-								unloadCodec();
-							}
-							if(i != loadedCodec) {
-								if(!loadCodec((Codecs[i][1])))
-									return;
-								loadedCodec = i;
-							}
-							startStream(file, streamIdx);
-							return;
-							
-						}
-					}
+					if(playFile(file))
+						return;
 				}
 			}
 		}
@@ -215,7 +194,6 @@ void updateBrowser(void)
 		}
 		drgY[1] = drgY[0] = 0;
 		drgTime = 0;
-
 	}
 	scrollY += (kinEn>>SCHUIF);
 	if(kinEn > 0)

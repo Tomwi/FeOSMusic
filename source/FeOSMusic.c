@@ -5,6 +5,7 @@ int oldSuspMode;
 
 void initFeOSMusic(void)
 {
+	srand(time(NULL));
 	getcwd(cwd, sizeof(cwd));
 	initVideo();
 	chdir("/");
@@ -21,10 +22,10 @@ void initFeOSMusic(void)
 void deinitFeOSMusic(void)
 {
 	deinitSoundStreamer();
+	destroyStream(streamIdx);
 	unloadCodec();
 	freeDir();
 	deinitVideo();
 	FeOS_SetSuspendMode(oldSuspMode);
 	chdir(cwd);
-	exit(0);
 }

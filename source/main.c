@@ -17,6 +17,11 @@ int main(int argc, char ** argv)
 		/* Exit program */
 		if(keysPres & KEY_START) {
 			deinitFeOSMusic();
+			return 0;
+		}
+		
+		if(keysPres & KEY_R){
+			setPlayLstState((getPlayLstState()+1)%4);
 		}
 		switch(getStreamState()) {
 		case STREAM_WAIT:
@@ -25,7 +30,8 @@ int main(int argc, char ** argv)
 				visualizePlayingSMP();
 
 			if(updateStream()< 0) {
-				destroyStream(streamIdx);
+				stopStream();
+				updatePlayList();
 				break;
 			}
 
@@ -39,7 +45,7 @@ int main(int argc, char ** argv)
 				break;
 			}
 			if(keysPres & KEY_B) {
-				destroyStream(streamIdx);
+				stopStream();
 				break;
 			}
 			if(keysPres & KEY_X) {
