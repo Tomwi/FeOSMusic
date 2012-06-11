@@ -1,6 +1,8 @@
 #include "wav.h"
 #include "decoder.h"
 
+#define RESOLUTION (256)
+
 WAV_HEADER curHdr;
 FORMAT_CHUNK fmt;
 DATA_CHUNK dat;
@@ -9,6 +11,16 @@ unsigned int bytSmp;
 
 FILE * fp;
 int dataOff;
+unsigned int fileSize;
+
+unsigned int get_fileSize(FILE * fp)
+{
+	unsigned int offset = ftell(fp);
+	fseek(fp, 0, SEEK_END);
+	unsigned int size = ftell(fp);
+	fseek(fp, offset, SEEK_SET);
+	return size;
+}
 
 int openFile(const char * name)
 {
@@ -20,6 +32,7 @@ int openFile(const char * name)
 				fseek(fp, (sizeof(WAV_HEADER)+fmt.fmtSz), SEEK_SET);
 				fread(&dat, 1, sizeof(DATA_CHUNK), fp);
 				bytSmp = fmt.bitSmp>>3;
+				fileSize = get_fileSize(fp);
 				return 1;
 			}
 		}
@@ -39,12 +52,14 @@ int getnChannels(void)
 
 int seek(int pos)
 {
-	return 0;
+	fseek(fp, (fileSize / RESOLUTION )* pos, SEEK_SET);
+	return 1;
 }
 
 int getPosition(void)
 {
-	return 0;
+	u32 current = ftell(fp);
+	return ((current)/(fileSize/RESOLUTION));
 }
 
 int getResolution(void)

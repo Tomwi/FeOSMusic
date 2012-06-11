@@ -19,6 +19,7 @@
 #include "file.h"
 #include "decoder.h"
 #include "browser.h"
+#include "playlist.h"
 
 #define CLAMP(n,l,u) ((n) = ((n) > (u) ? (u) : ((n)<l ? (l) : (n))))
 void initFeOSMusic(void);

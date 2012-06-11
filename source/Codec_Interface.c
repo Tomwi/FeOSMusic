@@ -1,8 +1,61 @@
 #include "FeOSMusic.h"
 
 CODEC_INTERFACE cur_codec;
-AUDIO_CALLBACKS audioCallbacks;
+
+static int onRead(int length, void* buf, void * context);
+static int onOpen(const char* name, AUDIO_INFO* inf, void** context);
+static void onClose(void * context);
+
+AUDIO_CALLBACKS audioCallbacks = {
+	onOpen,
+	onRead,
+	NULL,
+	onClose,
+	NULL,
+};
+
 int streamIdx;
+const char * Codecs [][2]= {
+	{".ogg", "ogg"},
+	{".m4a", "aac"},
+	{".aac", "aac"},
+	{".mp3", "mp3"},
+	{".flac", "flac"},
+	{".wav", "wav"},
+};
+
+#define NUM_EXT (sizeof(Codecs)/sizeof(Codecs[0]))
+
+int loadedCodec = -1;
+
+int isPlayable(const char* name)
+{
+	int i;
+	for(i =0; i<NUM_EXT; i++) {
+		if(strstr(name, Codecs[i][0])) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int provideCodec(const char* name)
+{
+	int ret;
+	if((ret=isPlayable(name))>=0) {
+		if(loadedCodec < 0) {
+			if(!loadCodec((Codecs[ret][1])))
+				return 0;
+		} else if(strcmp(Codecs[loadedCodec][1],(Codecs[ret][1]))) {
+			unloadCodec();
+			if(!loadCodec((Codecs[ret][1])))
+				return 0;
+		}
+		loadedCodec = ret;
+		return 1;
+	}
+	return 0;
+}
 
 void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLeft)
 {
@@ -10,7 +63,7 @@ void deFragReadbuf(unsigned char * readBuf, unsigned char ** readOff, int dataLe
 	*readOff = readBuf;
 }
 
-int onOpen(const char* name, AUDIO_INFO* inf, void** context)
+static int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 {
 	if(cur_codec.openFile(name)) {
 		inf->channelCount = cur_codec.getnChannels();
@@ -27,22 +80,18 @@ int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 	return 0;
 }
 
-int onRead(int length, void* buf, void * context)
+static int onRead(int length, void* buf, void* context)
 {
 	return cur_codec.decSamples(length, buf, context);
 }
 
-void onClose(void * context)
+static void onClose(void* context)
 {
 	cur_codec.freeDecoder(context);
 	glFlush(0);
 	bgSetScroll(prgrBar, 0, 0);
 	bgHide(prgrBar);
 	showConsole();
-	int i;
-	for(i =0; i<(ENTS_AL+1); i++) {
-		setSpriteVisiblity(false, i, SUB_SCREEN);
-	}
 }
 
 int loadCodec(const char * codecFile)
@@ -61,9 +110,6 @@ int loadCodec(const char * codecFile)
 		cur_codec.freeDecoder    = FeOS_FindSymbol(mdl, "freeDecoder");
 		cur_codec.decSamples     = FeOS_FindSymbol(mdl, "decSamples");
 		cur_codec.deFragReadbuf  = FeOS_FindSymbol(mdl, "deFragReadbuf");
-		audioCallbacks.onOpen = onOpen;
-		audioCallbacks.onClose = onClose;
-		audioCallbacks.onRead = onRead;
 		if(cur_codec.deFragReadbuf) {
 			*(int**)(cur_codec.deFragReadbuf) = (int*)deFragReadbuf;
 		}

@@ -18,11 +18,14 @@ typedef struct {
 	instance_t codecModule;
 } CODEC_INTERFACE;
 
-int loadCodec(const char * codecFile);
-void unloadCodec(void);
-
 extern AUDIO_CALLBACKS audioCallbacks;
 extern int streamIdx;
 extern CODEC_INTERFACE cur_codec;
+
+int isPlayable(const char* name);
+int provideCodec(const char* name);
+int loadCodec(const char * codecFile);
+void unloadCodec(void);
+
 
 #endif /* CODEC_INTERFACE_H */
