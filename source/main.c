@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
 		}
 		
 		if(keysPres & KEY_R){
-			setPlayLstState((getPlayLstState()+1)%4);
+			setPlayLstState((getPlayLstState()+1)%3);
 		}
 		switch(getStreamState()) {
 		case STREAM_WAIT:
