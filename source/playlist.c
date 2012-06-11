@@ -26,21 +26,27 @@ int playFile(const char* name)
 
 void shuffle(void)
 {
-	/*if(strlen(prev)>0) {
-		int val, files = (numEnt-lastDir);
+	if(strlen(prev)>0) {
+		int val, files = (numEnt-lastDir)-1;
+		printf("Files %d\n", files);
+		printf("Nument & lastdir %d, %d", numEnt, lastDir);
 		char* file = prev;
-		if(files>1) {
-			if(files > 2) {
-				val = rand() % files;
+		if(files>=1) {
+			if(files >= 2) {
+				
 select:
-				if(!strcmp(prev, &list[val+lastDir+1][ENTRY_NAME]))
+				val = rand() % files;
+				if(!strcmp(prev, &list[val+lastDir+1][ENTRY_NAME])){
+					printf("Not right! %s\n", &list[val+lastDir+1][ENTRY_NAME]);
 					goto select;
+				}
 				strcpy(prev, &list[val+lastDir+1][ENTRY_NAME]);
+				 printf("new file!: %s\n", prev); 
 			}
 			playFile(file);
 		}
 	}
-	 */
+	 
 }
 
 void updatePlayList(void)

@@ -2,7 +2,7 @@
 #define PLAYLIST_H
 
 enum PLAYLST_STATE {
-	SINGLE,
+	SINGLE = 0,
 	REPEAT,
 	SHUFFLE,
 };
