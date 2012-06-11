@@ -31,6 +31,7 @@ bool isRoot(char * path)
 	}
 	return true;
 }
+
 int compare(const void * a, const void * b)
 {
 	char * c = *((char**)a);

@@ -2,7 +2,7 @@
 #include "ogg_t.h"
 #include <feos.h>
 #include "decoder.h"
-#define RESOLUTION (256)
+
 FEOS_EXPORT unsigned char readBuf[READ_BUF_SIZE];
 FEOS_EXPORT unsigned char *readOff;
 FEOS_EXPORT int dataLeft;
@@ -39,18 +39,18 @@ int getnChannels(void)
 }
 int getPosition(void)
 {
-	return (int)((ov_time_tell(&vf))/(ov_time_total(&vf, -1)/RESOLUTION));
+	return (int)(ov_time_tell(&vf));
 }
 int seek(int pos)
 {
-	int ret = ov_time_seek(&vf,pos*(ov_time_total(&vf, -1)/RESOLUTION));
+	int ret = ov_time_seek(&vf,pos);
 	if(ret == 0)
 		return 0;
 	return -1;
 }
 int getResolution(void)
 {
-	return RESOLUTION;
+	return ov_time_total(&vf, -1);
 }
 int decSamples(int length, short * destBuf, void * context)
 {

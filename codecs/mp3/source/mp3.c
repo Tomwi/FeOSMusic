@@ -9,7 +9,6 @@
 #include "decoder.h"
 #include "coder.h"
 
-#define RESOLUTION (256)
 HMP3Decoder * mdecoder;
 MP3FrameInfo inf;
 
@@ -97,7 +96,7 @@ int openFile(const char * name)
 			mdecoder = MP3InitDecoder();
 			if(!findValidSync(&readOff, &dataLeft)) {
 				MP3GetLastFrameInfo(mdecoder, &inf);
-				bitrate = inf.bitrate;
+				bitrate = inf.bitrate;	
 				return 1;
 			}
 		}
@@ -120,7 +119,7 @@ int getnChannels(void)
 
 int seek(int pos)
 {
-	fseek(fp, (fileSize / RESOLUTION )* pos + firstFrame, SEEK_SET);
+	fseek(fp, pos + firstFrame, SEEK_SET);
 	dataLeft = 0;
 
 	int ret = fread(readBuf, 1, READ_BUF_SIZE, fp);
@@ -133,14 +132,14 @@ int seek(int pos)
 
 int getResolution()
 {
-	return RESOLUTION;
+	return fileSize;
 }
 
 int getPosition()
 {
 	u32 current = ftell(fp);
 	current -= firstFrame;
-	return ((current)/(fileSize/RESOLUTION));
+	return current;
 }
 
 void freeDecoder(void)

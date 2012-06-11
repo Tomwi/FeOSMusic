@@ -1,7 +1,7 @@
 #include "wav.h"
 #include "decoder.h"
 
-#define RESOLUTION (256)
+int RESOLUTION;
 
 WAV_HEADER curHdr;
 FORMAT_CHUNK fmt;
@@ -11,7 +11,7 @@ unsigned int bytSmp;
 
 FILE * fp;
 int dataOff;
-unsigned int fileSize;
+unsigned int fileSize, firstData;
 
 unsigned int get_fileSize(FILE * fp)
 {
@@ -32,7 +32,9 @@ int openFile(const char * name)
 				fseek(fp, (sizeof(WAV_HEADER)+fmt.fmtSz), SEEK_SET);
 				fread(&dat, 1, sizeof(DATA_CHUNK), fp);
 				bytSmp = fmt.bitSmp>>3;
-				fileSize = get_fileSize(fp);
+				firstData = ftell(fp);
+				fileSize = get_fileSize(fp)-firstData;
+				RESOLUTION = fileSize;
 				return 1;
 			}
 		}
@@ -52,19 +54,19 @@ int getnChannels(void)
 
 int seek(int pos)
 {
-	fseek(fp, (fileSize / RESOLUTION )* pos, SEEK_SET);
+	fseek(fp, (fileSize * pos)/RESOLUTION + firstData, SEEK_SET);
 	return 1;
 }
 
 int getPosition(void)
 {
-	u32 current = ftell(fp);
-	return ((current)/(fileSize/RESOLUTION));
+	u32 current = ftell(fp) - firstData;
+	return (current);
 }
 
 int getResolution(void)
 {
-	return 1;
+	return RESOLUTION;
 }
 
 void freeDecoder(void)
