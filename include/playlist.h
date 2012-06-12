@@ -5,6 +5,7 @@ enum PLAYLST_STATE {
 	SINGLE = 0,
 	REPEAT,
 	SHUFFLE,
+	NUM_PLAYLIST_STATES,
 };
 
 int playFile(const char* name);
