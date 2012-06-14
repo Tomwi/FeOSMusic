@@ -54,7 +54,7 @@ int getnChannels(void)
 
 int seek(int pos)
 {
-	fseek(fp, (fileSize * pos)/RESOLUTION + firstData, SEEK_SET);
+	fseek(fp, pos + firstData, SEEK_SET);
 	return 1;
 }
 
@@ -77,20 +77,17 @@ void freeDecoder(void)
 int decSamples(int length, short * destBuf, void * context)
 {
 	if(!feof(fp)) {
-		int ret = fread(destBuf, 1, length*bytSmp*fmt.nChans, fp);
+		int ret = fread(destBuf, bytSmp, length*fmt.nChans, fp);
 		if(ret){
 		/* convert unsigned to signed PCM */
 		if(fmt.bitSmp == 8){
 			int i;
 			u8* buf = (u8*)destBuf;
-			for(i=0; i< ret/(bytSmp); i++){
+			for(i=0; i < (ret * fmt.nChans); i++){
 				*buf++ ^= (1<<7);
 			}
 		}
-		if(feof(fp)) {
-			return DEC_EOF;
-		}
-		return ret/(bytSmp*fmt.nChans);
+		return ret / fmt.nChans;
 		}
 	}
 	return DEC_EOF;
