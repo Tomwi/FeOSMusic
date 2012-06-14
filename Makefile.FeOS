@@ -29,7 +29,7 @@ SOURCES       := source source/fix_fft
 DATA          := data
 INCLUDES      := include
 GRAPHICS	  := gfx
-
+CODEC_FILE	  := audiocodecs.cfg
 IMGBINS		  := $(foreach dir, $(GRAPHICS),$(notdir $(wildcard $(dir)/*.bin)))
 CONF_DEFINES =
 CONF_USERLIBS = libfar feos3d soundStream
@@ -40,3 +40,4 @@ include $(FEOSMK)/app.mk
 
 install: all
 	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
+	@cp $(CODEC_FILE) $(FEOSDEST)/data/FeOS/$(CODEC_FILE) || exit 1

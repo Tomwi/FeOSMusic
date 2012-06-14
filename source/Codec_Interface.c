@@ -14,25 +14,17 @@ AUDIO_CALLBACKS audioCallbacks = {
 	NULL,
 };
 
-int streamIdx;
-const char * Codecs [][2]= {
-	{".ogg", "ogg"},
-	{".m4a", "aac"},
-	{".aac", "aac"},
-	{".mp3", "mp3"},
-	{".flac", "flac"},
-	{".wav", "wav"},
-};
-
-#define NUM_EXT (sizeof(Codecs)/sizeof(Codecs[0]))
+CODECFILE* cdcLst;
+char* cfgBuf;
+int streamIdx, numExts;
 
 int loadedCodec = -1;
 
 int isPlayable(const char* name)
 {
 	int i;
-	for(i =0; i<NUM_EXT; i++) {
-		if(strstr(name, Codecs[i][0])) {
+	for(i =0; i<numExts; i++) {
+		if(strstr(name, cdcLst[i].ext)) {
 			return i;
 		}
 	}
@@ -44,11 +36,11 @@ int provideCodec(const char* name)
 	int ret;
 	if((ret=isPlayable(name))>=0) {
 		if(loadedCodec < 0) {
-			if(!loadCodec((Codecs[ret][1])))
+			if(!loadCodec(cdcLst[ret].cdc))
 				return 0;
-		} else if(strcmp(Codecs[loadedCodec][1],(Codecs[ret][1]))) {
+		} else if(strcmp(cdcLst[loadedCodec].cdc,cdcLst[ret].cdc)) {
 			unloadCodec();
-			if(!loadCodec((Codecs[ret][1])))
+			if(!loadCodec((cdcLst[ret].cdc)))
 				return 0;
 		}
 		loadedCodec = ret;
@@ -125,4 +117,57 @@ void unloadCodec(void)
 		FeOS_FreeModule(cur_codec.codecModule);
 		memset(&cur_codec, 0, sizeof(CODEC_INTERFACE));
 	}
+}
+
+void loadCdcList(const char* name)
+{
+	FILE* fp;
+	if((fp=fopen(name, "rb"))) {
+		unsigned int toAlloc = getFileSize(fp);
+		cfgBuf = malloc(toAlloc+1);
+		if(cfgBuf) {
+			cfgBuf[toAlloc] = '\n';
+			char* i=(cfgBuf+toAlloc);
+			fread(cfgBuf, 1, toAlloc, fp);
+			fclose(fp);
+			char* tkn = strtok(cfgBuf, "=\n");
+			while(tkn < i && tkn != NULL) {
+				void* tmp = realloc(cdcLst, (numExts+1)*sizeof(CODECFILE));
+				if(tmp) {
+					cdcLst = tmp;
+					cdcLst[numExts].ext = tkn;
+					tkn = strtok(NULL, "=\n");
+					if(tkn) {
+						cdcLst[numExts].cdc = tkn;
+						if(tkn[strlen(tkn)-1]=='\r')
+							tkn[strlen(tkn)-1] = 0;
+					} else
+						break;
+					numExts++;
+
+					if((tkn+strlen(tkn) + 1) < i)
+						tkn = strtok(NULL, "=\n");
+					else
+						break;
+
+				} else {
+					freeCdcLst();
+					break;
+				}
+			}
+		}
+	}
+}
+
+void freeCdcLst(void)
+{
+	if(cdcLst) {
+		free(cdcLst);
+		cdcLst = NULL;
+	}
+	if(cfgBuf) {
+		free(cfgBuf);
+		cfgBuf = NULL;
+	}
+	numExts = 0;
 }

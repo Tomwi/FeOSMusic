@@ -33,3 +33,11 @@ void * bufferFile(const char * file, int * sz)
 	DC_FlushRange(mem, size);
 	return mem;
 }
+
+unsigned int getFileSize(FILE* fp){
+	int pos = ftell(fp);
+	fseek(fp, 0, SEEK_END);
+	unsigned int sz = ftell(fp);
+	fseek(fp, pos, SEEK_SET);
+	return sz;
+}

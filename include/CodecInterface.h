@@ -18,6 +18,13 @@ typedef struct {
 	instance_t codecModule;
 } CODEC_INTERFACE;
 
+typedef struct{
+	char* ext;
+	char* cdc;
+}CODECFILE;
+
+void loadCdcList(const char* name);
+void freeCdcLst(void);
 extern AUDIO_CALLBACKS audioCallbacks;
 extern int streamIdx;
 extern CODEC_INTERFACE cur_codec;

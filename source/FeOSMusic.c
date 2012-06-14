@@ -3,12 +3,14 @@
 char cwd[1024];
 int oldSuspMode;
 
+#define CFG_PATH ("data/FeOS/audiocodecs.cfg")
 void initFeOSMusic(void)
 {
 	srand(time(NULL));
 	getcwd(cwd, sizeof(cwd));
 	initVideo();
 	chdir("/");
+	loadCdcList(CFG_PATH);
 	retrieveDir("");
 	initSoundStreamer();
 
@@ -25,6 +27,7 @@ void deinitFeOSMusic(void)
 		destroyStream(streamIdx);
 	deinitSoundStreamer();
 	unloadCodec();
+	freeCdcLst();
 	freeDir();
 	deinitVideo();
 	FeOS_SetSuspendMode(oldSuspMode);

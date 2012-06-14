@@ -3,6 +3,7 @@
 #include "FeOSMusic.h"
 
 void * bufferFile(const char * file, int * sz);
+unsigned int getFileSize(FILE* fp);
 
 extern far_t hArc;
 
