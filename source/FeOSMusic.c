@@ -21,8 +21,9 @@ void initFeOSMusic(void)
 
 void deinitFeOSMusic(void)
 {
+	if (streamIdx >= 0)
+		destroyStream(streamIdx);
 	deinitSoundStreamer();
-	destroyStream(streamIdx);
 	unloadCodec();
 	freeDir();
 	deinitVideo();
