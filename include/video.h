@@ -16,7 +16,7 @@ void deinitVideo(void);
 void initConsole(void);
 void hideConsole(void);
 void showConsole(void);
-void print(const char * string, int limit);
+void print(const char * string, int limit, ...);
 void setConsoleCoo(int, int);
 void setConsoleCooAbs(int , int );
 void updateVideo(void);

@@ -12,6 +12,8 @@ typedef struct {
 	int (*getResolution)(void);
 	int (*seek)(int pos);
 	int (*getPercentage) (void);
+	int (*getTrackCount)(void);
+	void (*setTrack)(int);
 	void (*freeDecoder)(void * context);
 	int (*decSamples)(int length, short * buf, void * context);
 	void (*deFragReadbuf)(unsigned char * readBuf, unsigned char ** readOff, int dataLeft);

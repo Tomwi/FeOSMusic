@@ -10,7 +10,6 @@ char cwd[FILENAME_MAX];
 
 static int scrolly = 0, beginY = 0, begin = 0;
 
-
 #define SCHUIF (2)
 #define MAX_EN (10<<SCHUIF)
 
@@ -123,7 +122,6 @@ void retrieveDir(char * path)
 void updateIcons()
 {
 	int i;
-
 	for(i=0; i<7; i++) {
 		if((i+begin) < numEnt) {
 			setSprXY(i, 0, (beginY+ICON_SZ*i), SUB_SCREEN);
@@ -147,17 +145,14 @@ void drawList()
 		CLAMP(j, 0, numEnt);
 
 		for(i=0; i<j; i++) {
-
 			setConsoleCoo((ICON_SZ/8), i * (ICON_SZ/8) + 2);
 			if(list) {
 				print(&list[(begin+i)][ENTRY_NAME], 32-(ICON_SZ/8));
 			}
 		}
-
 	} else {
 		print("EMPTY\n",-1);
 	}
-
 }
 
 void updateBrowser(void)

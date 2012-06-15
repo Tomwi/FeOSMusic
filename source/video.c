@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include "FeOSMusic.h"
 #include "fix_fft.h"
 
@@ -9,6 +10,8 @@
 
 hword_t *consoleMap;
 unsigned int row, col;
+char printBuf[16];
+
 int consoleId, prgrBar, prgr;
 int visualizer = NORMAL;
 
@@ -77,8 +80,8 @@ void initVideo(void)
 		FeOS_ConsoleMode();
 		abort();
 	}
-
 	init3D();
+	initPlayLstIcon();
 }
 
 void initConsole(void)
@@ -103,6 +106,7 @@ void showConsole(void)
 {
 	bgShow(consoleId);
 }
+
 void setConsoleCoo(int x, int y)
 {
 	col = x;
@@ -113,6 +117,7 @@ void setConsoleCooAbs(int x, int y)
 {
 	bgSetScroll(consoleId, x, y);
 }
+
 void putChar(char kar)
 {
 	if(col >= 0 && col <= 31) {
@@ -126,26 +131,37 @@ void putChar(char kar)
 	}
 }
 
-void print(const char * string, int limit)
+void print(const char * string, int limit, ...)
 {
-
+	va_list args;
+	va_start(args,limit);
 	int i;
-	if(limit < 0 || limit >strlen(string)) {
-		limit = strlen(string);
+	if(limit < 0) {
+		limit = 1<<30;
 	}
-	limit+=col;
-	for(i = 0; col<limit && i<strlen(string); i++) {
+	for(i = 0; i<limit && i<strlen(string); i++) {
 		int k = string[i];
 		switch(k) {
 		case '\n':
 			row++;
 			col = 0;
 			break;
+		case '%':
+			switch(string[++i]) {
+			case 'd':
+				sprintf(printBuf, "%d", va_arg(args, int));
+				int j;
+				for(j =0; j<strlen(printBuf); j++)
+					putChar(printBuf[j]);
+				break;
+			}
+			break;
 		default:
 			putChar(k);
 			break;
 		}
 	}
+	va_end(args);
 }
 
 void clearConsole(void)
@@ -219,7 +235,7 @@ void visualizePlayingSMP(void)
 	}
 	/* if it doesn't do what you expect well duh... it's b0rked!*/
 	else if(visualizer == BORKUALIZER) {
-	
+
 		if(!(core & 3)) {
 			int i;
 			memcpy(oldfreqs, frequencies, sizeof(int)*NUM_FREQS);
@@ -236,9 +252,9 @@ void visualizePlayingSMP(void)
 				}
 			}
 			fix_fftr(FFT, FFT_SAMP, 0);
-			for(i=0; i<(1<<FFT_SAMP); i++){
+			for(i=0; i<(1<<FFT_SAMP); i++) {
 				int ret;
-				if((ret = binLog(abs(FFT[i])))>=0){
+				if((ret = binLog(abs(FFT[i])))>=0) {
 					frequencies[ret] += (1<<PRECISION);
 				}
 			}
@@ -255,7 +271,7 @@ void visualizePlayingSMP(void)
 			glColor3b(0,128,255);
 			glVertex3v16(i*SEPERATION, 191, 0);
 			glEnd();
-			
+
 			curfreqs[i] += (frequencies[i] - oldfreqs[i])>>2;
 		}
 		glFlush(0);

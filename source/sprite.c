@@ -1,16 +1,16 @@
 #include "sprite.h"
 
 hword_t * const const spritePalettes[2] = {
-	SPRITE_PALETTE,
 	SPRITE_PALETTE_SUB,
+	SPRITE_PALETTE,
 };
 
 hword_t * loadFrame(hword_t * gfx, int color, int size, int index, bool screen)
 {
-	int sz = SPRITE_SIZE_PIXELS(size);
+	int bytes = SPRITE_SIZE_BYTES(size, color);
 	hword_t *temp = oamAllocateGfx(states(screen), size, color);
 	if(temp){
-		dmaCopy(&gfx[(sz*index)>>1], temp, sz*2);
+		dmaCopy(&gfx[(bytes*index)>>1], temp, bytes);
 	}
 	return temp;
 }

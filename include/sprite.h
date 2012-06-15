@@ -8,6 +8,7 @@
 #define SPRITE_SIZE_SHAPE(size) (((size) >> 12) & 0x3)
 #define SPRITE_SIZE_SIZE(size)  (((size) >> 14) & 0x3)
 #define SPRITE_SIZE_PIXELS(size) (((size) & 0xFFF) << 5)
+#define SPRITE_SIZE_BYTES(size,pal) (SPRITE_SIZE_PIXELS((size))>>(1-pal))
 
 extern hword_t * const const spritePalettes[2];
 

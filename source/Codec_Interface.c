@@ -61,12 +61,16 @@ static int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 		inf->channelCount = cur_codec.getnChannels();
 		inf->frequency = cur_codec.getSampleRate();
 		cur_codec.getFlags(&inf->flags);
-		hideConsole();
+		clearConsole();
+		setConsoleCooAbs(0,0);
+		print("Sample rate  : %d\n", -1, inf->frequency);
+		print("Channel count: %d\n", -1, inf->channelCount);
 		int i;
-		for(i =0; i<(ENTS_AL+1); i++) {
+		for(i=0; i<(ENTS_AL+1); i++) {
 			setSpriteVisiblity(true, i, SUB_SCREEN);
 		}
 		bgShow(prgrBar);
+		setSpriteVisiblity(false, (ENTS_AL+1), SUB_SCREEN);
 		return 1;
 	}
 	return 0;
@@ -79,6 +83,7 @@ static int onRead(int length, void* buf, void* context)
 
 static void onClose(void* context)
 {
+	setSpriteVisiblity(true, (ENTS_AL+1), SUB_SCREEN);
 	cur_codec.freeDecoder(context);
 	glFlush(0);
 	bgSetScroll(prgrBar, 0, 0);
@@ -102,6 +107,9 @@ int loadCodec(const char * codecFile)
 		cur_codec.freeDecoder    = FeOS_FindSymbol(mdl, "freeDecoder");
 		cur_codec.decSamples     = FeOS_FindSymbol(mdl, "decSamples");
 		cur_codec.deFragReadbuf  = FeOS_FindSymbol(mdl, "deFragReadbuf");
+		cur_codec.getTrackCount  = FeOS_FindSymbol(mdl, "getTrackCount");
+		cur_codec.setTrack		 = FeOS_FindSymbol(mdl, "setTrack");
+		
 		if(cur_codec.deFragReadbuf) {
 			*(int**)(cur_codec.deFragReadbuf) = (int*)deFragReadbuf;
 		}
