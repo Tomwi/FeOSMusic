@@ -61,16 +61,8 @@ static int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 		inf->channelCount = cur_codec.getnChannels();
 		inf->frequency = cur_codec.getSampleRate();
 		cur_codec.getFlags(&inf->flags);
-		clearConsole();
-		setConsoleCooAbs(0,0);
-		print("Sample rate  : %d\n", -1, inf->frequency);
-		print("Channel count: %d\n", -1, inf->channelCount);
-		int i;
-		for(i=0; i<(ENTS_AL+1); i++) {
-			setSpriteVisiblity(true, i, SUB_SCREEN);
-		}
-		bgShow(prgrBar);
-		setSpriteVisiblity(false, (ENTS_AL+1), SUB_SCREEN);
+		setGuiState(GUI_STREAMING);
+		printInfo();
 		return 1;
 	}
 	return 0;
@@ -81,14 +73,18 @@ static int onRead(int length, void* buf, void* context)
 	return cur_codec.decSamples(length, buf, context);
 }
 
+void waitForA(void){
+	while(1){
+	updateInput();
+	FeOS_WaitForVBlank();
+	if(keysPres & KEY_A)
+		return;
+	}
+}
 static void onClose(void* context)
 {
-	setSpriteVisiblity(true, (ENTS_AL+1), SUB_SCREEN);
+	setGuiState(GUI_BROWSING);
 	cur_codec.freeDecoder(context);
-	glFlush(0);
-	bgSetScroll(prgrBar, 0, 0);
-	bgHide(prgrBar);
-	showConsole();
 }
 
 int loadCodec(const char * codecFile)

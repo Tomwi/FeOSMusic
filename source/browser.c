@@ -13,11 +13,6 @@ static int scrolly = 0, beginY = 0, begin = 0;
 #define SCHUIF (2)
 #define MAX_EN (10<<SCHUIF)
 
-u16 * iconFrames[2] = {
-	NULL,
-	NULL,
-};
-
 bool isRoot(char * path)
 {
 	int i;
@@ -126,9 +121,9 @@ void updateIcons()
 		if((i+begin) < numEnt) {
 			setSprXY(i, 0, (beginY+ICON_SZ*i), SUB_SCREEN);
 			if(list[begin + i][ENTRY_TYPE]==DT_DIR) {
-				setFrame(iconFrames[0], i, SUB_SCREEN);
+				setFrame(iconFrames[0], false, i, SUB_SCREEN);
 			} else {
-				setFrame(iconFrames[1], i, SUB_SCREEN);
+				setFrame(iconFrames[1], false, i, SUB_SCREEN);
 			}
 
 		} else {
@@ -147,11 +142,11 @@ void drawList()
 		for(i=0; i<j; i++) {
 			setConsoleCoo((ICON_SZ/8), i * (ICON_SZ/8) + 2);
 			if(list) {
-				print(&list[(begin+i)][ENTRY_NAME], 32-(ICON_SZ/8));
+				print("%.*s", 32-(ICON_SZ/8), &list[(begin+i)][ENTRY_NAME]);
 			}
 		}
 	} else {
-		print("EMPTY\n",-1);
+		print("EMPTY\n");
 	}
 }
 

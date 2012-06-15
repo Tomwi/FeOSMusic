@@ -1,8 +1,6 @@
-#include <stdarg.h>
 #include "FeOSMusic.h"
 #include "fix_fft.h"
 
-#define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
 #define FFT_SAMP (9)
 #define NUM_FREQS (16)
 #define SEPERATION ((256/NUM_FREQS))
@@ -10,9 +8,8 @@
 
 hword_t *consoleMap;
 unsigned int row, col;
-char printBuf[16];
 
-int consoleId, prgrBar, prgr;
+int consoleId;
 int visualizer = NORMAL;
 
 s16 FFT[(1<<FFT_SAMP)];
@@ -44,57 +41,32 @@ void deinit3D(void)
 {
 	glDeinit();
 }
+
 void initVideo(void)
 {
-	u16 * iconGfx;
-	int sz = 0;
-
 	/* We need access to DS hardware */
 	FeOS_DirectMode();
+	/* Init video engine for the SUB_SCREEN */
 	videoSetModeSub(MODE_0_2D);
 	vramSetBankC(VRAM_C_SUB_BG);
-	u16* sharedPal = bufferFile("shared.pal.bin", &sz);
-	dmaCopy(sharedPal, BG_PALETTE_SUB, sz);
-	free(sharedPal);
-	initConsole();
-	initPrgrBar();
 	vramSetBankD(VRAM_D_SUB_SPRITE);
 	oamEnable(states(SUB_SCREEN));
 	oamInit(states(SUB_SCREEN), SpriteMapping_1D_128, true);
-
-	/* Load sprites */
-	void * pal = bufferFile("icon.pal.bin",NULL);
-	iconGfx = bufferFile("icon.img.bin",NULL);
-	if(pal && iconGfx) {
-		loadExtPalette(0, pal, SUB_SCREEN);
-		iconFrames[0] = loadFrame(iconGfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 0, SUB_SCREEN);
-		iconFrames[1] = loadFrame(iconGfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 1, SUB_SCREEN);
-		int i;
-		for(i =0; i<(ENTS_AL+1); i++) {
-			initSprite(i, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[0]),SpriteSize_32x32 ,SpriteColorFormat_256Color,SUB_SCREEN);
-			setSprXY(i, 0, i*ICON_SZ, SUB_SCREEN);
-		}
-		free(pal);
-		free(iconGfx);
-	} else {
-		FeOS_ConsoleMode();
-		abort();
-	}
+	/* Init video engine for the MAIN_SCREEN */
 	init3D();
-	initPlayLstIcon();
 }
 
 void initConsole(void)
 {
 	int sz = 0;
 	u16* consoleGfx = bufferFile("font.img.bin", &sz);
-
-	consoleId = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 2,0);
-
-	dmaCopy(consoleGfx, bgGetGfxPtr(consoleId), sz);
-	col = row = 0;
-	consoleMap = bgGetMapPtr(consoleId);
-	free(consoleGfx);
+	if(consoleGfx) {
+		consoleId = bgInitSub(0, BgType_Text4bpp, BgSize_T_256x256, 2,0);
+		dmaCopy(consoleGfx, bgGetGfxPtr(consoleId), sz);
+		col = row = 0;
+		consoleMap = bgGetMapPtr(consoleId);
+		free(consoleGfx);
+	}
 }
 
 void hideConsole(void)
@@ -120,48 +92,35 @@ void setConsoleCooAbs(int x, int y)
 
 void putChar(char kar)
 {
-	if(col >= 0 && col <= 31) {
+	if(col >= 0 && col <= 32) {
 		if(row >= 0 && row<=31) {
-			row += col >> 5;
-			col &= 31;
-			row &= 31;
-			consoleMap[col+(row*32)] = kar;
-			col++;
+			switch(kar) {
+			case '\n':
+				col = 0;
+				row++;
+				row &= 31;
+				break;
+			default:
+				row += col >> 5;
+				row &= 31;
+				col &= 31;
+				consoleMap[col+(row*32)] = kar;
+				col++;
+			}
 		}
 	}
 }
 
-void print(const char * string, int limit, ...)
+void print(const char *fmt, ...)
 {
-	va_list args;
-	va_start(args,limit);
+	static char buffer[MAX_STRLEN];
+	va_list arg_ptr;
+	va_start(arg_ptr, fmt);
+	vsnprintf(buffer, MAX_STRLEN, fmt, arg_ptr);
+	va_end(arg_ptr);
 	int i;
-	if(limit < 0) {
-		limit = 1<<30;
-	}
-	for(i = 0; i<limit && i<strlen(string); i++) {
-		int k = string[i];
-		switch(k) {
-		case '\n':
-			row++;
-			col = 0;
-			break;
-		case '%':
-			switch(string[++i]) {
-			case 'd':
-				sprintf(printBuf, "%d", va_arg(args, int));
-				int j;
-				for(j =0; j<strlen(printBuf); j++)
-					putChar(printBuf[j]);
-				break;
-			}
-			break;
-		default:
-			putChar(k);
-			break;
-		}
-	}
-	va_end(args);
+	for(i=0; i<strlen(buffer); i++)
+		putChar(buffer[i]);
 }
 
 void clearConsole(void)
@@ -276,47 +235,5 @@ void visualizePlayingSMP(void)
 		}
 		glFlush(0);
 		core++;
-	}
-
-}
-
-void initPrgrBar(void)
-{
-	int sz = 0;
-	u16* prgrGfx = bufferFile("prgr.img.bin", &sz);
-
-	prgrBar = bgInitSub(1, BgType_Text4bpp, BgSize_T_512x256, 3,1);
-
-	dmaCopy(prgrGfx, bgGetGfxPtr(prgrBar), sz);
-	free(prgrGfx);
-	u16 * map = bgGetMapPtr(prgrBar);
-	dmaFillHalfWords(0, map, 64*32*2);
-	map += PRGRBAR_Y*32 + 32*32;
-	int i,j;
-	for(i=1; i<3; i++) {
-		for(j = 0; j<32; j++) {
-			map[j] = i;
-		}
-		map+=32;
-	}
-	bgHide(prgrBar);
-}
-
-void updatePrgrBar(void)
-{
-	if(keysHold & KEY_TOUCH) {
-		if(stylus.y > PRGRBAR_Y*8 && stylus.y < (PRGRBAR_Y*8 + 2*8)) {
-			prgr = stylus.x;
-			bgSetScroll(prgrBar, -stylus.x, 0);
-		}
-	} else if(keysReleased & KEY_TOUCH) {
-		if(prgr) {
-			int seek = ((cur_codec.getResolution())*prgr)>>8;
-			cur_codec.seek(seek);
-			prgr = 0;
-		}
-	} else {
-		u64 pos = (cur_codec.getPosition()<<8)/(cur_codec.getResolution());
-		bgSetScroll(prgrBar, -pos, 0);
 	}
 }

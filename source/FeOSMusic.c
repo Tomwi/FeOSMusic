@@ -8,7 +8,7 @@ void initFeOSMusic(void)
 {
 	srand(time(NULL));
 	getcwd(cwd, sizeof(cwd));
-	initVideo();
+	initGui();
 	chdir("/");
 	loadCdcList(CFG_PATH);
 	retrieveDir("");
@@ -29,7 +29,7 @@ void deinitFeOSMusic(void)
 	unloadCodec();
 	freeCdcLst();
 	freeDir();
-	deinitVideo();
+	deinitGui();
 	FeOS_SetSuspendMode(oldSuspMode);
 	chdir(cwd);
 }

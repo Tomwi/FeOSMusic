@@ -9,7 +9,7 @@ hword_t * loadFrame(hword_t * gfx, int color, int size, int index, bool screen)
 {
 	int bytes = SPRITE_SIZE_BYTES(size, color);
 	hword_t *temp = oamAllocateGfx(states(screen), size, color);
-	if(temp){
+	if(temp) {
 		dmaCopy(&gfx[(bytes*index)>>1], temp, bytes);
 	}
 	return temp;
@@ -64,18 +64,21 @@ void initSprite(u8 no, u8 pal, hword_t name, int size, int format,  bool screen)
 	oamMem[no].color = format;
 }
 
-void setSprXY(int no, hword_t x, hword_t y, bool screen){
+void setSprXY(int no, hword_t x, hword_t y, bool screen)
+{
 	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
 	oamMem[no].x = x;
 	oamMem[no].y = y;
 }
 
-void setFrame(hword_t * ptr, int no, int screen){
+void setFrame(hword_t * ptr, bool hidden, int no, int screen)
+{
 	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
 	oamMem[no].name = oamGfxPtrToOffset(states(screen), ptr);
-	oamMem[no].disabled = false;
+	oamMem[no].disabled = hidden;
 }
-void setSpriteVisiblity(bool hidden, int no, int screen){
+void setSpriteVisiblity(bool hidden, int no, int screen)
+{
 	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
 	oamMem[no].disabled = hidden;
 }

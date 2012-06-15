@@ -7,10 +7,11 @@ enum PLAYLST_STATE {
 	SHUFFLE,
 	NUM_PLAYLIST_STATES,
 };
-void initPlayLstIcon(void);
 int playFile(const char* name);
+void printInfo(void);
 void updatePlayList(void);
 int getPlayLstState(void);
 void setPlayLstState(int stat);
+void selectTrack(int var);
 
 #endif

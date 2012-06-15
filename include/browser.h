@@ -1,11 +1,9 @@
 #ifndef BROWSER_H
 #define BROWSER_H
 #include "FeOSMusic.h"
-#include "input.h"
-
 
 #define ICON_SZ (32)
-#define ENTS_AL (SCREEN_HEIGHT/ICON_SZ)
+#define MAX_ENTRIES ((SCREEN_HEIGHT/ICON_SZ) + 1)
 
 #define ENTRY_TYPE (0)
 #define ENTRY_NAME (1)

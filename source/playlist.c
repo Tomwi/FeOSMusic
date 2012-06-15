@@ -3,7 +3,9 @@
 #define ICONX (256-16)
 #define ICONY (0)
 char prev[1024];
-int state = SINGLE;
+static int state = SINGLE;
+int track;
+
 u16* playStateFrms[NUM_PLAYLIST_STATES];
 
 static void onEof(void* context)
@@ -27,22 +29,13 @@ int playFile(const char* name)
 	return 0;
 }
 
-void initPlayLstIcon(void)
+void printInfo(void)
 {
-	void * pal = bufferFile("playlst.pal.bin",NULL);
-	u16* iconGfx = bufferFile("playlst.img.bin",NULL);
-	if(pal && iconGfx) {
-		loadPalette(0, pal, true, SUB_SCREEN);
-		int i;
-		for(i=0; i<NUM_PLAYLIST_STATES; i++) {
-			playStateFrms[i] = loadFrame(iconGfx,  SpriteColorFormat_16Color, SpriteSize_16x16 , i, SUB_SCREEN);
-		}
-		free(iconGfx);
-		free(pal);
-		initSprite((ENTS_AL+1), 0, oamGfxPtrToOffset(states(SUB_SCREEN), playStateFrms[0]),SpriteSize_16x16 ,SpriteColorFormat_16Color,SUB_SCREEN);
-		setSprXY((ENTS_AL+1), ICONX, ICONY, SUB_SCREEN);
-		setSpriteVisiblity(true, (ENTS_AL+1), SUB_SCREEN);
-	}
+	clearConsole();
+	AUDIO_INFO* inf = getStreamInfo(streamIdx);
+	print("Sample rate  : %d\n", inf->frequency);
+	print("Channel count: %d\n", inf->channelCount);
+	print("Current track: %d\n", track);
 }
 
 void shuffle(void)
@@ -72,6 +65,8 @@ void updatePlayList(void)
 			setPlayLstState(stat);
 		}
 	}
+	if(getStreamState() == STREAM_STOP)
+		track = 0;
 	switch(state) {
 	case SINGLE:
 		return;
@@ -93,9 +88,22 @@ int getPlayLstState(void)
 void setPlayLstState(int stat)
 {
 	state = stat;
-	setFrame(playStateFrms[stat], (ENTS_AL+1), SUB_SCREEN);
+	setFrame(iconFrames[PLAYLIST_FRAMES+stat], false, MAX_ENTRIES, SUB_SCREEN);
 	if(state==REPEAT)
 		audioCallbacks.onEof = onEof;
 	else
 		audioCallbacks.onEof = NULL;
+}
+
+void selectTrack(int var)
+{
+	/* Pretty useless to select another track when there's only one
+	 * or when selecting is unsupported.
+	 */
+	if(cur_codec.getTrackCount && cur_codec.setTrack) {
+		printInfo();
+		track+= var;
+		CYCLE(track, 0, cur_codec.getTrackCount());
+		cur_codec.setTrack(track);
+	}
 }
