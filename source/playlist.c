@@ -101,9 +101,10 @@ void selectTrack(int var)
 	 * or when selecting is unsupported.
 	 */
 	if(cur_codec.getTrackCount && cur_codec.setTrack) {
-		printInfo();
 		track+= var;
-		CYCLE(track, 0, cur_codec.getTrackCount());
+		int uBound = cur_codec.getTrackCount() - 1; // Prevent multiple calls to func due to MACRO
+		CYCLE(track, 0, uBound);
 		cur_codec.setTrack(track);
+		printInfo();
 	}
 }

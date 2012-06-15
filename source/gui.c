@@ -146,11 +146,10 @@ void updateGui(void)
 				pauseStream();
 				break;
 			}
-			if(keysPres & KEY_DOWN)
+			if(keysPres & KEY_RIGHT)
 				selectTrack(1);
-			if(keysPres & KEY_UP){
+			else if(keysPres & KEY_LEFT)
 				selectTrack(-1);
-			}
 			if(keysPres & KEY_B) {
 				setPlayLstState(SINGLE);
 				stopStream();
