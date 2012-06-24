@@ -12,7 +12,7 @@ filters/*/build/*
 arm7SndMod/build/*
 *.tags*
 *.workspace*
-gfx/*.bin
+*.bin
 gfx/*.h
 fs/
 gfx/shared/*.bin
