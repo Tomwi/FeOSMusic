@@ -15,6 +15,7 @@ void retrieveDir(char * path);
 void freeDir(void);
 void updateBrowser(void);
 void drawList(void);
+void setListedDir(void);
 
 #endif
 

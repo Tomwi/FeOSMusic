@@ -8,6 +8,7 @@ build/*
 codecs/*/build/*
 codecs/*/lib
 codecs/*/*.imp.a
+filters/*/build/*
 arm7SndMod/build/*
 *.tags*
 *.workspace*

@@ -16,6 +16,7 @@
 #include "codec.h"
 #include "decoder.h"
 #include "file.h"
+#include "filter.h" 
 #include "gui.h"
 #include "input.h"
 #include "playlist.h"

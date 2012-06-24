@@ -33,6 +33,7 @@ void printInfo(void)
 {
 	clearConsole();
 	AUDIO_INFO* inf = getStreamInfo(streamIdx);
+	setConsoleCoo(0, 0);
 	print("Sample rate  : %d\n", inf->frequency);
 	print("Channel count: %d\n", inf->channelCount);
 	print("Current track: %d\n", track);

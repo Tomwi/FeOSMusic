@@ -63,12 +63,12 @@ void initGui(void)
 	void* pal 	= bufferFile("icon.pal.bin",NULL);
 	void* gfx	= bufferFile("icon.img.bin",NULL);
 	assert(pal && gfx);
-	loadExtPalette(0, pal, SUB_SCREEN);
-	iconFrames[FILEBROWSER_FRAMES] = loadFrame(gfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 0, SUB_SCREEN);
-	iconFrames[FILEBROWSER_FRAMES+1] = loadFrame(gfx,  SpriteColorFormat_256Color, SpriteSize_32x32 , 1, SUB_SCREEN);
+	loadPalette(0, pal, true, SUB_SCREEN);
+	iconFrames[FILEBROWSER_FRAMES] = loadFrame(gfx,  SpriteColorFormat_16Color, SpriteSize_32x32 , 0, SUB_SCREEN);
+	iconFrames[FILEBROWSER_FRAMES+1] = loadFrame(gfx,  SpriteColorFormat_16Color, SpriteSize_32x32 , 1, SUB_SCREEN);
 	int i;
 	for(i =0; i<(MAX_ENTRIES); i++) {
-		initSprite(i, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[FILEBROWSER_FRAMES]),SpriteSize_32x32 ,SpriteColorFormat_256Color,SUB_SCREEN);
+		initSprite(i, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[FILEBROWSER_FRAMES]),SpriteSize_32x32 ,SpriteColorFormat_16Color,SUB_SCREEN);
 		setSprXY(i, 0, i*FB_ICONSZ, SUB_SCREEN);
 	}
 	free(pal);
@@ -77,15 +77,16 @@ void initGui(void)
 	pal = bufferFile("playlst.pal.bin",NULL);
 	gfx = bufferFile("playlst.img.bin",NULL);
 	assert(pal && gfx);
-	loadPalette(0, pal, true, SUB_SCREEN);
+	loadPalette(1, pal, true, SUB_SCREEN);
 	for(i=0; i<NUM_PLAYLIST_STATES; i++) {
 		iconFrames[PLAYLIST_FRAMES+i] = loadFrame(gfx,  SpriteColorFormat_16Color, SpriteSize_16x16 , i, SUB_SCREEN);
 	}
 	free(gfx);
 	free(pal);
-	initSprite(MAX_ENTRIES, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[PLAYLIST_FRAMES]), SpriteSize_16x16, SpriteColorFormat_16Color, SUB_SCREEN);
+	initSprite(MAX_ENTRIES, 1, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[PLAYLIST_FRAMES]), SpriteSize_16x16, SpriteColorFormat_16Color, SUB_SCREEN);
 	setSprXY(MAX_ENTRIES, SCREEN_WIDTH-PL_ICONSZ, 0, SUB_SCREEN);
 	setSpriteVisiblity(true, MAX_ENTRIES, SUB_SCREEN);
+	 
 	/* Initialize the progress bar */
 	initPrgrBar();
 }
@@ -167,6 +168,7 @@ void updateGui(void)
 				resumeStream();
 			break;
 		}
+		updateFilters();
 		updatePlayList();
 		break;
 	case GUI_BROWSING:
@@ -182,3 +184,5 @@ void deinitGui(void)
 {
 	deinitVideo();
 }
+
+

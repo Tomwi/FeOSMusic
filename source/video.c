@@ -46,12 +46,12 @@ void initVideo(void)
 {
 	/* We need access to DS hardware */
 	FeOS_DirectMode();
+	vramSetPrimaryBanks (VRAM_A_LCD, VRAM_B_LCD, VRAM_C_SUB_BG, VRAM_D_LCD);
 	/* Init video engine for the SUB_SCREEN */
 	videoSetModeSub(MODE_0_2D);
-	vramSetBankC(VRAM_C_SUB_BG);
-	vramSetBankD(VRAM_D_SUB_SPRITE);
+	vramSetBankI(VRAM_I_SUB_SPRITE);
 	oamEnable(states(SUB_SCREEN));
-	oamInit(states(SUB_SCREEN), SpriteMapping_1D_128, true);
+	oamInit(states(SUB_SCREEN), SpriteMapping_1D_128, false);
 	/* Init video engine for the MAIN_SCREEN */
 	init3D();
 }
@@ -89,7 +89,13 @@ void setConsoleCooAbs(int x, int y)
 {
 	bgSetScroll(consoleId, x, y);
 }
-
+void consoleClearLine(int y){
+	int i;
+	hword_t* dst = &consoleMap[(y%32)*32];
+	for(i=0; i<32; i++){
+		*dst++ = 0;
+	}
+}
 void putChar(char kar)
 {
 	if(col >= 0 && col <= 32) {

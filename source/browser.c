@@ -114,6 +114,10 @@ void retrieveDir(char * path)
 	}
 }
 
+void setListedDir(void){
+	chdir(cwd);
+}
+
 void updateIcons()
 {
 	int i;

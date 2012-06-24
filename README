@@ -8,3 +8,7 @@ steps:
 1) place soundStream in $(FEOSSDK)/userlib/
 2) Compile soundStream ('make install')
 3) Compile FeOSMusic   ('make install')
+
+NOTE:
+- The b0rklter sounds horrible, if you want to try it, adjust your volume (low!!)
+- Filters only work on 16bit files atm

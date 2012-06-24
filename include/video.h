@@ -23,6 +23,7 @@ void setConsoleCoo(int, int);
 void setConsoleCooAbs(int , int );
 void updateVideo(void);
 void clearConsole(void);
+void consoleClearLine(int y);
 void drawLine(int x, int y, int x2, int y2);
 void visualizePlayingSMP(void);
 
