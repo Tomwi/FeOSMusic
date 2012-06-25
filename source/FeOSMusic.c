@@ -15,7 +15,6 @@ void initFeOSMusic(void)
 	loadCdcList(CFG_PATH);
 	retrieveDir("");
 	initSoundStreamer();
-	enableFiltering(SOUNDBUF_0x6020000, false);
 	FeOS_SetAutoUpdate(AUTOUPD_KEYS, false);
 	oldSuspMode = FeOS_SetSuspendMode(SuspendMode_Headphones);
 	if((streamIdx = createStream(&audioCallbacks))<0) {

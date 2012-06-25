@@ -1,5 +1,4 @@
 #include "FeOSMusic.h"
-#include <assert.h>
 
 #define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
 
@@ -48,6 +47,28 @@ void updatePrgrBar(void)
 	}
 }
 
+void loadIcon(char* tls, char* pl, int palNo, int frameIdx, int numFrames, int size){
+	int i;
+	
+	if(tls){
+		void* gfx	= bufferFile(tls, NULL);
+		if(!gfx)
+			return;
+		if(pl){
+			void* pal 	= bufferFile(pl, NULL);
+			if(pal){
+				loadPalette(palNo, pal, true, SUB_SCREEN);
+				free(pal);
+			}
+		}
+	
+		for(i=0; i<numFrames; i++){
+			iconFrames[frameIdx+i] = loadFrame(gfx,  SpriteColorFormat_16Color, size, i, SUB_SCREEN);
+		}
+	free(gfx);
+	}
+}
+
 void initGui(void)
 {
 	initVideo();
@@ -60,32 +81,22 @@ void initGui(void)
 	initConsole();
 
 	/* Initialize the filebrowser icons */
-	void* pal 	= bufferFile("icon.pal.bin",NULL);
-	void* gfx	= bufferFile("icon.img.bin",NULL);
-	assert(pal && gfx);
-	loadPalette(0, pal, true, SUB_SCREEN);
-	iconFrames[FILEBROWSER_FRAMES] = loadFrame(gfx,  SpriteColorFormat_16Color, SpriteSize_32x32 , 0, SUB_SCREEN);
-	iconFrames[FILEBROWSER_FRAMES+1] = loadFrame(gfx,  SpriteColorFormat_16Color, SpriteSize_32x32 , 1, SUB_SCREEN);
+	loadIcon("icon.img.bin", "icon.pal.bin", 0, FILEBROWSER_FRAMES, PLAYLIST_FRAMES, SpriteSize_32x32);
 	int i;
 	for(i =0; i<(MAX_ENTRIES); i++) {
 		initSprite(i, 0, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[FILEBROWSER_FRAMES]),SpriteSize_32x32 ,SpriteColorFormat_16Color,SUB_SCREEN);
 		setSprXY(i, 0, i*FB_ICONSZ, SUB_SCREEN);
 	}
-	free(pal);
-	free(gfx);
+
+	loadIcon("filtericon.img.bin", "filtericon.pal.bin", 1, FILTER_FRAMES, NUM_FRAMES-FILTER_FRAMES, SpriteSize_16x16);
+	initSprite(FILTER_ICON, 1, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[FILTER_FRAMES]), SpriteSize_16x16, SpriteColorFormat_16Color, SUB_SCREEN);
+	setSprXY(FILTER_ICON, SCREEN_WIDTH-FL_ICONSZ, 0, SUB_SCREEN);
+
 	/* Initialize the playlist icon */
-	pal = bufferFile("playlst.pal.bin",NULL);
-	gfx = bufferFile("playlst.img.bin",NULL);
-	assert(pal && gfx);
-	loadPalette(1, pal, true, SUB_SCREEN);
-	for(i=0; i<NUM_PLAYLIST_STATES; i++) {
-		iconFrames[PLAYLIST_FRAMES+i] = loadFrame(gfx,  SpriteColorFormat_16Color, SpriteSize_16x16 , i, SUB_SCREEN);
-	}
-	free(gfx);
-	free(pal);
-	initSprite(MAX_ENTRIES, 1, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[PLAYLIST_FRAMES]), SpriteSize_16x16, SpriteColorFormat_16Color, SUB_SCREEN);
-	setSprXY(MAX_ENTRIES, SCREEN_WIDTH-PL_ICONSZ, 0, SUB_SCREEN);
-	setSpriteVisiblity(true, MAX_ENTRIES, SUB_SCREEN);
+	loadIcon("playlst.img.bin", "playlst.pal.bin", 2, PLAYLIST_FRAMES, FILTER_FRAMES-PLAYLIST_FRAMES, SpriteSize_16x16);
+	initSprite(PLAYLIST_ICON, 2, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[PLAYLIST_FRAMES]), SpriteSize_16x16, SpriteColorFormat_16Color, SUB_SCREEN);
+	setSprXY(PLAYLIST_ICON, SCREEN_WIDTH-PL_ICONSZ, 0, SUB_SCREEN);
+	setSpriteVisiblity(true, PLAYLIST_ICON, SUB_SCREEN);
 	 
 	/* Initialize the progress bar */
 	initPrgrBar();
@@ -97,7 +108,8 @@ void setGuiState(GUI_STATE stat)
 		state = stat;
 		switch(state) {
 		case GUI_BROWSING:
-			setSpriteVisiblity(true, MAX_ENTRIES, SUB_SCREEN);
+			setSpriteVisiblity(true, PLAYLIST_ICON, SUB_SCREEN);
+			setSpriteVisiblity(false, FILTER_ICON, SUB_SCREEN);
 			glFlush(0);
 			bgSetScroll(prgrBar, 0, 0);
 			bgHide(prgrBar);
@@ -111,7 +123,8 @@ void setGuiState(GUI_STATE stat)
 				setSpriteVisiblity(true, i, SUB_SCREEN);
 			}
 			bgShow(prgrBar);
-			setSpriteVisiblity(false, MAX_ENTRIES, SUB_SCREEN);
+			setSpriteVisiblity(false, PLAYLIST_ICON, SUB_SCREEN);
+			setSpriteVisiblity(true, FILTER_ICON, SUB_SCREEN);
 			break;
 		}
 	}
@@ -168,7 +181,6 @@ void updateGui(void)
 				resumeStream();
 			break;
 		}
-		updateFilters();
 		updatePlayList();
 		break;
 	case GUI_BROWSING:
@@ -178,6 +190,7 @@ void updateGui(void)
 		}
 		break;
 	}
+	updateFilters(state);
 }
 
 void deinitGui(void)

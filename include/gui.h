@@ -4,17 +4,20 @@
 enum SUB_ICONS {
 	FILEBROWSER_ICON 	= 0,
 	PLAYLIST_ICON		= MAX_ENTRIES,
+	FILTER_ICON,
 };
 
 enum SUB_ICONSZ {
 	FB_ICONSZ			= 32,
 	PL_ICONSZ			= 16,
+	FL_ICONSZ			= 16,
 };
 
 enum SUB_FRAMES {
 	FILEBROWSER_FRAMES  = 0,
 	PLAYLIST_FRAMES 	= 2,
-	NUM_FRAMES			= 5,
+	FILTER_FRAMES		= 5,
+	NUM_FRAMES			= 7,
 };
 
 typedef enum {

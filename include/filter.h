@@ -1,8 +1,10 @@
 #ifndef FEOSMUSIC_FILTER
 #define FEOSMUSIC_FILTER
 
+#include "gui.h"
+
 void loadFilters(void);
 void unloadFilters(void);
-void updateFilters(void);
+void updateFilters(GUI_STATE stat);
 
 #endif

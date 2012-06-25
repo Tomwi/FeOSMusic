@@ -166,15 +166,17 @@ void updateBrowser(void)
 
 	if(keysReleased & KEY_TOUCH) {
 		if(drgTime < 30 && abs(drgY[1]-drgY[0])<3) {
-			int selected = (scrollY + drgY[0])/ICON_SZ;
-			CLAMP(selected, 0, numEnt);
-			if(list[selected][ENTRY_TYPE]==DT_DIR)
-				retrieveDir(&list[selected][ENTRY_NAME]);
-			else {
-				if(getStreamState() == STREAM_STOP) {
-					char * file = &list[selected][ENTRY_NAME];
-					if(playFile(file))
-						return;
+			if(!(TouchedArea(256-FL_ICONSZ, 0, 256, FL_ICONSZ))){
+				int selected = (scrollY + drgY[0])/ICON_SZ;
+				CLAMP(selected, 0, numEnt);
+				if(list[selected][ENTRY_TYPE]==DT_DIR)
+					retrieveDir(&list[selected][ENTRY_NAME]);
+				else {
+					if(getStreamState() == STREAM_STOP) {
+						char * file = &list[selected][ENTRY_NAME];
+						if(playFile(file))
+							return;
+					}
 				}
 			}
 		}
