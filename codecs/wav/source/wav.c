@@ -54,6 +54,7 @@ int getnChannels(void)
 
 int seek(int pos)
 {
+	pos &= (~(bytSmp-1));
 	fseek(fp, pos + firstData, SEEK_SET);
 	return 1;
 }

@@ -4,6 +4,7 @@
 #define ICONY (0)
 char prev[1024];
 static int state = SINGLE;
+static int playingEntry;
 int track;
 
 u16* playStateFrms[NUM_PLAYLIST_STATES];
@@ -13,6 +14,15 @@ static void onEof(void* context)
 	if(getPlayLstState()==REPEAT) {
 		cur_codec.seek(0);
 	}
+}
+
+int getFileNo(const char* name, char** list, int numEnt){
+	int i;
+	for(i=0; i<numEnt; i++){
+		if(!strcmp(name, list[i]))
+			return i;
+	}	
+	return -1; 
 }
 
 int playFile(const char* name)
@@ -58,6 +68,28 @@ select:
 	}
 }
 
+
+inline void setPlayDirEntry(int entry){
+	playingEntry = entry;
+}
+
+inline int getFirstMusicFile(char** list, int numEnt)
+{
+	int i;
+	for(i=0; i<numEnt; i++){
+		if(isPlayable((const char*)list[i]))
+			return i;
+	}
+	return -1;
+}
+
+void playDir(void)
+{
+	playingEntry++; 
+	CLAMP(playingEntry,  (lastDir+1), numEnt);
+	playFile((const char*)&list[playingEntry][ENTRY_NAME]);
+	
+}
 void updatePlayList(void)
 {
 	if(keysPres & KEY_TOUCH) {
@@ -73,10 +105,12 @@ void updatePlayList(void)
 		return;
 	case REPEAT:
 		return; // handled automatically by onEof callback
+	case REPEAT_DIR:
+		if(getStreamState() == STREAM_STOP)
+			playDir();
 	case SHUFFLE:
-		if(getStreamState() == STREAM_STOP) {
+		if(getStreamState() == STREAM_STOP)
 			shuffle();
-		}
 		return;
 	}
 }
@@ -90,6 +124,13 @@ void setPlayLstState(int stat)
 {
 	state = stat;
 	setFrame(iconFrames[PLAYLIST_FRAMES+stat], false, MAX_ENTRIES, SUB_SCREEN);
+	
+	if(state==REPEAT_DIR){
+		int temp = getFileNo(prev, list, numEnt);
+		if(temp >= 0)
+			setPlayDirEntry(temp);
+	}
+		
 	if(state==REPEAT)
 		audioCallbacks.onEof = onEof;
 	else
