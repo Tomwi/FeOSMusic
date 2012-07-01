@@ -6,9 +6,9 @@ FIFO_FLTR_MSG msg;
 int fifoChan;
 
 // support for two channels
-int feedBack[2];
-/* 28.4fp */
-#define FILTER_CONSTANT (14)
+int capacitor[2];
+
+#define RC_CONSTANT (3)
 
 void filter()
 {
@@ -20,6 +20,9 @@ void filter()
 	for(i=0; i<msg.nChans; i++) {
 		for(j=msg.off; j<msg.off+msg.len; j++) {
 			int off = (j&(msg.bufLen - 1))+i*msg.bufLen;
+			/* Capacitor slowly charges */
+			capacitor[i] = ((out[off] - capacitor[i])>>RC_CONSTANT) + capacitor[i];
+			out[off] = capacitor[i];
 		}
 	}
 
