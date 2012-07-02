@@ -46,9 +46,9 @@ void initVideo(void)
 {
 	/* We need access to DS hardware */
 	FeOS_DirectMode();
-	vramSetPrimaryBanks (VRAM_A_LCD, VRAM_B_LCD, VRAM_C_SUB_BG, VRAM_D_LCD);
+	vramSetPrimaryBanks (VRAM_A_LCD, VRAM_B_LCD, VRAM_C_SUB_BG_0x06200000, VRAM_D_LCD);
 	/* Init video engine for the SUB_SCREEN */
-	videoSetModeSub(MODE_0_2D);
+	videoSetModeSub(MODE_5_2D);
 	vramSetBankI(VRAM_I_SUB_SPRITE);
 	oamEnable(states(SUB_SCREEN));
 	oamInit(states(SUB_SCREEN), SpriteMapping_1D_128, false);
@@ -228,12 +228,12 @@ void visualizePlayingSMP(void)
 		glBindTexture( 0, 0 );
 		for(i=0; i<(NUM_FREQS); i++) {
 			glBegin(GL_QUAD);
-			glColor3b(0,128,255);
+			glColor3b(0,0,128);
 			glVertex3v16((i*SEPERATION)+(SEPERATION), 191,0);
-			glColor3b((curfreqs[i]>>PRECISION)*2,128,255);
+			glColor3b(((curfreqs[i]>>PRECISION) <= 255? (curfreqs[i]>>PRECISION) : 255), 0, 128+((curfreqs[i]>>PRECISION)+2));
 			glVertex3v16((i*SEPERATION)+(SEPERATION), 191-(curfreqs[i]>>PRECISION), 0);
 			glVertex3v16(i*SEPERATION, 191-(curfreqs[i]>>PRECISION), 0);
-			glColor3b(0,128,255);
+			glColor3b(0,0,128);
 			glVertex3v16(i*SEPERATION, 191, 0);
 			glEnd();
 

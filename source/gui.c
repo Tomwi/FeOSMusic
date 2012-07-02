@@ -4,7 +4,7 @@
 
 static int state = GUI_BROWSING;
 u16* iconFrames[NUM_FRAMES];
-int prgrBar, prgr;
+int prgrBar, prgr, sbitmap;
 
 void initPrgrBar(void)
 {
@@ -100,6 +100,11 @@ void initGui(void)
 	 
 	/* Initialize the progress bar */
 	initPrgrBar();
+	
+	u16* sbmpGfx = bufferFile("sbitmap.img.bin", &sz);
+	sbitmap = bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 2,2);
+	dmaCopy(sbmpGfx, bgGetGfxPtr(sbitmap), 192*256*2);
+	free(sbmpGfx);
 }
 
 void setGuiState(GUI_STATE stat)

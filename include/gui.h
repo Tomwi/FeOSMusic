@@ -16,8 +16,8 @@ enum SUB_ICONSZ {
 enum SUB_FRAMES {
 	FILEBROWSER_FRAMES  = 0,
 	PLAYLIST_FRAMES 	= 2,
-	FILTER_FRAMES		= 5,
-	NUM_FRAMES			= 7,
+	FILTER_FRAMES		= 6,
+	NUM_FRAMES			= 8,
 };
 
 typedef enum {

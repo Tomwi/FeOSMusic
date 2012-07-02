@@ -18,8 +18,8 @@ static void onEof(void* context)
 
 int getFileNo(const char* name, char** list, int numEnt){
 	int i;
-	for(i=0; i<numEnt; i++){
-		if(!strcmp(name, list[i]))
+	for(i=(lastDir+1); i<numEnt; i++){
+		if(!strcmp(name, &list[i][ENTRY_NAME]))
 			return i;
 	}	
 	return -1; 
@@ -86,7 +86,7 @@ inline int getFirstMusicFile(char** list, int numEnt)
 void playDir(void)
 {
 	playingEntry++; 
-	CLAMP(playingEntry,  (lastDir+1), numEnt);
+	CYCLE(playingEntry,  (lastDir+1), (numEnt-1));
 	playFile((const char*)&list[playingEntry][ENTRY_NAME]);
 	
 }
@@ -108,6 +108,7 @@ void updatePlayList(void)
 	case REPEAT_DIR:
 		if(getStreamState() == STREAM_STOP)
 			playDir();
+		return;
 	case SHUFFLE:
 		if(getStreamState() == STREAM_STOP)
 			shuffle();
