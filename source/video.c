@@ -228,15 +228,14 @@ void visualizePlayingSMP(void)
 		glBindTexture( 0, 0 );
 		for(i=0; i<(NUM_FREQS); i++) {
 			glBegin(GL_QUAD);
+			glColor3b(0,63,128);
+			glVertex3v16((i*SEPERATION)+(SEPERATION), 192,0);
+			glColor3b(curfreqs[i]>>PRECISION, 0, 128);
+			glVertex3v16((i*SEPERATION)+(SEPERATION), 192-(curfreqs[i]>>PRECISION), 0);
+			glVertex3v16(i*SEPERATION, 192-(curfreqs[i]>>PRECISION), 0);
 			glColor3b(0,0,128);
-			glVertex3v16((i*SEPERATION)+(SEPERATION), 191,0);
-			glColor3b(((curfreqs[i]>>PRECISION) <= 255? (curfreqs[i]>>PRECISION) : 255), 0, 128+((curfreqs[i]>>PRECISION)+2));
-			glVertex3v16((i*SEPERATION)+(SEPERATION), 191-(curfreqs[i]>>PRECISION), 0);
-			glVertex3v16(i*SEPERATION, 191-(curfreqs[i]>>PRECISION), 0);
-			glColor3b(0,0,128);
-			glVertex3v16(i*SEPERATION, 191, 0);
-			glEnd();
-
+			glVertex3v16(i*SEPERATION, 192, 0);
+			//glEnd();
 			curfreqs[i] += (frequencies[i] - oldfreqs[i])>>2;
 		}
 		glFlush(0);
