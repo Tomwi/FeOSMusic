@@ -1,6 +1,8 @@
 #ifndef GUI_H
 #define GUI_H
 
+#include "playlist.h"
+
 enum SUB_ICONS {
 	FILEBROWSER_ICON 	= 0,
 	PLAYLIST_ICON		= MAX_ENTRIES,
@@ -16,8 +18,8 @@ enum SUB_ICONSZ {
 enum SUB_FRAMES {
 	FILEBROWSER_FRAMES  = 0,
 	PLAYLIST_FRAMES 	= 2,
-	FILTER_FRAMES		= 6,
-	NUM_FRAMES			= 8,
+	FILTER_FRAMES		= PLAYLIST_FRAMES+NUM_PLAYLIST_STATES,
+	NUM_FRAMES			= FILTER_FRAMES + 2,
 };
 
 typedef enum {

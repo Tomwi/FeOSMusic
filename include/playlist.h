@@ -1,11 +1,13 @@
 #ifndef PLAYLIST_H
 #define PLAYLIST_H
 
+
 enum PLAYLST_STATE {
 	SINGLE = 0,
 	REPEAT,
 	SHUFFLE,
 	REPEAT_DIR,
+	//MARKER,
 	NUM_PLAYLIST_STATES,
 };
 int playFile(const char* name);

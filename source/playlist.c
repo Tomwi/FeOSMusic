@@ -5,6 +5,8 @@
 char prev[1024];
 static int state = SINGLE;
 static int playingEntry;
+int markers[2];
+bool markersActive;
 int track;
 
 u16* playStateFrms[NUM_PLAYLIST_STATES];
@@ -151,3 +153,4 @@ void selectTrack(int var)
 		printInfo();
 	}
 }
+

@@ -37,12 +37,12 @@ void updatePrgrBar(void)
 		}
 	} else if(keysReleased & KEY_TOUCH) {
 		if(prgr) {
-			int seek = ((cur_codec.getResolution())*prgr)>>8;
+			unsigned int seek = ((unsigned int)(cur_codec.getResolution())*prgr)>>8;
 			cur_codec.seek(seek);
 			prgr = 0;
 		}
 	} else {
-		u64 pos = (cur_codec.getPosition()<<8)/(cur_codec.getResolution());
+		u64 pos = ((unsigned int)(cur_codec.getPosition())<<8)/((unsigned int)(cur_codec.getResolution()));
 		bgSetScroll(prgrBar, -pos, 0);
 	}
 }
