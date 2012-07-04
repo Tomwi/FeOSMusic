@@ -1,6 +1,6 @@
 #include <nds.h>
 #include <feos.h>
-#include <common/filter.h>
+#include <../common/include/filter.h>
 
 FIFO_FLTR_MSG msg;
 int fifoChan;
