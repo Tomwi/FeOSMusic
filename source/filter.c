@@ -1,7 +1,6 @@
 #include "FeOSMusic.h"
 
 #define FILTER_PATH ("/data/FeOSMusic/filters/")
-const char msg[] = "No filter selected";
 
 char* nameBlock;
 char** nameList;
@@ -48,18 +47,27 @@ void unloadFilters(void)
 	numFilters = 0;
 }
 
-void updateFilters(GUI_STATE stat)
+void printFilterInfo(void)
 {
 	char* string = "Filtering disabled";
-	switch(stat){
+	if(selected>=0)
+		string = nameList[selected];
+	consoleClearLine(23);
+	setConsoleCoo(0, 23);
+	print("%s\n", string);
+}
+
+void updateFilters(GUI_STATE stat)
+{
+	switch(stat) {
 	case GUI_STREAMING:
-		if(isEnabled){
+		if(isEnabled) {
 			if(keysPres & KEY_SELECT) {
 				int prev = selected;
 				selected++;
 				CYCLE(selected, -1, (numFilters-1));
 				/* unload filter if it became useless */
-				if(prev!=selected){
+				if(prev!=selected) {
 					if(prev>=0)
 						unloadFilter(&filter);
 				}
@@ -71,18 +79,12 @@ void updateFilters(GUI_STATE stat)
 						selected = -1;
 					setListedDir();
 				}
+				printFilterInfo();
 			}
-
-			string = (char*)msg;
-			if(selected>=0)
-				string = nameList[selected];
 		}
-		consoleClearLine(23);
-		setConsoleCoo(0, 23);
-		print("%s\n", string);
 		break;
 	case GUI_BROWSING:
-		if(keysPres & KEY_TOUCH){
+		if(keysPres & KEY_TOUCH) {
 			if(TouchinArea(256-FL_ICONSZ, 0, 256, FL_ICONSZ)) {
 				isEnabled++;
 				CYCLE(isEnabled, 0, 1);

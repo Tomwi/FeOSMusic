@@ -6,5 +6,6 @@
 void loadFilters(void);
 void unloadFilters(void);
 void updateFilters(GUI_STATE stat);
+void printFilterInfo(void);
 
 #endif

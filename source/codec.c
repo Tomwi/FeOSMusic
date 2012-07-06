@@ -63,6 +63,7 @@ static int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 		cur_codec.getFlags(&inf->flags);
 		setGuiState(GUI_STREAMING);
 		printInfo();
+		printFilterInfo();
 		return 1;
 	}
 	return 0;
