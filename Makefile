@@ -37,4 +37,6 @@ convert: $(IMGBINS)
 
 $(IMGBINS) : %.img.bin : $(GFX)/%.png $(GFX)/%.grit
 	@$(GRIT) $< -fh! -o$(CURDIR)/gfx/$*
+	
+
 

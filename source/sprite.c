@@ -77,8 +77,21 @@ void setFrame(hword_t * ptr, bool hidden, int no, int screen)
 	oamMem[no].name = oamGfxPtrToOffset(states(screen), ptr);
 	oamMem[no].disabled = hidden;
 }
+
 void setSpriteVisiblity(bool hidden, int no, int screen)
 {
 	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
 	oamMem[no].disabled = hidden;
+}
+
+void cloneSprite(int no, int toClone, int screen)
+{
+	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
+	memcpy(&oamMem[no], &oamMem[toClone], sizeof(SPRITE_ENTRY));
+}
+
+void setHflip(int no, bool flip, bool screen)
+{
+	SPRITE_ENTRY* oamMem = (SPRITE_ENTRY*)FeOS_GetOAMMemory(states(screen));
+	oamMem[no].hFlip = flip;
 }

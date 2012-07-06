@@ -1,13 +1,14 @@
 #ifndef PLAYLIST_H
 #define PLAYLIST_H
 
-
+extern int markersX[2];
+extern int dragging;
 enum PLAYLST_STATE {
 	SINGLE = 0,
 	REPEAT,
 	SHUFFLE,
 	REPEAT_DIR,
-	//MARKER,
+	MARKER,
 	NUM_PLAYLIST_STATES,
 };
 int playFile(const char* name);

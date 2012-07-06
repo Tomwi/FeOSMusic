@@ -85,6 +85,8 @@ static void onClose(void* context)
 {
 	setGuiState(GUI_BROWSING);
 	cur_codec.freeDecoder(context);
+	markersX[0] = 0;
+	markersX[1] = 256-8;
 }
 
 int loadCodec(const char * codecFile)

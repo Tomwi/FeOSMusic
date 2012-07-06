@@ -1,10 +1,11 @@
 #include "FeOSMusic.h"
-
+#include "marker.h"
 #define PRGRBAR_Y (SCREEN_HEIGHT/(8*2) - 1)
 
-static int state = GUI_BROWSING;
+static int state = -1;
 u16* iconFrames[NUM_FRAMES];
 int prgrBar, prgr, sbitmap;
+int pos;
 
 void initPrgrBar(void)
 {
@@ -28,44 +29,68 @@ void initPrgrBar(void)
 	bgHide(prgrBar);
 }
 
+inline int codecPosition(int pixels)
+{
+	return (((unsigned int)(cur_codec.getResolution())*pixels)>>8);
+}
+void seek(int pixels)
+{
+	unsigned int seek = codecPosition(pixels);
+	cur_codec.seek(seek);
+}
+
 void updatePrgrBar(void)
 {
-	if(keysHold & KEY_TOUCH) {
+	if(getPlayLstState()==MARKER) {
+		int pos1 = codecPosition(markersX[0]);
+		int pos2 = codecPosition(markersX[1]);
+		if(pos < pos1 || pos > pos2) {
+			cur_codec.seek(pos1);
+			pos = pos1;
+		}
+	}
+
+	if(keysHold & KEY_TOUCH && !dragging) {
 		if(stylus.y > PRGRBAR_Y*8 && stylus.y < (PRGRBAR_Y*8 + 2*8)) {
-			prgr = stylus.x;
-			bgSetScroll(prgrBar, -stylus.x, 0);
+			int temp1 = (getPlayLstState()==MARKER? markersX[0]+8 : 0);
+			int temp2 = (getPlayLstState()==MARKER? markersX[1] : 256);
+			if(stylus.x > temp1 && stylus.x < temp2) {
+				prgr = stylus.x;
+				bgSetScroll(prgrBar, -stylus.x, 0);
+			}
 		}
 	} else if(keysReleased & KEY_TOUCH) {
 		if(prgr) {
-			unsigned int seek = ((unsigned int)(cur_codec.getResolution())*prgr)>>8;
-			cur_codec.seek(seek);
+			seek(prgr);
 			prgr = 0;
 		}
 	} else {
-		u64 pos = ((unsigned int)(cur_codec.getPosition())<<8)/((unsigned int)(cur_codec.getResolution()));
-		bgSetScroll(prgrBar, -pos, 0);
+		pos = cur_codec.getPosition();
+		u64 positie = (pos<<8)/((unsigned int)(cur_codec.getResolution()));
+		bgSetScroll(prgrBar, -positie, 0);
 	}
 }
 
-void loadIcon(char* tls, char* pl, int palNo, int frameIdx, int numFrames, int size){
+void loadIcon(char* tls, char* pl, int palNo, int frameIdx, int numFrames, int size)
+{
 	int i;
-	
-	if(tls){
+
+	if(tls) {
 		void* gfx	= bufferFile(tls, NULL);
 		if(!gfx)
 			return;
-		if(pl){
+		if(pl) {
 			void* pal 	= bufferFile(pl, NULL);
-			if(pal){
+			if(pal) {
 				loadPalette(palNo, pal, true, SUB_SCREEN);
 				free(pal);
 			}
 		}
-	
-		for(i=0; i<numFrames; i++){
+
+		for(i=0; i<numFrames; i++) {
 			iconFrames[frameIdx+i] = loadFrame(gfx,  SpriteColorFormat_16Color, size, i, SUB_SCREEN);
 		}
-	free(gfx);
+		free(gfx);
 	}
 }
 
@@ -97,14 +122,20 @@ void initGui(void)
 	initSprite(PLAYLIST_ICON, 2, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[PLAYLIST_FRAMES]), SpriteSize_16x16, SpriteColorFormat_16Color, SUB_SCREEN);
 	setSprXY(PLAYLIST_ICON, SCREEN_WIDTH-PL_ICONSZ, 0, SUB_SCREEN);
 	setSpriteVisiblity(true, PLAYLIST_ICON, SUB_SCREEN);
-	 
+
+	loadPalette(3, (void*)markerPal, true, SUB_SCREEN);
+	iconFrames[MARKER_FRAMES] 	= loadFrame((void*)markerTiles,  SpriteColorFormat_16Color, SpriteSize_8x16, 0, SUB_SCREEN);
+	iconFrames[MARKER_FRAMES+1] = loadFrame((void*)markerTiles,  SpriteColorFormat_16Color, SpriteSize_8x16, 1, SUB_SCREEN);
+	initSprite(MARKER_ICON, 3, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[MARKER_FRAMES]), SpriteSize_8x16, SpriteColorFormat_16Color, SUB_SCREEN);
+	initSprite(MARKER_ICON+1, 3, oamGfxPtrToOffset(states(SUB_SCREEN), iconFrames[MARKER_FRAMES+1]), SpriteSize_8x16, SpriteColorFormat_16Color, SUB_SCREEN);
 	/* Initialize the progress bar */
 	initPrgrBar();
-	
+
 	u16* sbmpGfx = bufferFile("sbitmap.img.bin", &sz);
 	sbitmap = bgInitSub(3, BgType_Bmp16, BgSize_B16_256x256, 2,2);
 	dmaCopy(sbmpGfx, bgGetGfxPtr(sbitmap), 192*256*2);
 	free(sbmpGfx);
+	setGuiState(GUI_BROWSING);
 }
 
 void setGuiState(GUI_STATE stat)
@@ -113,6 +144,8 @@ void setGuiState(GUI_STATE stat)
 		state = stat;
 		switch(state) {
 		case GUI_BROWSING:
+			setSpriteVisiblity(true, MARKER_ICON, SUB_SCREEN);
+			setSpriteVisiblity(true, MARKER_ICON+1, SUB_SCREEN);
 			setSpriteVisiblity(true, PLAYLIST_ICON, SUB_SCREEN);
 			setSpriteVisiblity(false, FILTER_ICON, SUB_SCREEN);
 			glFlush(0);
@@ -152,11 +185,11 @@ void updateGui(void)
 		switch(getStreamState()) {
 		case STREAM_WAIT:
 		case STREAM_PLAY:
-			if (!inSleepMode){
+			if (!inSleepMode) {
 				visualizePlayingSMP();
 				updatePrgrBar();
 			}
-			
+
 			if(updateStream()< 0) {
 				stopStream();
 				break;
@@ -202,5 +235,3 @@ void deinitGui(void)
 {
 	deinitVideo();
 }
-
-

@@ -5,9 +5,8 @@
 char prev[1024];
 static int state = SINGLE;
 static int playingEntry;
-int markers[2];
-bool markersActive;
-int track;
+int markersX[2] = {0, 256-8};
+int track, dragging;
 
 u16* playStateFrms[NUM_PLAYLIST_STATES];
 
@@ -18,13 +17,14 @@ static void onEof(void* context)
 	}
 }
 
-int getFileNo(const char* name, char** list, int numEnt){
+int getFileNo(const char* name, char** list, int numEnt)
+{
 	int i;
-	for(i=(lastDir+1); i<numEnt; i++){
+	for(i=(lastDir+1); i<numEnt; i++) {
 		if(!strcmp(name, &list[i][ENTRY_NAME]))
 			return i;
-	}	
-	return -1; 
+	}
+	return -1;
 }
 
 int playFile(const char* name)
@@ -71,14 +71,15 @@ select:
 }
 
 
-inline void setPlayDirEntry(int entry){
+inline void setPlayDirEntry(int entry)
+{
 	playingEntry = entry;
 }
 
 inline int getFirstMusicFile(char** list, int numEnt)
 {
 	int i;
-	for(i=0; i<numEnt; i++){
+	for(i=0; i<numEnt; i++) {
 		if(isPlayable((const char*)list[i]))
 			return i;
 	}
@@ -87,18 +88,17 @@ inline int getFirstMusicFile(char** list, int numEnt)
 
 void playDir(void)
 {
-	playingEntry++; 
+	playingEntry++;
 	CYCLE(playingEntry,  (lastDir+1), (numEnt-1));
 	playFile((const char*)&list[playingEntry][ENTRY_NAME]);
-	
+
 }
 void updatePlayList(void)
 {
-	if(keysPres & KEY_TOUCH) {
-		if(TouchinArea(ICONX, ICONY, ICONX+16, ICONY+16)) {
-			int stat = (state+1)%NUM_PLAYLIST_STATES;
-			setPlayLstState(stat);
-		}
+
+	if(TouchinArea(ICONX, ICONY, ICONX+16, ICONY+16)) {
+		int stat = (state+1)%NUM_PLAYLIST_STATES;
+		setPlayLstState(stat);
 	}
 	if(getStreamState() == STREAM_STOP)
 		track = 0;
@@ -115,7 +115,34 @@ void updatePlayList(void)
 		if(getStreamState() == STREAM_STOP)
 			shuffle();
 		return;
+	case MARKER:
+		if(keysPres & KEY_TOUCH) {
+			if(TouchinArea(markersX[0], 88, markersX[0]+8, 88+16)) {
+				dragging = 1;
+			}
+			if(TouchinArea(markersX[1], 88, markersX[1]+8, 88+16)) {
+				dragging = 2;
+			}
+		}
+		if(dragging && (keysHold & KEY_TOUCH)) {
+			markersX[dragging-1] = stylus.x;
+			if(dragging==1) {
+				if((markersX[0]+8) > (markersX[1]))
+					markersX[0]=markersX[1]-8;
+			} else {
+				if(markersX[1] < (markersX[0]+8))
+					markersX[1]=markersX[0]+8;
+				CLAMP(markersX[1], 0, (256-8));
+			}
+		}
+		if(keysReleased && KEY_TOUCH)
+			dragging = 0;
+		setSprXY(MARKER_ICON, markersX[0], 88, SUB_SCREEN);
+		setSprXY(MARKER_ICON+1, markersX[1], 88, SUB_SCREEN);
+		return;
 	}
+
+
 }
 
 int getPlayLstState(void)
@@ -127,13 +154,19 @@ void setPlayLstState(int stat)
 {
 	state = stat;
 	setFrame(iconFrames[PLAYLIST_FRAMES+stat], false, MAX_ENTRIES, SUB_SCREEN);
-	
-	if(state==REPEAT_DIR){
+
+	if(state==REPEAT_DIR) {
 		int temp = getFileNo(prev, list, numEnt);
 		if(temp >= 0)
 			setPlayDirEntry(temp);
 	}
-		
+	if(state==MARKER) {
+		setSpriteVisiblity(false, MARKER_ICON, SUB_SCREEN);
+		setSpriteVisiblity(false, MARKER_ICON+1, SUB_SCREEN);
+	} else {
+		setSpriteVisiblity(true, MARKER_ICON, SUB_SCREEN);
+		setSpriteVisiblity(true, MARKER_ICON+1, SUB_SCREEN);
+	}
 	if(state==REPEAT)
 		audioCallbacks.onEof = onEof;
 	else
@@ -153,4 +186,3 @@ void selectTrack(int var)
 		printInfo();
 	}
 }
-

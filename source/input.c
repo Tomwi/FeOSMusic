@@ -14,6 +14,9 @@ void updateInput(void){
 }
 
 bool TouchinArea(int x, int y, int x2, int y2){
+	if(!(keysPres & KEY_TOUCH)) 
+		return false;
+		
 	if(stylus.x >= x && stylus.x <=x2){
 		if(stylus.y >=y && stylus.y <= y2)
 			return true;

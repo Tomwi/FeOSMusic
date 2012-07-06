@@ -62,6 +62,9 @@ void initSprite(u8 no, u8 pal, hword_t name, int size, int format,  bool screen)
 void setSprXY(int no, hword_t x, hword_t y, bool screen);
 void setFrame(hword_t * ptr, bool hidden, int no, int screen);
 void setSpriteVisiblity(bool hidden, int no, int screen);
+void cloneSprite(int no, int toClone, int screen);
+inline void setHflip(int no, bool flip, bool screen);
+
 #endif
 
 

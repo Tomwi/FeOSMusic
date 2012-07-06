@@ -25,9 +25,9 @@ FEOSMK = $(FEOSSDK)/mk
 #---------------------------------------------------------------------------------
 TARGET        := $(shell basename $(CURDIR))
 BUILD         := build
-SOURCES       := source source/fix_fft
+SOURCES       := source source/fix_fft source/gfx
 DATA          := data
-INCLUDES      := include
+INCLUDES      := include include/gfx
 GRAPHICS	  := gfx
 CODEC_FILE	  := audiocodecs.cfg
 IMGBINS		  := $(foreach dir, $(GRAPHICS),$(notdir $(wildcard $(dir)/*.bin)))
