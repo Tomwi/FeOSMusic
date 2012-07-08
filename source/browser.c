@@ -58,7 +58,8 @@ void retrieveDir(char * path)
 	if(path) {
 		chdir(path);
 		getcwd(cwd, FILENAME_MAX);
-
+		/* Free old directory BEFORE we set numEnt to 0 */
+		freeDir();
 		numEnt = 0;
 		scrollY = 0;
 		drgY[1] = drgY[0] = 0;
@@ -68,7 +69,6 @@ void retrieveDir(char * path)
 
 		if (pdir) {
 			chdir(cwd);
-			freeDir();
 			while ((pent=readdir(pdir))!=NULL) {
 
 				if(strcmp(".", pent->d_name) == 0)
