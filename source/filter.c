@@ -1,9 +1,9 @@
 #include "FeOSMusic.h"
 
-#define FILTER_PATH ("/data/FeOSMusic/filters/")
+#define FILTER_PATH ("/data/FeOSMusic/filters")
 
 char* nameBlock;
-char** nameList;
+int* nameList;
 int blockSize;
 int numFilters;
 int selected = -1;
@@ -15,7 +15,6 @@ void loadFilters(void)
 	DIR *pdir;
 	struct dirent *pent;
 	if((pdir=opendir(FILTER_PATH))) {
-		chdir(FILTER_PATH);
 		while ((pent=readdir(pdir))!=NULL) {
 			if(strstr(pent->d_name, ".fx2")) {
 				void* tmp = realloc(nameBlock, blockSize+strlen(pent->d_name)+1);
@@ -25,10 +24,10 @@ void loadFilters(void)
 					strcpy(dst, pent->d_name);
 					blockSize+=strlen(pent->d_name)+1;
 					numFilters++;
-					tmp = realloc(nameList, sizeof(char*)*numFilters);
+					tmp = realloc(nameList, sizeof(int)*numFilters);
 					if(tmp) {
 						nameList = tmp;
-						nameList[numFilters-1] = dst;
+						nameList[numFilters-1] = dst - nameBlock;
 					}
 				}
 			}
@@ -51,7 +50,7 @@ void printFilterInfo(void)
 {
 	char* string = "Filtering disabled";
 	if(selected>=0)
-		string = nameList[selected];
+		string = nameBlock + nameList[selected];
 	consoleClearLine(23);
 	setConsoleCoo(0, 23);
 	print("%s\n", string);
@@ -74,8 +73,9 @@ void updateFilters(GUI_STATE stat)
 
 				/* Load a new filter */
 				if(selected>=0 && selected!=prev) {
-					chdir(FILTER_PATH);
-					if(!loadFilter(&filter, nameList[selected]))
+					char buf[256];
+					snprintf(buf, sizeof(buf), "%s/%s", FILTER_PATH, nameBlock + nameList[selected]);
+					if(!loadFilter(&filter, buf))
 						selected = -1;
 					setListedDir();
 				}
