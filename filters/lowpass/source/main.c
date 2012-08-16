@@ -43,5 +43,5 @@ int arm7_main(int fifoCh)
 
 void arm7_fini()
 {
-	fifoSetDatamsgHandler(fifoChan,  0, 0);
+	coopFifoSetDatamsgHandler(fifoChan,  0, 0);
 }
