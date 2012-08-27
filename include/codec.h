@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#define CFG_FILES_FOLDER ("/data/FeOSMusic/cfg")
+
 typedef struct {
 	int (*openFile)(const char*);
 	int (*getSampleRate)(void);
@@ -25,7 +27,7 @@ typedef struct{
 	char* cdc;
 }CODECFILE;
 
-void loadCdcList(const char* name);
+void loadCdcList(void);
 void freeCdcLst(void);
 extern AUDIO_CALLBACKS audioCallbacks;
 extern int streamIdx;

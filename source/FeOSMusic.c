@@ -1,7 +1,5 @@
 #include "FeOSMusic.h"
 
-#define CFG_PATH ("data/FeOS/audiocodecs.cfg")
-
 char cwd[1024];
 int oldSuspMode;
 
@@ -11,8 +9,9 @@ void initFeOSMusic(void)
 	getcwd(cwd, sizeof(cwd));
 	initGui();
 	loadFilters();
+	chdir(CFG_FILES_FOLDER);
+	loadCdcList();
 	chdir("/");
-	loadCdcList(CFG_PATH);
 	retrieveDir("");
 	initSoundStreamer();
 	FeOS_SetAutoUpdate(AUTOUPD_KEYS, false);

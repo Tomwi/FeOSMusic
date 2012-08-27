@@ -40,4 +40,5 @@ include $(FEOSMK)/app.mk
 
 install: all
 	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2 || exit 1
-	@cp $(CODEC_FILE) $(FEOSDEST)/data/FeOS/$(CODEC_FILE) || exit 1
+	@mkdir -p $(FEOSDEST)/data/FeOSMusic/cfg/
+	@cp $(CODEC_FILE) $(FEOSDEST)/data/FeOSMusic/cfg|| exit 1

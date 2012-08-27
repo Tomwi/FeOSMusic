@@ -12,3 +12,4 @@ steps:
 NOTE:
 - The b0rklter sounds horrible, if you want to try it, adjust your volume (low!!)
 - Filters only work on 16bit files atm
+- all the codec config files should go into /data/FeOSMusic/cfg/

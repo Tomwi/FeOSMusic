@@ -1,4 +1,5 @@
 #include "FeOSMusic.h"
+#include "file.h"
 
 CODEC_INTERFACE cur_codec;
 
@@ -74,14 +75,6 @@ static int onRead(int length, void* buf, void* context)
 	return cur_codec.decSamples(length, buf, context);
 }
 
-void waitForA(void){
-	while(1){
-	updateInput();
-	FeOS_WaitForVBlank();
-	if(keysPres & KEY_A)
-		return;
-	}
-}
 static void onClose(void* context)
 {
 	setGuiState(GUI_BROWSING);
@@ -108,7 +101,7 @@ int loadCodec(const char * codecFile)
 		cur_codec.deFragReadbuf  = FeOS_FindSymbol(mdl, "deFragReadbuf");
 		cur_codec.getTrackCount  = FeOS_FindSymbol(mdl, "getTrackCount");
 		cur_codec.setTrack		 = FeOS_FindSymbol(mdl, "setTrack");
-		
+
 		if(cur_codec.deFragReadbuf) {
 			*(int**)(cur_codec.deFragReadbuf) = (int*)deFragReadbuf;
 		}
@@ -126,45 +119,65 @@ void unloadCodec(void)
 	}
 }
 
-void loadCdcList(const char* name)
+void loadCdcList(void)
 {
-	FILE* fp;
-	if((fp=fopen(name, "rb"))) {
-		unsigned int toAlloc = getFileSize(fp);
-		cfgBuf = malloc(toAlloc+1);
-		if(cfgBuf) {
-			cfgBuf[toAlloc] = '\n';
-			char* i=(cfgBuf+toAlloc);
-			fread(cfgBuf, 1, toAlloc, fp);
-			fclose(fp);
-			char* tkn = strtok(cfgBuf, "=\n");
-			while(tkn < i && tkn != NULL) {
-				void* tmp = realloc(cdcLst, (numExts+1)*sizeof(CODECFILE));
-				if(tmp) {
-					cdcLst = tmp;
-					cdcLst[numExts].ext = tkn;
-					tkn = strtok(NULL, "=\n");
-					if(tkn) {
-						cdcLst[numExts].cdc = tkn;
-						if(tkn[strlen(tkn)-1]=='\r')
-							tkn[strlen(tkn)-1] = 0;
-					} else
-						break;
-					numExts++;
+	/* scan for cfg files */
+	DIR *pdir;
+	struct dirent *pent;
+	if((pdir=opendir(CFG_FILES_FOLDER))) {
+		unsigned int toAlloc = 0; // terminating character
+		while ((pent=readdir(pdir))!=NULL) {
+			if(strstr(pent->d_name, ".cfg")) {
+				FILE* fp;
+				/* Buffer a config file */
+				if((fp=fopen(pent->d_name, "rb"))) {
+					unsigned sz = getFileSize(fp);
+					void* tmp = realloc(cfgBuf, toAlloc+sz+1);
+					/* Realloc failed, free memory */
+					if(tmp==NULL)
+						free(cfgBuf);
+					cfgBuf = tmp;
+					char* i=(cfgBuf+toAlloc+sz);
+					fread(cfgBuf+toAlloc, 1, sz, fp);
+					fclose(fp);
 
-					if((tkn+strlen(tkn) + 1) < i)
-						tkn = strtok(NULL, "=\n");
-					else
-						break;
+					char* tkn = strtok(cfgBuf+toAlloc, "=\n");
+					toAlloc+=sz;
+					while(tkn < i && tkn != NULL) {
+						void* tmp = realloc(cdcLst, (numExts+1)*sizeof(CODECFILE));
+						if(tmp) {
+							cdcLst = tmp;
+							cdcLst[numExts].ext = tkn;
+							tkn = strtok(NULL, "=\n");
+							if(tkn) {
+								cdcLst[numExts].cdc = tkn;
+								if(tkn[strlen(tkn)-1]=='\r')
+									tkn[strlen(tkn)-1] = 0;
+							} else
+								break;
+							numExts++;
 
+							if((tkn+strlen(tkn) + 1) < i)
+								tkn = strtok(NULL, "=\n");
+							else
+								break;
+
+						} else {
+							freeCdcLst();
+							break;
+						}
+					}
 				} else {
-					freeCdcLst();
-					break;
+#ifdef DEBUG
+					printf("File doesn't exist!\n");
+#endif
 				}
 			}
 		}
 	}
+	closedir(pdir);
 }
+
 
 void freeCdcLst(void)
 {

@@ -1,4 +1,5 @@
 #include <feos.h>
+#include <far.h>
 #include "file.h"
 
 far_t hArc;
@@ -23,8 +24,7 @@ void * bufferFile(const char * file, int * sz)
 	if(sz)
 		*sz = FAR_FileGetSize(hFile);
 	void* mem = malloc(size = FAR_FileGetSize(hFile));
-	if (!mem)
-	{
+	if (!mem) {
 		FAR_FileClose(hFile);
 		return NULL;
 	}
@@ -34,10 +34,12 @@ void * bufferFile(const char * file, int * sz)
 	return mem;
 }
 
-unsigned int getFileSize(FILE* fp){
+unsigned int getFileSize(FILE* fp)
+{
 	int pos = ftell(fp);
 	fseek(fp, 0, SEEK_END);
 	unsigned int sz = ftell(fp);
 	fseek(fp, pos, SEEK_SET);
 	return sz;
 }
+
