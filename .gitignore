@@ -2,8 +2,10 @@ build/*
 *.elf
 *.dbg
 *.fx2
+*.fpkg
 *.sh
 *.a
+*.db
 *~
 codecs/*/build/*
 codecs/*/lib
@@ -15,4 +17,3 @@ arm7SndMod/build/*
 *.bin
 gfx/*.h
 fs/
-gfx/shared/*.bin
