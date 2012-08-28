@@ -15,7 +15,6 @@ $(error "Please set FEOSSDK in your environment. export FEOSSDK=<path to>FeOS/sd
 endif
 
 FEOSMK = $(FEOSSDK)/mk
-export THIS_MAKEFILE := Makefile
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -39,4 +38,5 @@ CONF_CFLAGS	= -O3
 include $(FEOSMK)/dynlib.mk
 
 install: all
-	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/lib/$(TARGET).fx2 || exit 1
+	@mkdir -p $(FEOSDEST)/data/FeOS/lib
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/lib/$(TARGET).fx2

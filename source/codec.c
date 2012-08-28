@@ -146,6 +146,7 @@ void loadCdcList(void)
 					cfgBuf = tmp;
 					char* i=(cfgBuf+toAlloc+sz);
 					fread(cfgBuf+toAlloc, 1, sz, fp);
+					*i = 0;
 					fclose(fp);
 
 					/* Parse the buffer, as the buffer is reallocated, pointers may change,
@@ -153,7 +154,7 @@ void loadCdcList(void)
 					 */
 					char* tkn  = strtok(cfgBuf+toAlloc, "=\n");
 					char* base = cfgBuf;
-					toAlloc+=sz;
+					toAlloc+=sz+1;
 					while(tkn < i && tkn != NULL) {
 						void* tmp = realloc(cdcLst, (numExts+1)*sizeof(CODECFILE));
 						if(tmp) {
@@ -190,7 +191,7 @@ void loadCdcList(void)
 #ifdef DEBUG
 	int i;
 	for(i=0; i<numExts; i++) {
-		printf("%s=%s\n", &cfgBuf[cdcLst[i].cdc], &cfgBuf[cdcLst[i].ext]);
+		printf("%s=%s\n", &cfgBuf[cdcLst[i].ext], &cfgBuf[cdcLst[i].cdc]);
 	}
 #endif
 	closedir(pdir);

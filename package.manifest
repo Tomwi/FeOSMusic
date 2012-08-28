@@ -1,0 +1,7 @@
+Title: FeOSMusic
+Author: Tomwi <twidev@myopera.com>
+Copyright: 2011-2012 Tomwi
+Description: A music player for FeOS.
+Depends: soundstream
+Version: 0.0-prerelease
+License: Simplified-BSD
