@@ -15,7 +15,6 @@ $(error "Please set FEOSSDK in your environment. export FEOSSDK=<path to>FeOS/sd
 endif
 
 FEOSMK = $(FEOSSDK)/mk
-export THIS_MAKEFILE := Makefile
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -37,6 +36,5 @@ CONF_USERLIBS = soundStream
 include $(FEOSMK)/app.mk
 
 install: all
-	@[ -d $(FEOSDEST)/data/FeOSMusic/filters ] || mkdir -p $(FEOSDEST)/data/FeOSMusic/filters || exit 1
-	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOSMusic/filters/$(TARGET).fx2 || exit 1
-
+	@mkdir -p $(FEOSDEST)/data/FeOSMusic/filters
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOSMusic/filters/$(TARGET).fx2
