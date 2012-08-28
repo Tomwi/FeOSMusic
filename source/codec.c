@@ -2,6 +2,7 @@
 #include "file.h"
 
 CODEC_INTERFACE cur_codec;
+//#define DEBUG
 
 static int onRead(int length, void* buf, void * context);
 static int onOpen(const char* name, AUDIO_INFO* inf, void** context);
@@ -127,15 +128,18 @@ void loadCdcList(void)
 	if((pdir=opendir(CFG_FILES_FOLDER))) {
 		unsigned int toAlloc = 0; // terminating character
 		while ((pent=readdir(pdir))!=NULL) {
-			if(strstr(pent->d_name, ".cfg")) {
+			if(!strcmp(&pent->d_name[strlen(pent->d_name)-4], ".cfg")) {
 				FILE* fp;
 				/* Buffer a config file */
+#ifdef DEBUG
+				printf("Opening cfg: %s\n", pent->d_name);
+#endif
 				if((fp=fopen(pent->d_name, "rb"))) {
 					unsigned sz = getFileSize(fp);
 					/* cfgBuf may change, but we only keep track of the offsets of the strings in it*/
 					void* tmp = realloc(cfgBuf, toAlloc+sz+1);
 					/* Realloc failed, free memory */
-					if(tmp==NULL){
+					if(tmp==NULL) {
 						free(cfgBuf);
 						break;
 					}
@@ -143,12 +147,12 @@ void loadCdcList(void)
 					char* i=(cfgBuf+toAlloc+sz);
 					fread(cfgBuf+toAlloc, 1, sz, fp);
 					fclose(fp);
-					
+
 					/* Parse the buffer, as the buffer is reallocated, pointers may change,
 					 * so this is why offsets are used
 					 */
 					char* tkn  = strtok(cfgBuf+toAlloc, "=\n");
-					char* base = cfgBuf + toAlloc; 
+					char* base = cfgBuf;
 					toAlloc+=sz;
 					while(tkn < i && tkn != NULL) {
 						void* tmp = realloc(cdcLst, (numExts+1)*sizeof(CODECFILE));
@@ -183,6 +187,12 @@ void loadCdcList(void)
 			}
 		}
 	}
+#ifdef DEBUG
+	int i;
+	for(i=0; i<numExts; i++) {
+		printf("%s=%s\n", &cfgBuf[cdcLst[i].cdc], &cfgBuf[cdcLst[i].ext]);
+	}
+#endif
 	closedir(pdir);
 }
 
