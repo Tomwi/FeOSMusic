@@ -23,8 +23,8 @@ typedef struct {
 } CODEC_INTERFACE;
 
 typedef struct{
-	char* ext;
-	char* cdc;
+	unsigned int ext;
+	unsigned int cdc;
 }CODECFILE;
 
 void loadCdcList(void);

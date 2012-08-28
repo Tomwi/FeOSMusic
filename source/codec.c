@@ -25,7 +25,7 @@ int isPlayable(const char* name)
 {
 	int i;
 	for(i =0; i<numExts; i++) {
-		if(strstr(name, cdcLst[i].ext)) {
+		if(strstr(name, &cfgBuf[cdcLst[i].ext])) {
 			return i;
 		}
 	}
@@ -37,11 +37,11 @@ int provideCodec(const char* name)
 	int ret;
 	if((ret=isPlayable(name))>=0) {
 		if(loadedCodec < 0) {
-			if(!loadCodec(cdcLst[ret].cdc))
+			if(!loadCodec(&cfgBuf[cdcLst[ret].cdc]))
 				return 0;
-		} else if(strcmp(cdcLst[loadedCodec].cdc,cdcLst[ret].cdc)) {
+		} else if(cdcLst[loadedCodec].cdc==cdcLst[ret].cdc) {
 			unloadCodec();
-			if(!loadCodec((cdcLst[ret].cdc)))
+			if(!loadCodec(&cfgBuf[(cdcLst[ret].cdc)]))
 				return 0;
 		}
 		loadedCodec = ret;
@@ -132,25 +132,33 @@ void loadCdcList(void)
 				/* Buffer a config file */
 				if((fp=fopen(pent->d_name, "rb"))) {
 					unsigned sz = getFileSize(fp);
+					/* cfgBuf may change, but we only keep track of the offsets of the strings in it*/
 					void* tmp = realloc(cfgBuf, toAlloc+sz+1);
 					/* Realloc failed, free memory */
-					if(tmp==NULL)
+					if(tmp==NULL){
 						free(cfgBuf);
+						break;
+					}
 					cfgBuf = tmp;
 					char* i=(cfgBuf+toAlloc+sz);
 					fread(cfgBuf+toAlloc, 1, sz, fp);
 					fclose(fp);
-
-					char* tkn = strtok(cfgBuf+toAlloc, "=\n");
+					
+					/* Parse the buffer, as the buffer is reallocated, pointers may change,
+					 * so this is why offsets are used
+					 */
+					char* tkn  = strtok(cfgBuf+toAlloc, "=\n");
+					char* base = cfgBuf + toAlloc; 
 					toAlloc+=sz;
 					while(tkn < i && tkn != NULL) {
 						void* tmp = realloc(cdcLst, (numExts+1)*sizeof(CODECFILE));
 						if(tmp) {
 							cdcLst = tmp;
-							cdcLst[numExts].ext = tkn;
+							cdcLst[numExts].ext = (unsigned int)(tkn-base);
 							tkn = strtok(NULL, "=\n");
 							if(tkn) {
-								cdcLst[numExts].cdc = tkn;
+								cdcLst[numExts].cdc = tkn-base;
+								/* windows newlines */
 								if(tkn[strlen(tkn)-1]=='\r')
 									tkn[strlen(tkn)-1] = 0;
 							} else
