@@ -11,13 +11,13 @@ FILTERS	:= $(notdir $(patsubst %/,%,$(dir $(wildcard filters/*/Makefile))))
 all: main $(CODECS) $(FILTERS)
 
 main:
-	@make -f main.mk $(CONF_TARGET)
+	@$(MAKE) -f main.mk $(CONF_TARGET)
 
 $(CODECS):
-	@make -C codecs/$@ $(CONF_TARGET)
+	@$(MAKE) -C codecs/$@ $(CONF_TARGET)
 	
 $(FILTERS):
-	@make -C filters/$@ $(CONF_TARGET)
+	@$(MAKE) -C filters/$@ $(CONF_TARGET)
 
 clean: CONF_TARGET := clean
 clean: all

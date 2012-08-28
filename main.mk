@@ -53,7 +53,7 @@ install: all
 	@cp $(CODEC_FILE) $(FEOSDEST)/data/FeOSMusic/cfg/$(CODEC_FILE)
 
 convert: $(IMGBINS)
-	@make -C $(GFX)/$(SSUBG)
+	@$(MAKE) -C $(GFX)/$(SSUBG)
 	@mkdir -p $(CONF_FSDIR)
 	@cp $(GFX)/*.bin $(CONF_FSDIR)
 	@cp $(GFX)/$(SSUBG)/*.bin $(CONF_FSDIR)
