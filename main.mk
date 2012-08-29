@@ -35,7 +35,6 @@ GFX      := gfx
 PNGFILES := $(foreach dir, $(GFX),$(notdir $(wildcard $(dir)/*.png)))
 IMGBINS  := $(PNGFILES:.png=.img.bin)
 SSUBG    := shared_sbg
-GRIT     := $(DEVKITARM)/bin/grit
 
 CONF_DEFINES =
 CONF_USERLIBS = libfar feos3d soundStream
@@ -49,8 +48,11 @@ include $(FEOSMK)/app.mk
 install: all
 	@mkdir -p $(FEOSDEST)/data/FeOS/bin
 	@mkdir -p $(FEOSDEST)/data/FeOSMusic/cfg
+	@mkdir -p $(FEOSDEST)/data/FeOS/gui
 	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2
 	@cp $(CODEC_FILE) $(FEOSDEST)/data/FeOSMusic/cfg/$(CODEC_FILE)
+	@grit apptile.png -ftr -fh! -gb -gB16 -gT! -gzl -p! -o $(FEOSDEST)/data/FeOS/gui/$(TARGET).grf
+	@fmantool application.manifest $(FEOSDEST)/data/FeOS/gui/$(TARGET).app
 
 convert: $(IMGBINS)
 	@$(MAKE) -C $(GFX)/$(SSUBG)
@@ -59,4 +61,4 @@ convert: $(IMGBINS)
 	@cp $(GFX)/$(SSUBG)/*.bin $(CONF_FSDIR)
 
 $(IMGBINS) : %.img.bin : $(GFX)/%.png $(GFX)/%.grit
-	@$(GRIT) $< -fh! -o$(CURDIR)/$(GFX)/$*
+	@grit $< -fh! -o$(CURDIR)/$(GFX)/$*
