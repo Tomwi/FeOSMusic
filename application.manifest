@@ -14,3 +14,8 @@ Command: FeOSMusic
 ; as well as background processing.
 ; The value is ignored (here it is blank).
 Direct-Mode-App:
+
+; Command used to run files associated with this app
+FileType-Command: FeOSMusic %
+; Icon used to represent files associated with this app (relative to /data/FeOS/gui/ftypes)
+FileType-Icon: FeOSMusic.grf

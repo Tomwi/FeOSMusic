@@ -30,6 +30,7 @@ SOURCES       := source source/fix_fft source/gfx
 DATA          := data
 INCLUDES      := include include/gfx
 CODEC_FILE    := audiocodecs.cfg
+FILETYPES     := filetypes.cfg
 
 GFX      := gfx
 PNGFILES := $(foreach dir, $(GFX),$(notdir $(wildcard $(dir)/*.png)))
@@ -48,10 +49,12 @@ include $(FEOSMK)/app.mk
 install: all
 	@mkdir -p $(FEOSDEST)/data/FeOS/bin
 	@mkdir -p $(FEOSDEST)/data/FeOSMusic/cfg
-	@mkdir -p $(FEOSDEST)/data/FeOS/gui
+	@mkdir -p $(FEOSDEST)/data/FeOS/gui/ftypes
 	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/bin/$(TARGET).fx2
 	@cp $(CODEC_FILE) $(FEOSDEST)/data/FeOSMusic/cfg/$(CODEC_FILE)
+	@cp $(FILETYPES) $(FEOSDEST)/data/FeOS/gui/ftypes/$(TARGET).cfg
 	@grit apptile.png -ftr -fh! -gb -gB16 -gT! -gzl -p! -o $(FEOSDEST)/data/FeOS/gui/$(TARGET).grf
+	@grit fileicon.png -ftr -fh! -gb -gB16 -gT7FFE -gzl -p! -o $(FEOSDEST)/data/FeOS/gui/ftypes/$(TARGET).grf
 	@fmantool application.manifest $(FEOSDEST)/data/FeOS/gui/$(TARGET).app
 
 convert: $(IMGBINS)
