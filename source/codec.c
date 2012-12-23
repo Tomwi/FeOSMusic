@@ -4,7 +4,7 @@
 CODEC_INTERFACE cur_codec;
 //#define DEBUG
 
-static int onRead(int length, void* buf, void * context);
+static int onRead(AUDIO_INFO* audioInfo, int length, void* buf, void * context);
 static int onOpen(const char* name, AUDIO_INFO* inf, void** context);
 static void onClose(void * context);
 
@@ -71,7 +71,7 @@ static int onOpen(const char* name, AUDIO_INFO* inf, void** context)
 	return 0;
 }
 
-static int onRead(int length, void* buf, void* context)
+static int onRead(AUDIO_INFO* audioInfo, int length, void* buf, void* context)
 {
 	return cur_codec.decSamples(length, buf, context);
 }
@@ -134,7 +134,9 @@ void loadCdcList(void)
 #ifdef DEBUG
 				printf("Opening cfg: %s\n", pent->d_name);
 #endif
-				if((fp=fopen(pent->d_name, "rb"))) {
+				char filenBuf[256];
+				snprintf(filenBuf, sizeof(filenBuf), "%s/%s", CFG_FILES_FOLDER, pent->d_name);
+				if((fp=fopen(filenBuf, "rb"))) {
 					unsigned sz = getFileSize(fp);
 					/* cfgBuf may change, but we only keep track of the offsets of the strings in it*/
 					void* tmp = realloc(cfgBuf, toAlloc+sz+1);

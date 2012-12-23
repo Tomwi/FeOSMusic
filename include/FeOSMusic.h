@@ -28,7 +28,7 @@
 #define CYCLE(n,l,u) ((n) = ((n)>(u) ? (l) : ((n)<(l) ? (u) : (n))))
 #define CLAMP(n,l,u) ((n) = ((n) > (u) ? (u) : ((n)<(l) ? (l) : (n))))
 
-void initFeOSMusic(void);
+void initFeOSMusic(const char* cmdLineArg);
 void deinitFeOSMusic(void);
 int binLog(int no);
 

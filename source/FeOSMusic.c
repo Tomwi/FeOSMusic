@@ -1,23 +1,27 @@
 #include "FeOSMusic.h"
 
-char cwd[1024];
+char savedCwd[1024];
 int oldSuspMode;
 
-void initFeOSMusic(void)
+void initFeOSMusic(const char* cmdLineArg)
 {
 	srand(time(NULL));
-	getcwd(cwd, sizeof(cwd));
+	getcwd(savedCwd, sizeof(savedCwd));
 	initGui();
 	loadFilters();
-	chdir(CFG_FILES_FOLDER);
 	loadCdcList();
-	chdir("/");
+	if(!cmdLineArg) {
+		chdir("/");
+	}
 	retrieveDir("");
 	initSoundStreamer();
 	FeOS_SetAutoUpdate(AUTOUPD_KEYS, false);
 	oldSuspMode = FeOS_SetSuspendMode(SuspendMode_Headphones);
 	if((streamIdx = createStream(&audioCallbacks))<0) {
 		deinitFeOSMusic();
+	}
+	if(cmdLineArg) {
+		playFile(cmdLineArg);
 	}
 }
 
@@ -30,7 +34,8 @@ void deinitFeOSMusic(void)
 	freeCdcLst();
 	freeDir();
 	unloadFilters();
-	deinitGui();
+	chdir(savedCwd);
+	getcwd(savedCwd, sizeof(savedCwd));
 	FeOS_SetSuspendMode(oldSuspMode);
-	chdir(cwd);
+	deinitGui();
 }
