@@ -2,7 +2,7 @@
 
 int main(int argc, char ** argv)
 {
-	initFeOSMusic();
+	initFeOSMusic(argc > 1 ? argv[1] : NULL);
 
 	while(1) {
 		FeOS_WaitForVBlank();

@@ -134,7 +134,9 @@ void loadCdcList(void)
 #ifdef DEBUG
 				printf("Opening cfg: %s\n", pent->d_name);
 #endif
-				if((fp=fopen(pent->d_name, "rb"))) {
+				char filenBuf[256];
+				snprintf(filenBuf, sizeof(filenBuf), "%s/%s", CFG_FILES_FOLDER, pent->d_name);
+				if((fp=fopen(filenBuf, "rb"))) {
 					unsigned sz = getFileSize(fp);
 					/* cfgBuf may change, but we only keep track of the offsets of the strings in it*/
 					void* tmp = realloc(cfgBuf, toAlloc+sz+1);
