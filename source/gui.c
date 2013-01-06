@@ -187,7 +187,6 @@ void updateGui(void)
 		case STREAM_PLAY:
 			if (!inSleepMode) {
 				visualizePlayingSMP();
-				updatePrgrBar();
 			}
 
 			if(updateStream()< 0) {
@@ -219,6 +218,8 @@ void updateGui(void)
 				resumeStream();
 			break;
 		}
+		/* AB mode will fail in sleep mode if not updated */
+		updatePrgrBar();
 		updatePlayList();
 		break;
 	case GUI_BROWSING:
